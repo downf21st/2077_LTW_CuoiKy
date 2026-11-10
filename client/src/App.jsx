@@ -1,5 +1,9 @@
+import RecipeDetail from "./pages/RecipeDetail"
+
 function App() {
-  return <h1>Recipe Handbook</h1>
+  return (
+    <RecipeDetail />
+  )
 }
 
 export default App
