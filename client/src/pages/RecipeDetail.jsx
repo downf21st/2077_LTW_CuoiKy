@@ -313,6 +313,195 @@ function RecipeDetail() {
           </div>
         </section>
       </div>
+      <section
+        className="recipe-detail__reviews"
+        aria-labelledby="reviews-heading"
+      >
+        <h2 className="recipe-detail__section-title" id="reviews-heading">
+          Chuyện từ căn bếp
+        </h2>
+        <p className="recipe-detail__helper">
+          Những chia sẻ sau mỗi lần vào bếp.
+        </p>
+        <div className="recipe-detail__reviews-layout">
+          <div className="recipe-detail__community">
+            <div className="recipe-detail__review-summary">
+              <p className="recipe-detail__average">4,8</p>
+              <div>
+                <p className="recipe-detail__stars" aria-hidden="true">
+                  ★★★★★
+                </p>
+                <p className="recipe-detail__helper">
+                  Trên 5 sao · 128 đánh giá
+                </p>
+              </div>
+            </div>
+            <p className="recipe-detail__review-count">
+              Hiển thị 3 trong 128 đánh giá
+            </p>
+            <article className="recipe-detail__review">
+              <div className="recipe-detail__reviewer">
+                <span
+                  className="recipe-detail__review-avatar"
+                  aria-hidden="true"
+                >
+                  HT
+                </span>
+                <div className="recipe-detail__reviewer-info">
+                  <p>Hà Thoại</p>
+                  <time
+                    className="recipe-detail__review-date"
+                    dateTime="2026-11-02"
+                  >
+                    02/11/2026
+                  </time>
+                </div>
+                <p className="recipe-detail__review-score">
+                  <span aria-hidden="true">★★★★★</span> 5/5
+                </p>
+              </div>
+              <p>
+                Gà mềm, vị gừng rất thơm. Mình làm đúng lượng nước mắm, ăn với
+                cơm nóng vừa miệng cả nhà. Sẽ nấu lại!
+              </p>
+            </article>
+            <article className="recipe-detail__review">
+              <div className="recipe-detail__reviewer">
+                <span
+                  className="recipe-detail__review-avatar"
+                  aria-hidden="true"
+                >
+                  DA
+                </span>
+                <div className="recipe-detail__reviewer-info">
+                  <p>Duy Anh</p>
+                  <time
+                    className="recipe-detail__review-date"
+                    dateTime="2026-10-30"
+                  >
+                    30/10/2026
+                  </time>
+                </div>
+                <p className="recipe-detail__review-score">
+                  <span aria-hidden="true">★★★★★</span> 5/5
+                </p>
+              </div>
+              <p>
+                Lần đầu kho gà mà thành công. Hướng dẫn thắng màu rõ ràng, sốt
+                lên màu đẹp và không bị đắng.
+              </p>
+            </article>
+            <article className="recipe-detail__review">
+              <div className="recipe-detail__reviewer">
+                <span
+                  className="recipe-detail__review-avatar"
+                  aria-hidden="true"
+                >
+                  HN
+                </span>
+                <div className="recipe-detail__reviewer-info">
+                  <p>Hải Nam</p>
+                  <time
+                    className="recipe-detail__review-date"
+                    dateTime="2026-10-28"
+                  >
+                    28/10/2026
+                  </time>
+                </div>
+                <p className="recipe-detail__review-score">
+                  <span aria-hidden="true">★★★★☆</span> 4/5
+                </p>
+              </div>
+              <p>
+                Món ngon, dễ làm. Nhà mình ăn nhạt nên lần sau sẽ giảm chút nước
+                mắm. Cho gừng ở cuối giúp mùi thơm hơn hẳn.
+              </p>
+            </article>
+            <button
+              className="recipe-detail__button recipe-detail__button--outline"
+              type="button"
+            >
+              Xem thêm đánh giá
+            </button>
+          </div>
+
+          <form className="recipe-detail__review-form">
+            <h3 className="recipe-detail__review-form-title">
+              Bữa cơm của bạn thế nào?
+            </h3>
+            <p className="recipe-detail__review-login-hint">
+              <img className="recipe-detail__lock-icon" src={lockIcon} alt="" />{" "}
+              Đăng nhập để đánh giá và bình luận.
+            </p>
+            <button
+              className="recipe-detail__button recipe-detail__button--primary recipe-detail__review-form-button"
+              type="button"
+            >
+              Đăng nhập
+            </button>
+            <fieldset className="recipe-detail__rating-field" disabled>
+              <legend className="recipe-detail__rating-legend">
+                Điểm của bạn · Chưa đăng nhập
+              </legend>
+              <div className="recipe-detail__rating-options">
+                <button
+                  className="recipe-detail__rating-star"
+                  type="button"
+                  aria-label="1 sao"
+                >
+                  ☆
+                </button>
+                <button
+                  className="recipe-detail__rating-star"
+                  type="button"
+                  aria-label="2 sao"
+                >
+                  ☆
+                </button>
+                <button
+                  className="recipe-detail__rating-star"
+                  type="button"
+                  aria-label="3 sao"
+                >
+                  ☆
+                </button>
+                <button
+                  className="recipe-detail__rating-star"
+                  type="button"
+                  aria-label="4 sao"
+                >
+                  ☆
+                </button>
+                <button
+                  className="recipe-detail__rating-star"
+                  type="button"
+                  aria-label="5 sao"
+                >
+                  ☆
+                </button>
+              </div>
+            </fieldset>
+            <label className="recipe-detail__comment-label">
+              Bình luận của bạn
+              <textarea
+                className="recipe-detail__comment"
+                placeholder="Viết cảm nhận của bạn…"
+                disabled
+              />
+            </label>
+            <button
+              className="recipe-detail__button recipe-detail__button--disabled recipe-detail__review-form-button"
+              type="submit"
+              disabled
+            >
+              Gửi đánh giá
+            </button>
+            <p className="recipe-detail__review-form-note">
+              Chưa thể gửi khi chưa đăng nhập.
+            </p>
+          </form>
+        </div>
+      </section>
     </main>
   );
 }
