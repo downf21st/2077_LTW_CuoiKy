@@ -1,5 +1,5 @@
 import "./RecipeDetail.css";
-import lockIcon from "../../assets/lock-keyhole.svg";
+import lockIcon from "../assets/lock-keyhole.svg";
 
 function RecipeDetail() {
   return (
