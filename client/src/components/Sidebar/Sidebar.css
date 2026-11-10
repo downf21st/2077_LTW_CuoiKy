@@ -43,7 +43,7 @@
 .sidebar__avatar {
   width: 23px;
   height: 24px;
-  stroke-width: 1px;
+  color: var(--color-border-default); /* Đổi sang var(--color-text-on-primary) nếu muốn trắng sáng hơn */
 }
 
 /* Cách khối "Khách" 32px tới mục đầu. Mỗi mục có padding 8px trên dưới nên trừ đi 8px còn 24px. */

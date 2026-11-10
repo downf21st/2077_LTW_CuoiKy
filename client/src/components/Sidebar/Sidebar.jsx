@@ -2,27 +2,30 @@ import { NavLink } from 'react-router-dom'
 import './Sidebar.css'
 
 const ICONS = {
+  
   home: (
     <>
-      <path d="M3 11l9-8 9 8" />
-      <path d="M5 10v10h14V10" />
-      <path d="M10 20v-6h4v6" />
+      <path d="M3 10L12 3l9 7v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9z" />
+      <path d="M9 16h6" />
     </>
   ),
+
   recipe: (
     <>
-      <path d="M6 3h9l4 4v14H6z" />
-      <path d="M14 3v5h5" />
-      <path d="M9 13h7M9 17h7" />
+      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="3" width="7" height="7" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+      <rect x="14" y="14" width="7" height="7" rx="1.5" />
     </>
   ),
+  // Bộ dụng cụ ăn uống
   cooking: (
     <>
-      <path d="M4 11h16v6a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z" />
-      <path d="M2 11h20" />
-      <path d="M9 3v4M12 2v5M15 3v4" />
+      <path d="M5 3v6a3 3 0 0 0 3 3m0-9v18m3-18v6a3 3 0 0 1-3 3" />
+      <path d="M18 3c-2.2 0-3.5 2.2-3.5 5.5 0 2.5 1.2 4 3.5 4V21" />
     </>
   ),
+  // Mũi tên đi vào khung cửa bên phải
   login: (
     <>
       <path d="M14 4h5v16h-5" />
@@ -30,10 +33,15 @@ const ICONS = {
       <path d="M11 8l4 4-4 4" />
     </>
   ),
+  // Avatar Khách tô đặc
   user: (
     <>
-      <circle cx="12" cy="8" r="4" />
-      <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+      <circle cx="12" cy="7.5" r="4.5" fill="currentColor" stroke="none" />
+      <path
+        d="M4.5 19.5C4.5 15.6 7.8 13 12 13s7.5 2.6 7.5 6.5c0 .8-.7 1.5-1.5 1.5H6c-.8 0-1.5-.7-1.5-1.5z"
+        fill="currentColor"
+        stroke="none"
+      />
     </>
   ),
 }

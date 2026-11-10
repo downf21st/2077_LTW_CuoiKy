@@ -1,5 +1,14 @@
+import { BrowserRouter } from 'react-router-dom'
+import Layout from './components/Layout/Layout'
+
 function App() {
-  return <h1>Recipe Handbook</h1>
+  return (
+    <BrowserRouter>
+      <Layout>
+        <h1>Recipe Handbook</h1>
+      </Layout>
+    </BrowserRouter>
+  )
 }
 
 export default App
