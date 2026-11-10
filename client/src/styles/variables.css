@@ -17,10 +17,10 @@
   /* ----- Token gốc (Primitives) ----- */
 
   /* Cream - nền */
-  --cream-100: #f9f2ea;
-  --cream-75: #fbf8f3;
+  --cream-100: #f7f3ea;
+  --cream-75: #faf8f2;
   --cream-50: #faf8f3;
-  --cream-25: #fefbf8;
+  --cream-25: #fcfbf8;
 
   --white: #ffffff;
   --black: #000000;
@@ -30,7 +30,7 @@
   --green-900: #1e3c2d;
   --green-800: #264838;
   --green-500: #628573;
-  --green-200: #bdc9bf;
+  --green-200: #bdcabf;
 
   /* Orange / brown - điểm nhấn */
   --brown-800: #7e4428;
@@ -79,6 +79,13 @@
   --color-error: #b3382c; /* ƯỚC LƯỢNG: Figma không có token đỏ trong palette */
   --color-disabled-bg: var(--gray-200); /* nút "Đang đăng nhập..." */
 
+    /* Sidebar và logo (theo handoff Figma) */
+  --color-bg-inverse: var(--green-900);
+  --color-text-brand: var(--green-900);
+  --color-text-on-primary: var(--cream-100);
+  --color-text-on-inverse: var(--white);
+  --color-border-default: var(--green-200);
+  
   /* ----- Chữ ----- */
 
   /* Bộ font của nhóm (khai báo @font-face trong fonts.css):
@@ -111,14 +118,13 @@
   /* ----- Bo góc ----- (ƯỚC LƯỢNG) */
   --radius-sm: 8px; /* nút, ô nhập */
   --radius-md: 12px;
-  --radius-lg: 16px; /* thẻ món, thẻ nổi bật */
+  --radius-lg: 14px; /* thẻ món, thẻ nổi bật */
   --radius-xl: 20px;
   --radius-pill: 999px; /* tag, chip, thanh lọc */
 
   /* ----- Hiệu ứng ----- (ƯỚC LƯỢNG) */
   --shadow-card-featured: 0 16px 40px rgba(38, 72, 56, 0.18), 0 2px 6px rgba(0, 0, 0, 0.06);
-  --shadow-sidebar-toggle: 0 2px 8px rgba(0, 0, 0, 0.16);
-
+  --shadow-sidebar-toggle: 2px 0 4px rgba(0, 0, 0, 0.1), 7px 0 7px rgba(0, 0, 0, 0.09);
   /* ----- Khoảng cách (bước 4px) ----- */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
