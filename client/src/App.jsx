@@ -1,3 +1,4 @@
+import Layout from './components/Layout/Layout'
 import { Routes, Route } from 'react-router-dom'
 import MainLayout from './components/layout/MainLayout'
 import Home from './pages/Home'

@@ -1,0 +1,16 @@
+/* Cao 71px = chỗ main bắt đầu trong Figma. Logo cách mép trên 22px, hộp logo cao 25px. */
+.header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  height: 71px;
+  padding-top: 22px;
+}
+
+.header__logo {
+  font-family: var(--font-display);
+  font-size: var(--font-size-base);
+  line-height: 25px;
+  color: var(--color-text-brand);
+}
