@@ -1,0 +1,24 @@
+:root {
+  --sidebar-width: 218px;
+  --content-width: 858px;
+}
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Cột nội dung rộng tối đa 858px, căn giữa. Màn hình hẹp thì chừa lề 24px hai bên. */
+.layout__main {
+  flex: 1;
+  width: min(100% - 2 * var(--space-6), var(--content-width));
+  margin-inline: auto;
+}
+
+/* Chỗ đặt footer: Figma cao 240px, cách nội dung 23px (làm tròn 24px). Nội dung bên trong dựng sau. */
+.layout__footer {
+  min-height: 240px;
+  margin-top: var(--space-6);
+  background-color: var(--color-bg-footer);
+}

@@ -1,0 +1,146 @@
+/* Khung ngoài: nằm đè lên trang, không đẩy nội dung.
+   Khi đóng, trượt sang trái 226px (218 + 8) để chỉ còn lộ 25px của nút đóng/mở, đúng frame "Home" trong Figma. */
+.sidebar {
+  position: fixed;
+  top: 3px;
+  left: 5px;
+  z-index: 20;
+  width: var(--sidebar-width);
+  height: calc(100dvh - 6px); /* shortcut: Figma vẽ cố định 908px, nhóm chưa chốt */
+  transform: translateX(calc(-1 * (var(--sidebar-width) + 8px)));
+  transition: transform 300ms ease-out;
+}
+
+.sidebar--open {
+  transform: none;
+}
+
+.sidebar__panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding-top: var(--space-3);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-inverse);
+  box-shadow: var(--shadow-sidebar-toggle);
+  font-size: var(--font-size-xs);
+}
+
+/* Đóng thì bỏ bóng, nếu không vệt bóng bên phải panel lọt vào mép trái màn hình */
+.sidebar:not(.sidebar--open) .sidebar__panel {
+  box-shadow: none;
+}
+
+/* Khối "Khách" */
+.sidebar__role {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-left: 7px;
+  color: var(--color-text-on-primary);
+}
+
+.sidebar__avatar {
+  width: 23px;
+  height: 24px;
+  color: var(--color-border-default); /* Đổi sang var(--color-text-on-primary) nếu muốn trắng sáng hơn */
+}
+
+/* Cách khối "Khách" 32px tới mục đầu. Mỗi mục có padding 8px trên dưới nên trừ đi 8px còn 24px. */
+.sidebar__nav {
+  flex: 1;
+  min-height: 0;
+  margin-top: var(--space-6);
+  overflow-y: auto;
+}
+
+/* Cách đáy sidebar 18px, trừ 8px padding của mục còn 10px */
+.sidebar__login {
+  padding-bottom: 10px;
+}
+
+.sidebar__login .nav-item__label {
+  color: var(--color-text-on-inverse);
+}
+
+/* Mục menu: nội dung cao 15px, thêm padding 8px trên dưới để vùng bấm cao 31px, bước giữa các mục vẫn 31px như Figma */
+.nav-item {
+  display: flex;
+  align-items: center;
+  height: 31px;
+  padding: 8px var(--space-3);
+  color: var(--color-border-default);
+}
+
+.nav-item__icon {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  stroke-width: 1px;
+}
+
+/* Giữ nét đúng 1px/2px bất kể icon vẽ trong hệ 24 đơn vị */
+.nav-item__icon *,
+.sidebar__avatar * {
+  vector-effect: non-scaling-stroke;
+}
+
+.nav-item__label {
+  min-width: 0;
+  margin-left: 10px;
+  overflow: hidden;
+  font-size: var(--font-size-xs);
+  line-height: 15px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--color-text-on-primary);
+}
+
+.nav-item__arrow {
+  display: none;
+  flex: none;
+  width: 4px;
+  margin: 0 var(--space-2) 0 1px;
+  font-size: var(--font-size-2xs);
+  line-height: 15px;
+  color: var(--color-text-on-primary);
+}
+
+/* Mục đang chọn: có mũi tên, nhãn đậm, icon nét 2px */
+.nav-item[aria-current="page"] .nav-item__arrow {
+  display: block;
+}
+
+.nav-item[aria-current="page"] .nav-item__icon {
+  stroke-width: 2px;
+}
+
+.nav-item[aria-current="page"] .nav-item__label {
+  font-weight: var(--font-weight-semibold);
+}
+
+/* shortcut: Figma chưa thiết kế hover, tạm làm chữ mờ nhẹ */
+.nav-item:hover .nav-item__label {
+  opacity: 0.8;
+}
+
+/* Nút đóng/mở: 47 x 44, nhô ra ngoài mép phải panel 28px, icon nằm ở phần nhô ra */
+.sidebar__toggle {
+  position: absolute;
+  top: min(466px, calc(100% - 60px));
+  left: calc(var(--sidebar-width) - 19px);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 47px;
+  height: 44px;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-inverse);
+  color: var(--color-bg-surface);
+  box-shadow: var(--shadow-sidebar-toggle);
+}
+
+/* Viền focus mặc định của reset là màu xanh, chìm trên nền xanh của sidebar */
+.sidebar :focus-visible {
+  outline-color: var(--color-accent);
+}
