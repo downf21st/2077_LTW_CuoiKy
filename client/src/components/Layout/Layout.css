@@ -1,6 +1,5 @@
 :root {
   --sidebar-width: 218px;
-  --content-width: 858px;
 }
 
 .layout {
@@ -11,6 +10,5 @@
 
 .layout__main {
   flex: 1;
-  width: min(100% - 2 * var(--space-6), var(--content-width));
-  margin-inline: auto;
+  width: 100%;
 }
