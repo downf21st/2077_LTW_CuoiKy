@@ -1,6 +1,6 @@
 import "./RecipeDetail.css";
 import lockIcon from "../assets/lock-keyhole.svg";
-
+import recipePhoto from "../assets/images/ga-kho-gung.jpg";
 function RecipeDetail() {
   return (
     <main className="recipe-detail">
@@ -13,7 +13,15 @@ function RecipeDetail() {
           className="recipe-detail__photo"
           role="img"
           aria-label="Gà kho gừng"
-        />
+        >
+          <img
+            className="recipe-detail__photo-image"
+            src={recipePhoto}
+            alt="Món gà kho gừng trong nồi đất"
+            width="584"
+            height="474"
+          />
+        </figure>
 
         <div className="recipe-detail__introduction">
           <p className="recipe-detail__kicker">BỮA CƠM NHÀ / MÓN KHO</p>
