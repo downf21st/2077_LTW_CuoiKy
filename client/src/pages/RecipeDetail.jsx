@@ -1,6 +1,19 @@
 import "./RecipeDetail.css";
 import lockIcon from "../assets/lock-keyhole.svg";
 import recipePhoto from "../assets/images/ga-kho-gung.jpg";
+
+const ingredients = [
+  { name: "Thịt đùi gà, chặt miếng", amount: "800 g" },
+  { name: "Gừng tươi, thái sợi", amount: "50 g" },
+  { name: "Hành tím, băm nhỏ", amount: "2 củ" },
+  { name: "Tỏi, băm nhỏ", amount: "3 tép" },
+  { name: "Nước mắm", amount: "3 muỗng canh" },
+  { name: "Đường", amount: "1½ muỗng canh" },
+  { name: "Dầu ăn", amount: "1 muỗng canh" },
+  { name: "Tiêu xay", amount: "½ muỗng cà phê" },
+  { name: "Nước lọc", amount: "150 ml" },
+];
+
 function RecipeDetail() {
   return (
     <main className="recipe-detail">
@@ -128,60 +141,20 @@ function RecipeDetail() {
               Đánh dấu những thứ bạn đã chuẩn bị.
             </p>
             <ul className="recipe-detail__ingredient-list">
-              <li className="recipe-detail__ingredient">
-                <label className="recipe-detail__ingredient-label">
-                  <input type="checkbox" /> Thịt đùi gà, chặt miếng
-                </label>
-                <span className="recipe-detail__amount">800 g</span>
-              </li>
-              <li className="recipe-detail__ingredient">
-                <label className="recipe-detail__ingredient-label">
-                  <input type="checkbox" /> Gừng tươi, thái sợi
-                </label>
-                <span className="recipe-detail__amount">50 g</span>
-              </li>
-              <li className="recipe-detail__ingredient">
-                <label className="recipe-detail__ingredient-label">
-                  <input type="checkbox" /> Hành tím, băm nhỏ
-                </label>
-                <span className="recipe-detail__amount">2 củ</span>
-              </li>
-              <li className="recipe-detail__ingredient">
-                <label className="recipe-detail__ingredient-label">
-                  <input type="checkbox" /> Tỏi, băm nhỏ
-                </label>
-                <span className="recipe-detail__amount">3 tép</span>
-              </li>
-              <li className="recipe-detail__ingredient">
-                <label className="recipe-detail__ingredient-label">
-                  <input type="checkbox" /> Nước mắm
-                </label>
-                <span className="recipe-detail__amount">3 muỗng canh</span>
-              </li>
-              <li className="recipe-detail__ingredient">
-                <label className="recipe-detail__ingredient-label">
-                  <input type="checkbox" /> Đường
-                </label>
-                <span className="recipe-detail__amount">1½ muỗng canh</span>
-              </li>
-              <li className="recipe-detail__ingredient">
-                <label className="recipe-detail__ingredient-label">
-                  <input type="checkbox" /> Dầu ăn
-                </label>
-                <span className="recipe-detail__amount">1 muỗng canh</span>
-              </li>
-              <li className="recipe-detail__ingredient">
-                <label className="recipe-detail__ingredient-label">
-                  <input type="checkbox" /> Tiêu xay
-                </label>
-                <span className="recipe-detail__amount">½ muỗng cà phê</span>
-              </li>
-              <li className="recipe-detail__ingredient">
-                <label className="recipe-detail__ingredient-label">
-                  <input type="checkbox" /> Nước lọc
-                </label>
-                <span className="recipe-detail__amount">150 ml</span>
-              </li>
+              {ingredients.map(({ name, amount }) => (
+                <li className="recipe-detail__ingredient" key={name}>
+                  <label className="recipe-detail__ingredient-label">
+                    <input
+                      className="recipe-detail__ingredient-checkbox"
+                      type="checkbox"
+                    />
+                    <span className="recipe-detail__ingredient-name">
+                      {name}
+                    </span>
+                    <span className="recipe-detail__amount">{amount}</span>
+                  </label>
+                </li>
+              ))}
             </ul>
             <p className="recipe-detail__conversion">
               1 muỗng canh = 15 ml
