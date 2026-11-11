@@ -1,13 +1,24 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { NavLink, useMatch } from 'react-router-dom'
+import divider from '../../assets/footer/divider.svg'
+import send from '../../assets/footer/send.svg'
+import github from '../../assets/footer/github.svg'
+import instagram from '../../assets/footer/instagram.svg'
+import threads from '../../assets/footer/threads.svg'
 import './Footer.css'
 
 function Footer() {
+  const recipeMatch = useMatch('/recipe/:id')
+  const cookingMatch = useMatch('/recipe/:id/cooking-mode')
+  const matchedId = recipeMatch?.params.id ?? cookingMatch?.params.id
+  const recipeId = matchedId === 'create' ? undefined : matchedId
+  const cookingPath = recipeId ? `/recipe/${encodeURIComponent(recipeId)}/cooking-mode` : '/cooking-mode-emty'
   const [email, setEmail] = useState('')
+  const [newsletterUnavailable, setNewsletterUnavailable] = useState(false)
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    setEmail('')
+    setNewsletterUnavailable(true)
   }
 
   return (
@@ -25,48 +36,53 @@ function Footer() {
                 type="email"
                 className="footer__input"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="cooked2026test@example.com"
+                onChange={(event) => {
+                  setEmail(event.target.value)
+                  setNewsletterUnavailable(false)
+                }}
+                placeholder="cooked2026est@example.com"
                 aria-label="Email nhận công thức"
                 required
               />
               <button type="submit" className="footer__submit">
                 Subscribe
-                <svg viewBox="0 0 24 24" width="8" height="8" aria-hidden="true">
-                  <path d="M2 11.5L22 2l-6 20-5-8z" fill="currentColor" />
-                </svg>
+                <img src={send} alt="" aria-hidden="true" />
               </button>
             </form>
+            {newsletterUnavailable && (
+              <p className="footer__notice" role="status">Chức năng đăng ký nhận email chưa khả dụng.</p>
+            )}
           </div>
 
           <nav className="footer__links" aria-label="Liên kết chân trang">
             <div className="footer__column">
-              <p className="footer__heading">Explore</p>
+              <p className="footer__heading">Khám phá</p>
               <ul className="footer__list">
-                <li><Link to="/my-account/profile">Tài khoản</Link></li>
-                <li><Link to="/">Món ăn</Link></li>
+                <li><NavLink to="/my-account/profile">Tài khoản</NavLink></li>
+                <li><NavLink to="/" end>Món ăn</NavLink></li>
               </ul>
             </div>
             <div className="footer__column">
-              <p className="footer__heading">Kitchen</p>
+              <p className="footer__heading">Góc bếp</p>
               <ul className="footer__list">
-                <li><Link to="/recipe/create">Thêm món</Link></li>
-                <li><Link to="/cooking">Bếp</Link></li>
+                <li><NavLink to="/recipe/create">Thêm món</NavLink></li>
+                <li><NavLink to={cookingPath}>Bếp</NavLink></li>
               </ul>
             </div>
             <div className="footer__column footer__column--follow">
-              <p className="footer__heading">Follow</p>
-              <div className="footer__social" aria-hidden="true">
-                <span />
-                <span />
-                <span />
+              <p className="footer__heading">Theo dõi</p>
+              <div className="footer__social">
+                <a href="https://www.instagram.com/downf.21st/" target="_blank" rel="noopener noreferrer" aria-label="Instagram (mở tab mới)"><img src={instagram} alt="" /></a>
+                <a href="https://github.com/downf21st/2077_LTW_CuoiKy" target="_blank" rel="noopener noreferrer" aria-label="GitHub dự án (mở tab mới)"><img src={github} alt="" /></a>
+                <a href="https://www.threads.com/@downf.21st?hl=vi" target="_blank" rel="noopener noreferrer" aria-label="Threads (mở tab mới)"><img src={threads} alt="" /></a>
               </div>
             </div>
           </nav>
         </div>
 
         <div className="footer__bottom">
-          <span>© 2026 Cooked with care.</span>
+          <img className="footer__divider" src={divider} alt="" aria-hidden="true" />
+          <span>© {new Date().getFullYear()} Cooked with care.</span>
           <span>Nấu ngon - ăn khỏe</span>
         </div>
       </div>
