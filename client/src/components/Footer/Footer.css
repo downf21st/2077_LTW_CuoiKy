@@ -1,0 +1,131 @@
+.footer {
+  --footer-small: 0.5rem;
+  min-height: 240px;
+  margin-top: var(--space-6);
+  background-color: var(--color-bg-footer);
+  font-size: var(--footer-small);
+}
+
+.footer__inner {
+  width: min(100% - 2 * var(--space-6), var(--content-width));
+  margin-inline: auto;
+  padding-top: 42px;
+}
+
+.footer__top {
+  display: grid;
+  grid-template-columns: minmax(0, 497px) auto;
+  align-items: start;
+}
+
+.footer__title {
+  font-size: var(--font-size-base);
+  line-height: 1.3;
+  color: var(--color-text);
+}
+
+.footer__title-accent {
+  display: block;
+  color: var(--color-accent-soft);
+}
+
+.footer__tagline {
+  margin-top: 2px;
+  font-size: var(--font-size-xs);
+  font-style: italic;
+  font-weight: var(--font-weight-light);
+  line-height: 1.3;
+  color: var(--color-text-muted);
+}
+
+.footer__form {
+  display: flex;
+  gap: 4px;
+  margin-top: 14px;
+}
+
+.footer__input {
+  width: 156px;
+  height: 21px;
+  padding: 0 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background-color: var(--color-bg-elevated);
+  font-size: var(--footer-small);
+  font-weight: var(--font-weight-light);
+}
+
+.footer__input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.footer__submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 21px;
+  padding: 0 6px;
+  border-radius: 4px;
+  background-color: var(--color-brand);
+  color: var(--color-on-brand);
+  font-size: var(--footer-small);
+}
+
+.footer__submit:hover {
+  background-color: var(--color-brand-hover);
+}
+
+.footer__links {
+  display: flex;
+  gap: 20px;
+  padding-top: 5px;
+}
+
+.footer__column--follow {
+  margin-left: 49px;
+}
+
+.footer__heading {
+  margin-bottom: 4px;
+  font-weight: var(--font-weight-light);
+  line-height: 10px;
+  color: var(--color-text-muted);
+}
+
+.footer__list {
+  display: grid;
+  line-height: 9px;
+  color: var(--color-text);
+}
+
+.footer__social {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.footer__social span {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-border);
+}
+
+.footer__bottom {
+  display: flex;
+  justify-content: space-between;
+  width: min(100%, 552px);
+  margin: 39px auto 0;
+  padding: 30px 0 23px;
+  border-top: 1px solid color-mix(in srgb, var(--orange-400) 25%, var(--cream-25));
+  font-weight: var(--font-weight-light);
+  line-height: 10px;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 767px) {
+  .footer__top {
+    grid-template-columns: 1fr;
+    row-gap: var(--space-6);
+  }
+}

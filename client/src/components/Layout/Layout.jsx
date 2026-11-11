@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import Header from '../Header/Header'
 import Sidebar from '../Sidebar/Sidebar'
+import Footer from '../Footer/Footer'
 import './Layout.css'
 
-// Khi Nam đẩy Router lên: đổi `children` thành <Outlet /> (import từ react-router-dom)
 function Layout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
@@ -25,7 +25,7 @@ function Layout({ children }) {
         onToggle={() => setIsSidebarOpen((open) => !open)}
       />
       <main className="layout__main">{children}</main>
-      <footer className="layout__footer" />
+      <Footer />
     </div>
   )
 }

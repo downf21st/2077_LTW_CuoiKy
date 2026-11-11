@@ -1,0 +1,191 @@
+.home-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  width: 100%;
+  max-width: 858px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.home-hero {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-4) 0 var(--space-6);
+}
+
+/* Đường phân cách mảnh giữa Hero và SearchBar */
+.home-hero::after {
+  content: "";
+  grid-column: 1 / -1;
+  width: 180px;
+  height: 1px;
+  margin: var(--space-4) auto 0;
+  background-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+}
+
+.home-hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.home-hero__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 var(--space-3);
+  color: var(--color-accent);
+  font-family: var(--font-body);
+  font-size: var(--font-size-xs);
+  font-weight: 400;
+}
+
+.home-hero__kicker-icon {
+  flex-shrink: 0;
+  display: block;
+}
+
+/* Căn 4 dòng của tiêu đề thành 4 hàng riêng biệt, khoảng cách đều chằn chặn */
+.home-hero__title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 0 var(--space-6);
+  color: var(--color-text);
+  letter-spacing: normal;
+}
+
+.home-hero__title-line {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 2.3rem;
+  font-weight: 400; /* Không in đậm giả cho font Oi */
+  line-height: 1;
+}
+
+.home-hero__title-highlight {
+  display: block;
+  color: var(--color-accent);
+  font-family: var(--font-heading);
+  font-size: 2.75rem;
+  font-weight: 700; /* In đậm chữ memorable cam */
+  line-height: 1;
+}
+
+.home-hero__description {
+  max-width: 390px;
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-light);
+  line-height: 1.5;
+}
+
+.home-hero__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 28px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-brand);
+  color: var(--color-text-on-primary);
+  font-family: var(--font-body);
+  font-size: var(--font-size-xs);
+  text-decoration: none;
+  transition: background-color 150ms ease-out;
+}
+
+.home-hero__cta:hover {
+  background-color: var(--color-brand-hover);
+}
+
+/* Cụm thẻ bên phải */
+.home-hero__visual {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  height: 310px;
+}
+
+.home-hero__backdrop-card {
+  position: absolute;
+  right: 28px;
+  top: 8px;
+  width: 205px;
+  height: 265px;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-elevated);
+  box-shadow: var(--shadow-card-featured);
+  transform: rotate(15deg);
+}
+
+.home-hero__featured-card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 232px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-surface);
+  box-shadow: var(--shadow-card-featured);
+  margin-bottom: var(--space-4);
+}
+
+.home-hero__badge {
+  align-self: flex-start;
+  padding: 3px var(--space-2);
+  border-radius: 4px;
+  background-color: var(--color-highlight);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 7px;
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+}
+
+.home-hero__featured-body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.home-hero__featured-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-placeholder);
+  flex-shrink: 0;
+}
+
+.home-hero__featured-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.home-hero__featured-name {
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-display);
+  line-height: 1.2;
+}
+
+.home-hero__featured-meta {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-light);
+}
