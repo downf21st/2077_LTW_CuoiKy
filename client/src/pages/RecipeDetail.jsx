@@ -1,6 +1,7 @@
-import "./RecipeDetail.css";
-import lockIcon from "../assets/lock-keyhole.svg";
 import recipePhoto from "../assets/images/ga-kho-gung.jpg";
+import lockIcon from "../assets/lock-keyhole.svg";
+import StarRating, { StarInput } from "../components/StarRating/StarRating";
+import "./RecipeDetail.css";
 
 const ingredients = [
   { name: "Thịt đùi gà, chặt miếng", amount: "800 g" },
@@ -12,6 +13,33 @@ const ingredients = [
   { name: "Dầu ăn", amount: "1 muỗng canh" },
   { name: "Tiêu xay", amount: "½ muỗng cà phê" },
   { name: "Nước lọc", amount: "150 ml" },
+];
+
+const reviews = [
+  {
+    initials: "HT",
+    name: "Hà Thoại",
+    date: "2026-11-02",
+    displayDate: "02/11/2026",
+    rating: 5,
+    text: "Gà mềm, vị gừng rất thơm. Mình làm đúng lượng nước mắm, ăn với cơm nóng vừa miệng cả nhà. Sẽ nấu lại!",
+  },
+  {
+    initials: "DA",
+    name: "Duy Anh",
+    date: "2026-10-30",
+    displayDate: "30/10/2026",
+    rating: 5,
+    text: "Lần đầu kho gà mà thành công. Hướng dẫn thắng màu rõ ràng, sốt lên màu đẹp và không bị đắng.",
+  },
+  {
+    initials: "HN",
+    name: "Hải Nam",
+    date: "2026-10-28",
+    displayDate: "28/10/2026",
+    rating: 4,
+    text: "Món ngon, dễ làm. Nhà mình ăn nhạt nên lần sau sẽ giảm chút nước mắm. Cho gừng ở cuối giúp mùi thơm hơn hẳn.",
+  },
 ];
 
 function RecipeDetail() {
@@ -307,97 +335,43 @@ function RecipeDetail() {
         <div className="recipe-detail__reviews-layout">
           <div className="recipe-detail__community">
             <div className="recipe-detail__review-summary">
-              <p className="recipe-detail__average">4,8</p>
-              <div>
-                <p className="recipe-detail__stars" aria-hidden="true">
-                  ★★★★★
-                </p>
-                <p className="recipe-detail__helper">
-                  Trên 5 sao · 128 đánh giá
-                </p>
-              </div>
+              <StarRating value={4.8} />
+              <p className="recipe-detail__helper">Trên 5 sao · 128 đánh giá</p>
             </div>
             <p className="recipe-detail__review-count">
               Hiển thị 3 trong 128 đánh giá
             </p>
-            <article className="recipe-detail__review">
-              <div className="recipe-detail__reviewer">
-                <span
-                  className="recipe-detail__review-avatar"
-                  aria-hidden="true"
+            {reviews.map(
+              ({ initials, name, date, displayDate, rating, text }) => (
+                <article
+                  className="recipe-detail__review"
+                  key={`${name}-${date}`}
                 >
-                  HT
-                </span>
-                <div className="recipe-detail__reviewer-info">
-                  <p>Hà Thoại</p>
-                  <time
-                    className="recipe-detail__review-date"
-                    dateTime="2026-11-02"
-                  >
-                    02/11/2026
-                  </time>
-                </div>
-                <p className="recipe-detail__review-score">
-                  <span aria-hidden="true">★★★★★</span> 5/5
-                </p>
-              </div>
-              <p>
-                Gà mềm, vị gừng rất thơm. Mình làm đúng lượng nước mắm, ăn với
-                cơm nóng vừa miệng cả nhà. Sẽ nấu lại!
-              </p>
-            </article>
-            <article className="recipe-detail__review">
-              <div className="recipe-detail__reviewer">
-                <span
-                  className="recipe-detail__review-avatar"
-                  aria-hidden="true"
-                >
-                  DA
-                </span>
-                <div className="recipe-detail__reviewer-info">
-                  <p>Duy Anh</p>
-                  <time
-                    className="recipe-detail__review-date"
-                    dateTime="2026-10-30"
-                  >
-                    30/10/2026
-                  </time>
-                </div>
-                <p className="recipe-detail__review-score">
-                  <span aria-hidden="true">★★★★★</span> 5/5
-                </p>
-              </div>
-              <p>
-                Lần đầu kho gà mà thành công. Hướng dẫn thắng màu rõ ràng, sốt
-                lên màu đẹp và không bị đắng.
-              </p>
-            </article>
-            <article className="recipe-detail__review">
-              <div className="recipe-detail__reviewer">
-                <span
-                  className="recipe-detail__review-avatar"
-                  aria-hidden="true"
-                >
-                  HN
-                </span>
-                <div className="recipe-detail__reviewer-info">
-                  <p>Hải Nam</p>
-                  <time
-                    className="recipe-detail__review-date"
-                    dateTime="2026-10-28"
-                  >
-                    28/10/2026
-                  </time>
-                </div>
-                <p className="recipe-detail__review-score">
-                  <span aria-hidden="true">★★★★☆</span> 4/5
-                </p>
-              </div>
-              <p>
-                Món ngon, dễ làm. Nhà mình ăn nhạt nên lần sau sẽ giảm chút nước
-                mắm. Cho gừng ở cuối giúp mùi thơm hơn hẳn.
-              </p>
-            </article>
+                  <div className="recipe-detail__reviewer">
+                    <span
+                      className="recipe-detail__review-avatar"
+                      aria-hidden="true"
+                    >
+                      {initials}
+                    </span>
+                    <div className="recipe-detail__reviewer-info">
+                      <p>{name}</p>
+                      <time
+                        className="recipe-detail__review-date"
+                        dateTime={date}
+                      >
+                        {displayDate}
+                      </time>
+                    </div>
+                    <p className="recipe-detail__review-score">
+                      <StarRating value={rating} size="sm" />{" "}
+                      <span>{rating}/5</span>
+                    </p>
+                  </div>
+                  <p>{text}</p>
+                </article>
+              ),
+            )}
             <button
               className="recipe-detail__button recipe-detail__button--outline"
               type="button"
@@ -424,43 +398,7 @@ function RecipeDetail() {
               <legend className="recipe-detail__rating-legend">
                 Điểm của bạn · Chưa đăng nhập
               </legend>
-              <div className="recipe-detail__rating-options">
-                <button
-                  className="recipe-detail__rating-star"
-                  type="button"
-                  aria-label="1 sao"
-                >
-                  ☆
-                </button>
-                <button
-                  className="recipe-detail__rating-star"
-                  type="button"
-                  aria-label="2 sao"
-                >
-                  ☆
-                </button>
-                <button
-                  className="recipe-detail__rating-star"
-                  type="button"
-                  aria-label="3 sao"
-                >
-                  ☆
-                </button>
-                <button
-                  className="recipe-detail__rating-star"
-                  type="button"
-                  aria-label="4 sao"
-                >
-                  ☆
-                </button>
-                <button
-                  className="recipe-detail__rating-star"
-                  type="button"
-                  aria-label="5 sao"
-                >
-                  ☆
-                </button>
-              </div>
+              <StarInput name="rating" />
             </fieldset>
             <label className="recipe-detail__comment-label">
               Bình luận của bạn
