@@ -1,11 +1,27 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import RecipeCard from '../RecipeCard/RecipeCard';
 import './RecipeList.css';
 
-const FILTER_OPTIONS = ['Tất cả', 'Chiên', 'Xào', 'Nấu', 'Luộc'];
+const DIFFICULTY_FILTERS = [
+  { id: 'all', label: 'Tất cả' },
+  { id: 'hard', label: 'Khó', match: 'khó' },
+  { id: 'medium', label: 'Trung Bình', match: 'trung bình' },
+  { id: 'easy', label: 'Dễ', match: 'dễ' },
+];
 
 export default function RecipeList({ recipes = [] }) {
-  const [activeCategory, setActiveCategory] = useState('Tất cả');
+  const [activeFilter, setActiveFilter] = useState('all');
+
+  const filteredRecipes = useMemo(() => {
+    if (activeFilter === 'all') return recipes;
+    const target = DIFFICULTY_FILTERS.find((f) => f.id === activeFilter);
+    if (!target) return recipes;
+
+    return recipes.filter((recipe) => {
+      const diff = (recipe.difficulty || '').toLowerCase().trim();
+      return diff === target.match || diff === target.id;
+    });
+  }, [recipes, activeFilter]);
 
   return (
     <section className="recipe-list" aria-labelledby="daily-recipes-heading">
@@ -14,34 +30,46 @@ export default function RecipeList({ recipes = [] }) {
           Món ăn trong ngày
         </h2>
 
-        <div className="filter-bar" role="group" aria-label="Bộ lọc loại món">
-          {FILTER_OPTIONS.map((category) => {
-            const isActive = activeCategory === category;
+        <div
+          className="filter-bar"
+          role="group"
+          aria-label="Lọc món ăn theo độ khó"
+        >
+          {DIFFICULTY_FILTERS.map((filter) => {
+            const isActive = activeFilter === filter.id;
             return (
               <button
-                key={category}
+                key={filter.id}
                 type="button"
-                className={`filter-bar__chip ${isActive ? 'filter-bar__chip--active' : ''}`}
+                className={`filter-bar__chip ${
+                  isActive ? 'filter-bar__chip--active' : ''
+                }`}
                 aria-pressed={isActive}
-                onClick={() => setActiveCategory(category)}
+                onClick={() => setActiveFilter(filter.id)}
               >
-                {category}
+                {filter.label}
               </button>
             );
           })}
         </div>
       </div>
 
-      {recipes.length > 0 ? (
+      {filteredRecipes.length > 0 ? (
         <ul className="recipe-list__grid">
-          {recipes.map((recipe) => (
-            <li key={recipe.id} className="recipe-list__item">
-              <RecipeCard {...recipe} />
+          {filteredRecipes.map((recipe, index) => (
+            <li
+              key={recipe.id}
+              className="recipe-list__item"
+              style={{ animationDelay: `${index * 60}ms` }}
+            >
+              <RecipeCard recipe={recipe} />
             </li>
           ))}
         </ul>
       ) : (
-        <p className="recipe-list__empty">Không tìm thấy món phù hợp.</p>
+        <p className="recipe-list__empty">
+          Không tìm thấy món ăn nào phù hợp với bộ lọc hiện tại.
+        </p>
       )}
     </section>
   );

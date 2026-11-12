@@ -204,6 +204,7 @@
   font-weight: var(--font-weight-light);
   line-height: 10px;
   color: var(--gray-500);
+  border-top: 1px solid color-mix(in srgb, var(--orange-400) 40%, rgba(219, 142, 105, 0.4));
 }
 
 .footer__divider {
@@ -230,4 +231,11 @@
   .footer__divider {
     display: none;
   }
+}
+
+@media (max-width: 860px) {
+  .footer { padding-left: 24px !important; padding-right: 24px !important; }
+}
+@media (max-width: 600px) {
+  .footer { padding-left: 16px !important; padding-right: 16px !important; }
 }

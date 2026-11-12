@@ -1,151 +1,105 @@
 import { useState } from 'react';
 import './SearchBar.css';
 
-export default function SearchBar({
-  initialMode = 'name',
-  initialValue = '',
-  initialIngredients = ['Gà', 'Tỏi', 'Kem tươi'],
-}) {
-  const [mode, setMode] = useState(initialMode);
-  const [value, setValue] = useState(initialValue);
-  const [ingredients, setIngredients] = useState(initialIngredients);
-  const [isFocused, setIsFocused] = useState(false);
-
-  const isIngredientMode = mode === 'ingredient';
-  const isFilled = value.trim().length > 0;
+export default function SearchBar({ tags = [], onTagsChange }) {
+  const [inputValue, setInputValue] = useState('');
+  const [currentMode, setCurrentMode] = useState('name'); 
 
   const handleSubmit = (e) => {
     e.preventDefault();
-  };
+    const trimmed = inputValue.trim();
+    if (!trimmed) return;
 
-  const handleKeyDown = (e) => {
-    if (isIngredientMode && e.key === 'Enter' && value.trim()) {
-      e.preventDefault();
-      setIngredients((prev) => [...prev, value.trim()]);
-      setValue('');
+    
+    const isDuplicate = tags.some(
+      (t) => t.type === currentMode && t.value.toLowerCase() === trimmed.toLowerCase()
+    );
+
+    if (!isDuplicate) {
+      onTagsChange([...tags, { type: currentMode, value: trimmed }]);
     }
+    
+    
+    setInputValue('');
   };
 
-  const handleRemoveIngredient = (target) => {
-    setIngredients((prev) => prev.filter((item) => item !== target));
+  const removeTag = (indexToRemove) => {
+    onTagsChange(tags.filter((_, idx) => idx !== indexToRemove));
   };
 
   return (
-    <form
-      role="search"
-      className={[
-        'search-bar',
-        isFocused ? 'search-bar--focused' : '',
-        isFilled ? 'search-bar--filled' : '',
-        isIngredientMode ? 'search-bar--ingredient' : '',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      onSubmit={handleSubmit}
-    >
-      <label htmlFor="recipe-search-input" className="search-bar__sr-only">
-        Tìm kiếm món ăn hoặc nguyên liệu
-      </label>
+    <div className="search-container">
+      <form className="search-bar" role="search" onSubmit={handleSubmit}>
+        <div className="search-bar__input-wrap">
+          <svg className="search-bar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
 
-      <span className="search-bar__icon" aria-hidden="true">
-        <svg
-          viewBox="0 0 24 24"
-          width="22"
-          height="22"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.75"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="11" cy="11" r="7" />
-          <line x1="20" y1="20" x2="16.2" y2="16.2" />
-        </svg>
-      </span>
+          <input
+            type="search"
+            className="search-bar__input"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder={
+              currentMode === 'ingredient'
+                ? 'Nhập nguyên liệu rồi nhấn Tìm...'
+                : 'Nhập tên món ăn rồi nhấn Tìm...'
+            }
+            aria-label="Tìm món ăn hoặc nguyên liệu"
+          />
+        </div>
 
-      <div className="search-bar__field">
-        {isIngredientMode &&
-          ingredients.map((item) => (
-            <span key={item} className="search-bar__chip">
-              <span>{item}</span>
-              <button
-                type="button"
-                className="search-bar__chip-remove"
-                aria-label={`Xóa ${item}`}
-                onClick={() => handleRemoveIngredient(item)}
+        <div className="search-bar__actions">
+          <div className="search-bar__modes" role="group" aria-label="Chế độ tìm kiếm">
+            <button
+              type="button"
+              className={`search-bar__mode-btn ${currentMode === 'name' ? 'search-bar__mode-btn--active' : ''}`}
+              aria-pressed={currentMode === 'name'}
+              onClick={() => setCurrentMode('name')}
+            >
+              Tên món
+            </button>
+            <button
+              type="button"
+              className={`search-bar__mode-btn ${currentMode === 'ingredient' ? 'search-bar__mode-btn--active' : ''}`}
+              aria-pressed={currentMode === 'ingredient'}
+              onClick={() => setCurrentMode('ingredient')}
+            >
+              Nguyên liệu
+            </button>
+          </div>
+
+          <button type="submit" className="search-bar__submit">Tìm</button>
+        </div>
+      </form>
+
+      
+      {tags.length > 0 && (
+        <div className="search-tags" aria-label="Các từ khóa đang lọc">
+          {tags.map((tag, index) => (
+            <span key={index} className="search-tag">
+              <span className="search-tag__label">
+                {tag.type === 'name' ? 'Món: ' : 'Ng.liệu: '}
+                <strong>{tag.value}</strong>
+              </span>
+              <button 
+                type="button" 
+                className="search-tag__remove" 
+                onClick={() => removeTag(index)}
+                aria-label={`Xóa từ khóa ${tag.value}`}
               >
                 ×
               </button>
             </span>
           ))}
-
-        <input
-          id="recipe-search-input"
-          type="text"
-          className="search-bar__input"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          onKeyDown={handleKeyDown}
-          placeholder={
-            isIngredientMode
-              ? 'Nhập nguyên liệu, nhấn Enter để thêm'
-              : 'Tìm món ăn hoặc nguyên liệu...'
-          }
-        />
-
-        {isFilled && !isIngredientMode && (
-          <button
-            type="button"
-            className="search-bar__clear"
-            aria-label="Xóa chữ đã gõ"
-            onClick={() => setValue('')}
-          >
-            ×
-          </button>
-        )}
-      </div>
-
-      <div
-        className="search-bar__mode-switch"
-        role="radiogroup"
-        aria-label="Chế độ tìm kiếm"
-      >
-        <label
-          className={`search-bar__mode-option ${
-            !isIngredientMode ? 'search-bar__mode-option--active' : ''
-          }`}
-        >
-          <input
-            type="radio"
-            name="searchMode"
-            value="name"
-            checked={!isIngredientMode}
-            onChange={() => setMode('name')}
-          />
-          <span>Tên món</span>
-        </label>
-
-        <label
-          className={`search-bar__mode-option ${
-            isIngredientMode ? 'search-bar__mode-option--active' : ''
-          }`}
-        >
-          <input
-            type="radio"
-            name="searchMode"
-            value="ingredient"
-            checked={isIngredientMode}
-            onChange={() => setMode('ingredient')}
-          />
-          <span>Nguyên liệu</span>
-        </label>
-      </div>
-
-      <button type="submit" className="search-bar__submit">
-        Tìm
-      </button>
-    </form>
+          {tags.length > 1 && (
+            <button type="button" className="search-tags__clear" onClick={() => onTagsChange([])}>
+              Xóa tất cả
+            </button>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
