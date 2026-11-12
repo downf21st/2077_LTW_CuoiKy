@@ -1,0 +1,66 @@
+.cooking-mode {
+  min-height: 100vh;
+  background: var(--color-bg-page);
+}
+
+.cooking-mode__header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: 88px;
+  padding-inline: var(--space-16);
+  border-bottom: 1px solid var(--color-border-default);
+  color: var(--color-text-brand);
+}
+
+.cooking-mode__context {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: var(--font-size-xs);
+  line-height: 1;
+}
+
+.cooking-mode__recipe {
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-light);
+}
+
+.cooking-mode__logo {
+  font-family: var(--font-display);
+  font-size: var(--font-size-base);
+  line-height: 1;
+}
+
+.cooking-mode__exit-wrap {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cooking-mode__exit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 200px;
+  height: 48px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  font-size: var(--font-size-base);
+  line-height: 1;
+}
+
+.cooking-mode__workspace {
+  min-height: 675px;
+  padding: var(--space-12) max(var(--space-16), calc((100% - 1120px) / 2));
+}
+
+.cooking-mode__title {
+  color: var(--color-text-brand);
+  font-size: 32px;
+  line-height: 1;
+}
+
+.cooking-mode > .footer {
+  margin-top: 0;
+}
