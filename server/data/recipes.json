@@ -1,142 +1,146 @@
 [
   {
     "id": "recipe-001",
-    "title": "Phở bò tái",
-    "description": "Tô phở thơm với nước dùng ninh cùng quế, hồi và gừng nướng, ăn kèm thịt bò tái và rau thơm.",
-    "category": "Món nước",
-    "cookingTime": 90,
-    "difficulty": "Trung bình",
+    "title": "Gà kho gừng",
+    "description": "Gà kho mềm với gừng thơm, nước màu và nước mắm, thích hợp ăn cùng cơm nóng.",
+    "category": "Món chính",
+    "cookingTime": 55,
+    "difficulty": "Dễ",
     "authorId": "user-001",
-    "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=1200&q=85",
+    "image": "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=1200&q=85",
+    "servings": 4,
+    "equipment": ["Dao", "Thớt", "Bát lớn", "Chảo sâu lòng", "Bếp"],
     "ingredients": [
-      { "name": "Bánh phở", "quantity": 400, "unit": "g" },
-      { "name": "Thịt bò phi lê", "quantity": 300, "unit": "g" },
-      { "name": "Xương bò", "quantity": 800, "unit": "g" },
-      { "name": "Gừng", "quantity": 40, "unit": "g" },
-      { "name": "Hành tây", "quantity": 1, "unit": "củ" },
-      { "name": "Hoa hồi", "quantity": 3, "unit": "cánh" },
-      { "name": "Quế", "quantity": 1, "unit": "thanh" },
-      { "name": "Hành lá", "quantity": 20, "unit": "g" }
+      { "name": "Thịt gà", "quantity": 700, "unit": "g" },
+      { "name": "Gừng", "quantity": 50, "unit": "g" },
+      { "name": "Hành tím", "quantity": 2, "unit": "củ" },
+      { "name": "Nước mắm", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Đường", "quantity": 1, "unit": "muỗng canh" },
+      { "name": "Nước dừa", "quantity": 200, "unit": "ml" },
+      { "name": "Dầu ăn", "quantity": 1, "unit": "muỗng canh" },
+      { "name": "Tiêu xay", "quantity": 1, "unit": "muỗng cà phê" }
     ],
     "steps": [
-      "Rửa sạch xương bò, chần nhanh trong nước sôi rồi rửa lại để nước dùng trong.",
-      "Nướng gừng và hành tây cho thơm. Rang hoa hồi và quế trên chảo khô khoảng một phút.",
-      "Ninh xương với 2 lít nước, gừng, hành tây, hoa hồi và quế trong khoảng 75 phút. Nêm muối và nước mắm vừa ăn.",
-      "Trụng bánh phở trong nước sôi, chia vào tô. Thái thịt bò thật mỏng rồi xếp lên trên.",
-      "Chan nước dùng đang sôi vào tô để làm chín thịt. Thêm hành lá và dùng nóng."
+      {
+        "title": "Sơ chế nguyên liệu",
+        "duration": 8,
+        "instruction": "Rửa sạch gà, để ráo rồi chặt miếng vừa ăn. Gọt vỏ gừng, thái sợi; bóc vỏ và băm nhỏ hành tím."
+      },
+      {
+        "title": "Ướp thịt gà",
+        "duration": 15,
+        "instruction": "Trộn gà với nước mắm, một nửa lượng gừng, hành tím và tiêu. Để thịt thấm gia vị trong 15 phút."
+      },
+      {
+        "title": "Tạo nước màu",
+        "duration": 5,
+        "instruction": "Làm nóng dầu trong chảo, cho đường vào đun nhỏ lửa đến khi chuyển màu cánh gián."
+      },
+      {
+        "title": "Xào săn thịt",
+        "duration": 7,
+        "instruction": "Cho gà đã ướp vào chảo nước màu, đảo đều đến khi các mặt thịt săn lại."
+      },
+      {
+        "title": "Kho gà",
+        "duration": 20,
+        "instruction": "Thêm nước dừa và phần gừng còn lại. Đậy nắp, kho nhỏ lửa khoảng 20 phút đến khi gà chín mềm và nước sốt sánh lại."
+      }
     ],
     "reviews": [],
     "averageRating": 0
   },
   {
     "id": "recipe-002",
-    "title": "Gỏi cuốn tôm thịt",
-    "description": "Gỏi cuốn thanh nhẹ với tôm, thịt ba chỉ, bún tươi và rau sống, chấm cùng tương đậu phộng.",
-    "category": "Món khai vị",
-    "cookingTime": 35,
-    "difficulty": "Dễ",
-    "authorId": "user-002",
-    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=85",
+    "title": "Phở bò",
+    "description": "Phở bò với nước dùng thơm từ xương, gừng và gia vị, ăn cùng bánh phở và rau thơm.",
+    "category": "Món nước",
+    "cookingTime": 120,
+    "difficulty": "Trung bình",
+    "authorId": "user-001",
+    "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=1200&q=85",
+    "servings": 4,
+    "equipment": ["Dao", "Thớt", "Nồi lớn", "Chảo", "Rây", "Bát"],
     "ingredients": [
-      { "name": "Tôm sú", "quantity": 200, "unit": "g" },
-      { "name": "Thịt ba chỉ", "quantity": 200, "unit": "g" },
-      { "name": "Bún tươi", "quantity": 200, "unit": "g" },
-      { "name": "Bánh tráng", "quantity": 10, "unit": "cái" },
-      { "name": "Xà lách", "quantity": 100, "unit": "g" },
-      { "name": "Hẹ", "quantity": 10, "unit": "nhánh" },
-      { "name": "Tương đậu phộng", "quantity": 100, "unit": "ml" }
+      { "name": "Xương bò", "quantity": 1000, "unit": "g" },
+      { "name": "Thịt bò phi lê", "quantity": 300, "unit": "g" },
+      { "name": "Bánh phở", "quantity": 500, "unit": "g" },
+      { "name": "Gừng", "quantity": 50, "unit": "g" },
+      { "name": "Hành tây", "quantity": 1, "unit": "củ" },
+      { "name": "Hoa hồi", "quantity": 3, "unit": "cánh" },
+      { "name": "Quế", "quantity": 1, "unit": "thanh" },
+      { "name": "Nước mắm", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Hành lá", "quantity": 20, "unit": "g" }
     ],
     "steps": [
-      "Luộc thịt ba chỉ với chút muối trong 20 phút, vớt ra để nguội rồi thái lát mỏng.",
-      "Luộc tôm đến khi chuyển màu hồng, để nguội, bóc vỏ và chẻ đôi theo chiều dọc.",
-      "Trụng bún qua nước nóng, để ráo. Rửa sạch xà lách và hẹ.",
-      "Làm mềm bánh tráng bằng một lớp nước mỏng. Xếp rau, bún, thịt và tôm lên bánh tráng.",
-      "Gấp hai mép bánh tráng vào trong, cuốn chặt tay và chừa phần hẹ ló ra một đầu. Dùng với tương đậu phộng."
+      {
+        "title": "Sơ chế xương",
+        "duration": 10,
+        "instruction": "Rửa sạch xương bò, chần trong nước sôi khoảng 5 phút rồi đổ bỏ nước và rửa lại xương."
+      },
+      {
+        "title": "Nướng gừng và hành",
+        "duration": 10,
+        "instruction": "Nướng gừng và hành tây trên chảo hoặc bếp đến khi dậy mùi thơm. Rang hoa hồi và quế trên chảo khô."
+      },
+      {
+        "title": "Ninh nước dùng",
+        "duration": 80,
+        "instruction": "Cho xương vào nồi cùng 2,5 lít nước, gừng, hành tây, hoa hồi và quế. Ninh nhỏ lửa, thường xuyên vớt bọt để nước dùng trong."
+      },
+      {
+        "title": "Chuẩn bị thịt và bánh phở",
+        "duration": 15,
+        "instruction": "Thái thịt bò thành lát mỏng, thái nhỏ hành lá. Trụng bánh phở trong nước sôi rồi chia vào các bát."
+      },
+      {
+        "title": "Hoàn thành món phở",
+        "duration": 5,
+        "instruction": "Nêm nước dùng với nước mắm cho vừa ăn. Xếp thịt bò lên bánh phở, chan nước dùng đang sôi và thêm hành lá."
+      }
     ],
     "reviews": [],
     "averageRating": 0
   },
   {
     "id": "recipe-003",
-    "title": "Cơm chiên rau củ",
-    "description": "Cơm chiên tơi hạt với trứng và rau củ nhiều màu, thích hợp cho bữa ăn nhanh gọn.",
+    "title": "Trứng chiên hành",
+    "description": "Trứng chiên mềm thơm với hành lá, nêm gia vị vừa ăn và dùng nóng với cơm.",
     "category": "Món chính",
-    "cookingTime": 25,
-    "difficulty": "Dễ",
-    "authorId": "user-001",
-    "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=1200&q=85",
-    "ingredients": [
-      { "name": "Cơm nguội", "quantity": 500, "unit": "g" },
-      { "name": "Trứng gà", "quantity": 2, "unit": "quả" },
-      { "name": "Cà rốt", "quantity": 1, "unit": "củ" },
-      { "name": "Đậu Hà Lan", "quantity": 80, "unit": "g" },
-      { "name": "Hành lá", "quantity": 15, "unit": "g" },
-      { "name": "Nước tương", "quantity": 1, "unit": "muỗng canh" },
-      { "name": "Dầu ăn", "quantity": 2, "unit": "muỗng canh" }
-    ],
-    "steps": [
-      "Đánh tan trứng với một chút muối. Cà rốt gọt vỏ, thái hạt lựu; hành lá thái nhỏ.",
-      "Làm nóng chảo với một muỗng canh dầu, cho trứng vào đảo nhanh rồi trút ra đĩa.",
-      "Thêm dầu còn lại, xào cà rốt và đậu Hà Lan khoảng ba phút cho vừa chín.",
-      "Cho cơm nguội vào chảo, đảo tơi trên lửa vừa. Nêm nước tương rồi cho trứng trở lại.",
-      "Đảo thêm hai phút, rắc hành lá và dùng khi cơm còn nóng."
-    ],
-    "reviews": [],
-    "averageRating": 0
-  },
-  {
-    "id": "recipe-004",
-    "title": "Đậu hũ sốt cà chua",
-    "description": "Đậu hũ vàng mềm phủ sốt cà chua đậm đà, dùng cùng cơm trắng cho bữa cơm gia đình.",
-    "category": "Món chay",
-    "cookingTime": 30,
+    "cookingTime": 15,
     "difficulty": "Dễ",
     "authorId": "user-002",
-    "image": "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=85",
+    "image": "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=1200&q=85",
+    "servings": 2,
+    "equipment": ["Bát", "Đũa", "Chảo chống dính", "Bếp"],
     "ingredients": [
-      { "name": "Đậu hũ trắng", "quantity": 400, "unit": "g" },
-      { "name": "Cà chua", "quantity": 3, "unit": "quả" },
-      { "name": "Hành tím", "quantity": 2, "unit": "củ" },
+      { "name": "Trứng gà", "quantity": 4, "unit": "quả" },
       { "name": "Hành lá", "quantity": 15, "unit": "g" },
-      { "name": "Nước mắm chay", "quantity": 1, "unit": "muỗng canh" },
-      { "name": "Đường", "quantity": 1, "unit": "muỗng cà phê" },
-      { "name": "Dầu ăn", "quantity": 2, "unit": "muỗng canh" }
+      { "name": "Nước mắm", "quantity": 1, "unit": "muỗng cà phê" },
+      { "name": "Tiêu xay", "quantity": 0.5, "unit": "muỗng cà phê" },
+      { "name": "Dầu ăn", "quantity": 1, "unit": "muỗng canh" }
     ],
     "steps": [
-      "Thấm khô đậu hũ, cắt miếng vuông vừa ăn. Cà chua thái hạt lựu, hành tím băm nhỏ.",
-      "Chiên đậu hũ với một muỗng canh dầu đến khi các mặt vàng nhẹ, gắp ra đĩa.",
-      "Phi thơm hành tím với phần dầu còn lại. Cho cà chua vào xào đến khi mềm và ra nước.",
-      "Nêm nước mắm chay, đường và khoảng 60 ml nước. Đun sốt nhỏ lửa trong năm phút.",
-      "Cho đậu hũ vào chảo, đảo nhẹ để sốt phủ đều rồi đun thêm ba phút. Rắc hành lá trước khi dùng."
-    ],
-    "reviews": [],
-    "averageRating": 0
-  },
-  {
-    "id": "recipe-005",
-    "title": "Mì xào bò rau cải",
-    "description": "Mì xào thơm lửa với thịt bò mềm, cải ngọt và nước sốt mặn ngọt dễ ăn.",
-    "category": "Món xào",
-    "cookingTime": 30,
-    "difficulty": "Trung bình",
-    "authorId": "user-001",
-    "image": "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=1200&q=85",
-    "ingredients": [
-      { "name": "Mì trứng", "quantity": 300, "unit": "g" },
-      { "name": "Thịt bò", "quantity": 250, "unit": "g" },
-      { "name": "Cải ngọt", "quantity": 200, "unit": "g" },
-      { "name": "Tỏi", "quantity": 3, "unit": "tép" },
-      { "name": "Dầu hào", "quantity": 1, "unit": "muỗng canh" },
-      { "name": "Nước tương", "quantity": 1, "unit": "muỗng canh" },
-      { "name": "Dầu ăn", "quantity": 2, "unit": "muỗng canh" }
-    ],
-    "steps": [
-      "Thái thịt bò thành lát mỏng, ướp với một nửa lượng dầu hào và nước tương trong 10 phút.",
-      "Luộc mì theo hướng dẫn trên bao bì, xả nhanh qua nước lạnh rồi để ráo.",
-      "Rửa cải ngọt, cắt khúc. Băm nhỏ tỏi.",
-      "Làm nóng chảo với một muỗng canh dầu, xào thịt bò nhanh trên lửa lớn đến khi vừa chín tới rồi gắp ra.",
-      "Thêm dầu còn lại, phi thơm tỏi, cho cải vào xào hai phút. Thêm mì, phần dầu hào và nước tương còn lại.",
-      "Cho thịt bò trở lại chảo, đảo đều thêm một phút rồi tắt bếp."
+      {
+        "title": "Sơ chế hành lá",
+        "duration": 3,
+        "instruction": "Rửa sạch hành lá, để ráo rồi thái nhỏ."
+      },
+      {
+        "title": "Đánh trứng",
+        "duration": 3,
+        "instruction": "Đập trứng vào bát, thêm nước mắm và tiêu. Đánh đều rồi trộn hành lá vào."
+      },
+      {
+        "title": "Chiên trứng",
+        "duration": 7,
+        "instruction": "Làm nóng chảo với dầu ăn. Đổ trứng vào, chiên lửa vừa đến khi mặt dưới vàng và mặt trên vừa se lại."
+      },
+      {
+        "title": "Gấp và hoàn thành",
+        "duration": 2,
+        "instruction": "Gấp trứng làm đôi, chiên thêm khoảng một phút rồi tắt bếp và dùng nóng."
+      }
     ],
     "reviews": [],
     "averageRating": 0

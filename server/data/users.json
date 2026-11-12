@@ -1,0 +1,22 @@
+[
+  {
+    "id": "user-001",
+    "fullName": "Thành viên",
+    "username": "member",
+    "email": "member@cooked.test",
+    "role": "member",
+    "bio": "",
+    "avatarUrl": null,
+    "passwordHash": "scrypt$16384$8$1$150c3b0343b6ea4c9b4024bce26755c0$9bfb26bc3389dfe8a28da2f04a1171a0634915019ccbfbdb80aefebbef63f61e76e866b41f786f52f569ce6b89c3eded185991c9f8c1dd5327e4f9dcb41458fa"
+  },
+  {
+    "id": "user-002",
+    "fullName": "Admin",
+    "username": "admin",
+    "email": "admin@cooked.test",
+    "role": "admin",
+    "bio": "",
+    "avatarUrl": null,
+    "passwordHash": "scrypt$16384$8$1$d054d5d3d93fca496b7d7bd63d18daeb$b1dfec0f0ee81cb0fdf2bd05b3f91bc6989b58ba8c5a82be39eec79b6324e9b052b46d9c6d1edff0e1100eac9ebf1b749c762d0c563663074a32c02e2f03c956"
+  }
+]
