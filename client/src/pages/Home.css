@@ -1,3 +1,14 @@
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .home-page {
   display: flex;
   flex-direction: column;
@@ -6,6 +17,7 @@
   max-width: 858px;
   margin: 0 auto;
   text-align: left;
+  animation: fadeSlideUp 0.45s ease-out both;
 }
 
 .home-hero {
@@ -14,16 +26,6 @@
   align-items: center;
   gap: var(--space-8);
   padding: var(--space-4) 0 var(--space-6);
-}
-
-/* Đường phân cách mảnh giữa Hero và SearchBar */
-.home-hero::after {
-  content: "";
-  grid-column: 1 / -1;
-  width: 180px;
-  height: 1px;
-  margin: var(--space-4) auto 0;
-  background-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
 }
 
 .home-hero__content {
@@ -48,7 +50,6 @@
   display: block;
 }
 
-/* Căn 4 dòng của tiêu đề thành 4 hàng riêng biệt, khoảng cách đều chằn chặn */
 .home-hero__title {
   display: flex;
   flex-direction: column;
@@ -63,7 +64,7 @@
   display: block;
   font-family: var(--font-display);
   font-size: 2.3rem;
-  font-weight: 400; /* Không in đậm giả cho font Oi */
+  font-weight: 400;
   line-height: 1;
 }
 
@@ -72,7 +73,7 @@
   color: var(--color-accent);
   font-family: var(--font-heading);
   font-size: 2.75rem;
-  font-weight: 700; /* In đậm chữ memorable cam */
+  font-weight: 700;
   line-height: 1;
 }
 
@@ -98,25 +99,40 @@
   font-family: var(--font-body);
   font-size: var(--font-size-xs);
   text-decoration: none;
-  transition: background-color 150ms ease-out;
+  transition:
+    background-color 200ms ease,
+    transform 200ms ease,
+    box-shadow 200ms ease;
 }
 
 .home-hero__cta:hover {
   background-color: var(--color-brand-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(38, 72, 56, 0.18);
 }
 
-/* Cụm thẻ bên phải */
+.home-hero__cta-arrow {
+  display: inline-block;
+  transition: transform 200ms ease;
+}
+
+.home-hero__cta:hover .home-hero__cta-arrow {
+  transform: translateX(4px);
+}
+
+
 .home-hero__visual {
   position: relative;
   display: flex;
   align-items: flex-end;
-  justify-content: flex-start;
+  justify-content: flex-start; 
   height: 310px;
+  width: 320px; 
 }
 
 .home-hero__backdrop-card {
   position: absolute;
-  right: 28px;
+  right: 0;
   top: 8px;
   width: 205px;
   height: 265px;
@@ -124,6 +140,7 @@
   background-color: var(--color-bg-elevated);
   box-shadow: var(--shadow-card-featured);
   transform: rotate(15deg);
+  transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .home-hero__featured-card {
@@ -139,6 +156,18 @@
   background-color: var(--color-bg-surface);
   box-shadow: var(--shadow-card-featured);
   margin-bottom: var(--space-4);
+  margin-left: 0; 
+  text-decoration: none;
+  transition:
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 280ms ease,
+    border-color 280ms ease;
+}
+
+.home-hero__featured-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-accent);
+  box-shadow: 0 18px 42px rgba(38, 72, 56, 0.14);
 }
 
 .home-hero__badge {
@@ -164,6 +193,7 @@
   height: 44px;
   border-radius: var(--radius-sm);
   background-color: var(--color-bg-placeholder);
+  object-fit: cover;
   flex-shrink: 0;
 }
 
@@ -171,6 +201,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .home-hero__featured-name {
@@ -180,6 +211,9 @@
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-display);
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .home-hero__featured-meta {
@@ -188,4 +222,57 @@
   font-family: var(--font-body);
   font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-light);
+}
+
+
+
+@media (max-width: 860px) {
+  .home-page {
+    padding: 0 24px; 
+  }
+  .home-hero {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    padding: var(--space-3) 0 var(--space-4);
+  }
+  .home-hero__visual {
+    height: 260px;
+    max-width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  .home-page {
+    padding: 0 16px; 
+  }
+  
+  .home-hero__title { gap: 8px; }
+  .home-hero__title-line { font-size: 2rem; }
+  .home-hero__title-highlight { font-size: 2.3rem; }
+
+
+  
+  .home-hero__visual {
+    position: relative; 
+    height: 280px;
+    width: 290px; 
+    max-width: 100%;
+    justify-content: flex-start;
+    margin-top: 10px;
+  }
+  
+  .home-hero__backdrop-card {
+    width: 180px;
+    height: 240px;
+    
+    right: 10px; 
+    left: auto; 
+    top: 10px;
+  }
+
+  .home-hero__featured-card {
+    width: 220px;
+    margin-left: 0;
+  }
 }
