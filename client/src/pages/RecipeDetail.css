@@ -26,8 +26,16 @@ html:has(.recipe-detail) {
   --rd-card-gap: 20px;
   --rd-row-padding: 10px;
   --rd-row-min-height: 64px;
-  --rd-tip-background: color-mix(in srgb, var(--color-brand) 6%, var(--color-bg-surface));
-  --rd-row-hover: color-mix(in srgb, var(--color-brand) 5%, var(--color-bg-surface));
+  --rd-tip-background: color-mix(
+    in srgb,
+    var(--color-brand) 6%,
+    var(--color-bg-surface)
+  );
+  --rd-row-hover: color-mix(
+    in srgb,
+    var(--color-brand) 5%,
+    var(--color-bg-surface)
+  );
   --rd-step-gap: 1.25rem;
   --rd-review-form-width: 22.5rem;
   --rd-review-score-size: 2.5rem;
@@ -154,6 +162,10 @@ html:has(.recipe-detail) {
 }
 
 .recipe-detail__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   min-height: var(--rd-button-height);
   padding: var(--space-2) var(--space-4);
   border: 0;
@@ -632,4 +644,54 @@ html:has(.recipe-detail) {
 html {
   scrollbar-color: var(--color-brand) var(--color-bg-page);
   scrollbar-width: thin;
+}
+
+.recipe-detail__button:disabled {
+  cursor: not-allowed;
+}
+.recipe-detail__back {
+  display: inline-block;
+  margin-top: var(--space-4);
+  color: var(--color-brand);
+  text-decoration: underline;
+}
+.recipe-detail :is(a, button, input):focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .recipe-detail__button--primary:hover {
+    background: var(--color-brand-hover);
+  }
+  .recipe-detail__breadcrumb a:hover,
+  .recipe-detail__back:hover {
+    color: var(--color-accent);
+  }
+}
+
+.recipe-detail__button:not(:disabled):active {
+  filter: brightness(0.92);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .recipe-detail {
+    animation: recipe-detail-enter 450ms ease-out both;
+  }
+  .recipe-detail__button:not(:disabled) {
+    transition:
+      background-color 200ms ease,
+      filter 200ms ease;
+  }
+}
+
+@keyframes recipe-detail-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

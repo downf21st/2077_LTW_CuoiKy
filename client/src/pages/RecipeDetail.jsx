@@ -1,123 +1,105 @@
-import recipePhoto from "../assets/images/ga-kho-gung.jpg";
+import { Link, useParams } from "react-router-dom";
 import lockIcon from "../assets/lock-keyhole.svg";
 import StarRating, { StarInput } from "../components/StarRating/StarRating";
+import { MOCK_RECIPES } from "../data/mockRecipes";
 import "./RecipeDetail.css";
 
-const ingredients = [
-  { name: "Thịt đùi gà, chặt miếng", amount: "800 g" },
-  { name: "Gừng tươi, thái sợi", amount: "50 g" },
-  { name: "Hành tím, băm nhỏ", amount: "2 củ" },
-  { name: "Tỏi, băm nhỏ", amount: "3 tép" },
-  { name: "Nước mắm", amount: "3 muỗng canh" },
-  { name: "Đường", amount: "1½ muỗng canh" },
-  { name: "Dầu ăn", amount: "1 muỗng canh" },
-  { name: "Tiêu xay", amount: "½ muỗng cà phê" },
-  { name: "Nước lọc", amount: "150 ml" },
-];
+function RecipeContent({ recipe }) {
+  const ingredients = recipe.ingredients ?? [];
+  const steps = recipe.steps ?? [];
+  const equipment = recipe.equipment ?? [];
+  const reviews = recipe.reviews ?? [];
+  const cookingPath = `/recipe/${encodeURIComponent(recipe.id)}/cooking-mode`;
 
-const reviews = [
-  {
-    initials: "HT",
-    name: "Hà Thoại",
-    date: "2026-11-02",
-    displayDate: "02/11/2026",
-    rating: 5,
-    text: "Gà mềm, vị gừng rất thơm. Mình làm đúng lượng nước mắm, ăn với cơm nóng vừa miệng cả nhà. Sẽ nấu lại!",
-  },
-  {
-    initials: "DA",
-    name: "Duy Anh",
-    date: "2026-10-30",
-    displayDate: "30/10/2026",
-    rating: 5,
-    text: "Lần đầu kho gà mà thành công. Hướng dẫn thắng màu rõ ràng, sốt lên màu đẹp và không bị đắng.",
-  },
-  {
-    initials: "HN",
-    name: "Hải Nam",
-    date: "2026-10-28",
-    displayDate: "28/10/2026",
-    rating: 4,
-    text: "Món ngon, dễ làm. Nhà mình ăn nhạt nên lần sau sẽ giảm chút nước mắm. Cho gừng ở cuối giúp mùi thơm hơn hẳn.",
-  },
-];
-
-function RecipeDetail() {
   return (
-    <main className="recipe-detail">
+    <div className="recipe-detail">
       <nav className="recipe-detail__breadcrumb" aria-label="Breadcrumb">
-        Trang chủ / Món ăn / Gà kho gừng
+        <Link to="/">Trang chủ</Link> / Món ăn / {recipe.title}
       </nav>
-
       <section className="recipe-detail__hero" aria-labelledby="recipe-title">
-        <figure
-          className="recipe-detail__photo"
-          role="img"
-          aria-label="Gà kho gừng"
-        >
-          <img
-            className="recipe-detail__photo-image"
-            src={recipePhoto}
-            alt="Món gà kho gừng trong nồi đất"
-            width="584"
-            height="474"
-          />
+        <figure className="recipe-detail__photo">
+          {recipe.image ? (
+            <img
+              className="recipe-detail__photo-image"
+              src={recipe.image}
+              alt={recipe.title}
+              width="584"
+              height="474"
+            />
+          ) : (
+            <span>Chưa có ảnh món ăn</span>
+          )}
         </figure>
-
         <div className="recipe-detail__introduction">
-          <p className="recipe-detail__kicker">BỮA CƠM NHÀ / MÓN KHO</p>
-          <h1 className="recipe-detail__title" id="recipe-title">
-            Gà kho gừng
-          </h1>
-
-          <div className="recipe-detail__author">
-            <span className="recipe-detail__avatar" aria-hidden="true">
-              D
-            </span>
-            <span>Công thức của Đông</span>
-          </div>
-
-          <p className="recipe-detail__description">
-            Món kho thân quen cho bữa cơm ấm cúng: gà mềm, thơm nồng vị gừng, áo
-            lớp sốt nước mắm đậm đà. Chỉ cần thêm bát cơm nóng là đủ ngon.
+          <p className="recipe-detail__kicker">
+            {recipe.category || "Chưa có loại món"}
           </p>
-
-          <div className="recipe-detail__rating">
-            <span className="recipe-detail__stars" aria-hidden="true">
-              ★★★★★
-            </span>
-            <span>4,8/5 · 128 đánh giá</span>
+          <h1 className="recipe-detail__title" id="recipe-title">
+            {recipe.title}
+          </h1>
+          <div className="recipe-detail__author">
+            {recipe.authorId
+              ? `Người đăng: ${recipe.authorId}`
+              : "Chưa có thông tin người đăng"}
           </div>
-
+          <p className="recipe-detail__description">
+            {recipe.description || "Chưa có mô tả."}
+          </p>
+          <div className="recipe-detail__rating">
+            {reviews.length > 0 && recipe.averageRating != null ? (
+              <>
+                <StarRating value={recipe.averageRating} />
+                <span>
+                  {recipe.averageRating}/5 · {reviews.length} đánh giá
+                </span>
+              </>
+            ) : (
+              <span>Chưa có đánh giá</span>
+            )}
+          </div>
           <div className="recipe-detail__stats">
             <div className="recipe-detail__stat">
-              <span>45 phút</span>
-              <span className="recipe-detail__stat-label">
-                15′ chuẩn bị · 30′ nấu
+              <span>
+                {recipe.cookingTime != null
+                  ? `${recipe.cookingTime} phút`
+                  : "Chưa cập nhật"}
               </span>
+              <span className="recipe-detail__stat-label">Thời gian</span>
             </div>
             <div className="recipe-detail__stat">
-              <span>Dễ</span>
+              <span>{recipe.difficulty || "Chưa cập nhật"}</span>
               <span className="recipe-detail__stat-label">Độ khó</span>
             </div>
             <div className="recipe-detail__stat">
-              <span>4 người</span>
+              <span>
+                {recipe.servings != null
+                  ? `${recipe.servings} người`
+                  : "Chưa cập nhật"}
+              </span>
               <span className="recipe-detail__stat-label">Khẩu phần</span>
             </div>
           </div>
-
-          <button
-            className="recipe-detail__button recipe-detail__button--primary"
-            type="button"
-          >
-            Bắt đầu nấu
-          </button>
+          {steps.length > 0 ? (
+            <Link
+              className="recipe-detail__button recipe-detail__button--primary"
+              to={cookingPath}
+            >
+              Bắt đầu nấu
+            </Link>
+          ) : (
+            <button
+              className="recipe-detail__button recipe-detail__button--disabled"
+              type="button"
+              disabled
+            >
+              Bắt đầu nấu
+            </button>
+          )}
           <p className="recipe-detail__note">
             Nấu từng bước, không cần đăng nhập.
           </p>
         </div>
       </section>
-
       <section
         className="recipe-detail__guest"
         aria-label="Tính năng dành cho thành viên"
@@ -130,21 +112,23 @@ function RecipeDetail() {
           <button
             className="recipe-detail__button recipe-detail__button--locked"
             type="button"
+            disabled
           >
             Lưu yêu thích
           </button>
           <button
             className="recipe-detail__button recipe-detail__button--locked"
             type="button"
+            disabled
           >
             Thêm vào thực đơn tuần
           </button>
-          <button
+          <Link
             className="recipe-detail__button recipe-detail__button--primary recipe-detail__button--login"
-            type="button"
+            to="/login"
           >
             Đăng nhập
-          </button>
+          </Link>
         </div>
       </section>
       <div className="recipe-detail__content">
@@ -160,44 +144,57 @@ function RecipeDetail() {
               Nguyên liệu
             </h2>
             <div className="recipe-detail__servings">
-              <span>Cho 4 người</span>
+              <span>
+                {recipe.servings != null
+                  ? `Cho ${recipe.servings} người`
+                  : "Chưa có khẩu phần"}
+              </span>
               <span className="recipe-detail__ingredient-count">
-                9 nguyên liệu
+                {ingredients.length} nguyên liệu
               </span>
             </div>
-            <p className="recipe-detail__helper">
-              Đánh dấu những thứ bạn đã chuẩn bị.
-            </p>
-            <ul className="recipe-detail__ingredient-list">
-              {ingredients.map(({ name, amount }) => (
-                <li className="recipe-detail__ingredient" key={name}>
-                  <label className="recipe-detail__ingredient-label">
-                    <input
-                      className="recipe-detail__ingredient-checkbox"
-                      type="checkbox"
-                    />
-                    <span className="recipe-detail__ingredient-name">
-                      {name}
-                    </span>
-                    <span className="recipe-detail__amount">{amount}</span>
-                  </label>
-                </li>
-              ))}
-            </ul>
-            <p className="recipe-detail__conversion">
-              1 muỗng canh = 15 ml
-              <br />1 muỗng cà phê = 5 ml
-            </p>
+            {ingredients.length > 0 ? (
+              <>
+                <p className="recipe-detail__helper">
+                  Đánh dấu những thứ bạn đã chuẩn bị.
+                </p>
+                <ul className="recipe-detail__ingredient-list">
+                  {ingredients.map(({ name, quantity, unit }, index) => (
+                    <li
+                      className="recipe-detail__ingredient"
+                      key={`${name}-${index}`}
+                    >
+                      <label className="recipe-detail__ingredient-label">
+                        <input
+                          className="recipe-detail__ingredient-checkbox"
+                          type="checkbox"
+                        />
+                        <span className="recipe-detail__ingredient-name">
+                          {name}
+                        </span>
+                        <span className="recipe-detail__amount">
+                          {quantity ?? ""} {unit ?? ""}
+                        </span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p className="recipe-detail__helper">
+                Chưa có danh sách nguyên liệu.
+              </p>
+            )}
           </div>
           <aside className="recipe-detail__tip">
-            <h3 className="recipe-detail__tip-title">Nhỏ mà có võ</h3>
+            <h3 className="recipe-detail__tip-title">Dụng cụ</h3>
             <p>
-              Chọn gừng ta để món kho thơm hơn. Chia gừng làm hai lần cho vào
-              nồi: một lần để dậy mùi, một lần để giữ vị ấm cay.
+              {equipment.length
+                ? equipment.join(", ")
+                : "Chưa có thông tin dụng cụ."}
             </p>
           </aside>
         </section>
-
         <section
           className="recipe-detail__instructions"
           aria-labelledby="instructions-heading"
@@ -209,117 +206,48 @@ function RecipeDetail() {
             Cách làm
           </h2>
           <p className="recipe-detail__helper">
-            6 bước đơn giản, một nồi cơm nhà thật ngon.
+            {steps.length
+              ? `${steps.length} bước thực hiện.`
+              : "Chưa có hướng dẫn nấu."}
           </p>
           <ol className="recipe-detail__step-list">
-            <li className="recipe-detail__step">
-              <span className="recipe-detail__step-number" aria-hidden="true">
-                1
-              </span>
-              <div className="recipe-detail__step-content">
-                <h3 className="recipe-detail__step-title">
-                  Sơ chế nguyên liệu
-                </h3>
-                <p className="recipe-detail__step-duration">5 phút</p>
-                <p className="recipe-detail__step-description">
-                  Thấm khô gà bằng giấy bếp, chặt miếng vừa ăn. Gừng cạo vỏ,
-                  thái sợi; hành tím và tỏi bóc vỏ, băm nhỏ. Dùng dao, thớt
-                  riêng cho gà sống và rửa tay, dụng cụ sau khi sơ chế.
-                </p>
-              </div>
-            </li>
-            <li className="recipe-detail__step">
-              <span className="recipe-detail__step-number" aria-hidden="true">
-                2
-              </span>
-              <div className="recipe-detail__step-content">
-                <h3 className="recipe-detail__step-title">
-                  Ướp gà cho thấm vị
-                </h3>
-                <p className="recipe-detail__step-duration">10 phút</p>
-                <p className="recipe-detail__step-description">
-                  Trộn gà với 2 muỗng canh nước mắm, ½ muỗng canh đường, ½ lượng
-                  hành tỏi và ¼ muỗng cà phê tiêu. Ướp 10 phút trong ngăn mát tủ
-                  lạnh.
-                </p>
-              </div>
-            </li>
-            <li className="recipe-detail__step">
-              <span className="recipe-detail__step-number" aria-hidden="true">
-                3
-              </span>
-              <div className="recipe-detail__step-content">
-                <h3 className="recipe-detail__step-title">
-                  Thắng màu, phi thơm
-                </h3>
-                <p className="recipe-detail__step-duration">5 phút</p>
-                <p className="recipe-detail__step-description">
-                  Cho dầu ăn và 1 muỗng canh đường còn lại vào nồi, đun lửa nhỏ
-                  đến màu hổ phách. Thêm hành tỏi còn lại cùng ½ lượng gừng, đảo
-                  thơm; tránh để đường cháy đắng.
-                </p>
-              </div>
-            </li>
-            <li className="recipe-detail__step">
-              <span className="recipe-detail__step-number" aria-hidden="true">
-                4
-              </span>
-              <div className="recipe-detail__step-content">
-                <h3 className="recipe-detail__step-title">Đảo gà săn lại</h3>
-                <p className="recipe-detail__step-duration">5 phút</p>
-                <p className="recipe-detail__step-description">
-                  Cho gà cùng phần nước ướp vào nồi. Tăng lên lửa vừa, đảo
-                  khoảng 5 phút để các mặt gà săn lại và áo đều màu. Cẩn thận
-                  khi cho gà vào vì dầu có thể bắn.
-                </p>
-              </div>
-            </li>
-            <li className="recipe-detail__step">
-              <span className="recipe-detail__step-number" aria-hidden="true">
-                5
-              </span>
-              <div className="recipe-detail__step-content">
-                <h3 className="recipe-detail__step-title">Kho nhỏ lửa</h3>
-                <p className="recipe-detail__step-duration">15 phút</p>
-                <p className="recipe-detail__step-description">
-                  Thêm 150 ml nước lọc và 1 muỗng canh nước mắm còn lại. Đun
-                  sôi, hạ lửa nhỏ, đậy hé nắp và kho 15 phút. Trở gà một lần để
-                  thấm đều; thêm chút nước nóng nếu nồi cạn sớm.
-                </p>
-              </div>
-            </li>
-            <li className="recipe-detail__step">
-              <span className="recipe-detail__step-number" aria-hidden="true">
-                6
-              </span>
-              <div className="recipe-detail__step-content">
-                <h3 className="recipe-detail__step-title">
-                  Hoàn thiện và thưởng thức
-                </h3>
-                <p className="recipe-detail__step-duration">5 phút</p>
-                <p className="recipe-detail__step-description">
-                  Thêm gừng và tiêu còn lại, mở nắp kho 5 phút cho sốt sánh. Đo
-                  phần thịt dày nhất, không chạm xương: gà cần đạt ít nhất 74°C;
-                  nếu chưa đạt, kho thêm đến khi chín an toàn. Dọn nóng cùng cơm
-                  trắng.
-                </p>
-              </div>
-            </li>
+            {steps.map((step, index) => (
+              <li className="recipe-detail__step" key={index}>
+                <span className="recipe-detail__step-number" aria-hidden="true">
+                  {index + 1}
+                </span>
+                <div className="recipe-detail__step-content">
+                  <h3 className="recipe-detail__step-title">
+                    {step.title || `Bước ${index + 1}`}
+                  </h3>
+                  {step.duration != null && (
+                    <p className="recipe-detail__step-duration">
+                      {step.duration} phút
+                    </p>
+                  )}
+                  <p className="recipe-detail__step-description">
+                    {step.instruction || "Chưa có hướng dẫn."}
+                  </p>
+                </div>
+              </li>
+            ))}
           </ol>
-          <div className="recipe-detail__invitation">
-            <h3 className="recipe-detail__invitation-title">
-              Sẵn sàng vào bếp?
-            </h3>
-            <p className="recipe-detail__helper">
-              Chuyển sang chế độ nấu để xem từng bước rõ ràng hơn.
-            </p>
-            <button
-              className="recipe-detail__button recipe-detail__button--primary recipe-detail__invitation-button"
-              type="button"
-            >
-              Bắt đầu nấu
-            </button>
-          </div>
+          {steps.length > 0 && (
+            <div className="recipe-detail__invitation">
+              <h3 className="recipe-detail__invitation-title">
+                Sẵn sàng vào bếp?
+              </h3>
+              <p className="recipe-detail__helper">
+                Chuyển sang chế độ nấu để xem từng bước rõ ràng hơn.
+              </p>
+              <Link
+                className="recipe-detail__button recipe-detail__button--primary recipe-detail__invitation-button"
+                to={cookingPath}
+              >
+                Bắt đầu nấu
+              </Link>
+            </div>
+          )}
         </section>
       </div>
       <section
@@ -334,53 +262,29 @@ function RecipeDetail() {
         </p>
         <div className="recipe-detail__reviews-layout">
           <div className="recipe-detail__community">
-            <div className="recipe-detail__review-summary">
-              <StarRating value={4.8} />
-              <p className="recipe-detail__helper">Trên 5 sao · 128 đánh giá</p>
-            </div>
-            <p className="recipe-detail__review-count">
-              Hiển thị 3 trong 128 đánh giá
-            </p>
-            {reviews.map(
-              ({ initials, name, date, displayDate, rating, text }) => (
+            {reviews.length > 0 ? (
+              reviews.map((review, index) => (
                 <article
                   className="recipe-detail__review"
-                  key={`${name}-${date}`}
+                  key={review.id ?? index}
                 >
-                  <div className="recipe-detail__reviewer">
-                    <span
-                      className="recipe-detail__review-avatar"
-                      aria-hidden="true"
-                    >
-                      {initials}
-                    </span>
-                    <div className="recipe-detail__reviewer-info">
-                      <p>{name}</p>
-                      <time
-                        className="recipe-detail__review-date"
-                        dateTime={date}
-                      >
-                        {displayDate}
-                      </time>
-                    </div>
-                    <p className="recipe-detail__review-score">
-                      <StarRating value={rating} size="sm" />{" "}
-                      <span>{rating}/5</span>
-                    </p>
-                  </div>
-                  <p>{text}</p>
+                  <p>{review.name || "Người dùng"}</p>
+                  {review.rating != null && (
+                    <StarRating value={review.rating} size="sm" />
+                  )}
+                  <p>{review.text || ""}</p>
                 </article>
-              ),
+              ))
+            ) : (
+              <p className="recipe-detail__helper">
+                Chưa có đánh giá cho món này.
+              </p>
             )}
-            <button
-              className="recipe-detail__button recipe-detail__button--outline"
-              type="button"
-            >
-              Xem thêm đánh giá
-            </button>
           </div>
-
-          <form className="recipe-detail__review-form">
+          <form
+            className="recipe-detail__review-form"
+            onSubmit={(event) => event.preventDefault()}
+          >
             <h3 className="recipe-detail__review-form-title">
               Bữa cơm của bạn thế nào?
             </h3>
@@ -388,12 +292,12 @@ function RecipeDetail() {
               <img className="recipe-detail__lock-icon" src={lockIcon} alt="" />{" "}
               Đăng nhập để đánh giá và bình luận.
             </p>
-            <button
+            <Link
               className="recipe-detail__button recipe-detail__button--primary recipe-detail__review-form-button"
-              type="button"
+              to="/login"
             >
               Đăng nhập
-            </button>
+            </Link>
             <fieldset className="recipe-detail__rating-field" disabled>
               <legend className="recipe-detail__rating-legend">
                 Điểm của bạn · Chưa đăng nhập
@@ -421,8 +325,22 @@ function RecipeDetail() {
           </form>
         </div>
       </section>
-    </main>
+    </div>
   );
 }
 
-export default RecipeDetail;
+export default function RecipeDetail() {
+  const { id } = useParams();
+  const recipe = MOCK_RECIPES.find((item) => item.id === id);
+  if (!recipe)
+    return (
+      <div className="recipe-detail" key={id}>
+        <h1>Không tìm thấy món ăn</h1>
+        <p>Món ăn này không có trong dữ liệu mẫu.</p>
+        <Link className="recipe-detail__back" to="/">
+          Về trang chủ
+        </Link>
+      </div>
+    );
+  return <RecipeContent key={recipe.id} recipe={recipe} />;
+}
