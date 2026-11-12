@@ -1,4 +1,5 @@
 const express = require('express');
+const { getRecipeById } = require('../controllers/recipeController');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 
@@ -104,5 +105,7 @@ router.get('/', async (req, res) => {
     });
   }
 });
+
+router.get('/:id', getRecipeById);
 
 module.exports = router;
