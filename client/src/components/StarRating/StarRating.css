@@ -11,8 +11,12 @@
   vertical-align: middle;
 }
 
-.star-rating--sm { --star-size: var(--star-size-sm); }
-.star-rating--md { --star-size: var(--star-size-md); }
+.star-rating--sm {
+  --star-size: var(--star-size-sm);
+}
+.star-rating--md {
+  --star-size: var(--star-size-md);
+}
 
 .star-rating__star {
   position: relative;
@@ -29,8 +33,12 @@
   height: var(--star-size);
 }
 
-.star-rating__empty { fill: var(--star-color-empty); }
-.star-rating__filled { fill: var(--star-color-filled); }
+.star-rating__empty {
+  fill: var(--star-color-empty);
+}
+.star-rating__filled {
+  fill: var(--star-color-filled);
+}
 .star-rating__fill {
   position: absolute;
   inset: 0 auto 0 0;
@@ -60,7 +68,10 @@
   border: 0;
 }
 
-.star-input__options { display: flex; gap: var(--star-input-gap); }
+.star-input__options {
+  display: flex;
+  gap: var(--star-input-gap);
+}
 .star-input__option {
   position: relative;
   display: grid;
@@ -70,7 +81,10 @@
   place-items: center;
   cursor: pointer;
 }
-.star-input__radio { position: absolute; opacity: 0; }
+.star-input__radio {
+  position: absolute;
+  opacity: 0;
+}
 .star-input__icon {
   width: var(--star-input-size);
   height: var(--star-input-size);
@@ -80,18 +94,26 @@
   stroke-linejoin: round;
 }
 .star-input__option:has(.star-input__radio:checked) .star-input__icon,
-.star-input__option:has(~ .star-input__option .star-input__radio:checked) .star-input__icon {
+.star-input__option:has(~ .star-input__option .star-input__radio:checked)
+  .star-input__icon {
   fill: var(--color-on-accent);
   stroke: var(--color-on-accent);
 }
-.star-input__options:has(.star-input__radio:not(:disabled)):has(.star-input__option:hover) .star-input__icon {
+.star-input__options:has(.star-input__radio:not(:disabled)):has(
+    .star-input__option:hover
+  )
+  .star-input__icon {
   fill: none;
   stroke: var(--color-text-muted);
 }
 .star-input__options:has(.star-input__radio:not(:disabled))
-.star-input__option:has(.star-input__radio:not(:disabled)):hover .star-input__icon,
+  .star-input__option:has(.star-input__radio:not(:disabled)):hover
+  .star-input__icon,
 .star-input__options:has(.star-input__radio:not(:disabled))
-.star-input__option:has(~ .star-input__option:hover .star-input__radio:not(:disabled)) .star-input__icon {
+  .star-input__option:has(
+    ~ .star-input__option:hover .star-input__radio:not(:disabled)
+  )
+  .star-input__icon {
   fill: var(--color-on-accent);
   stroke: var(--color-on-accent);
 }
@@ -100,4 +122,6 @@
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
-.star-input__option:has(.star-input__radio:disabled) { cursor: not-allowed; }
+.star-input__option:has(.star-input__radio:disabled) {
+  cursor: not-allowed;
+}
