@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { MOCK_RECIPES } from '../data/mockRecipes';
+import { getRecipes } from '../api';
 import SearchBar from '../components/SearchBar/SearchBar';
 import RecipeList from '../components/RecipeList/RecipeList';
 import './Home.css';
@@ -24,39 +24,28 @@ function getRecipeOfTheDay(recipesList) {
   return recipesList[dayIndex % recipesList.length];
 }
 
-export default function Home({ apiRecipes }) {
-  const [recipes, setRecipes] = useState(
-    Array.isArray(apiRecipes) && apiRecipes.length > 0 ? apiRecipes : MOCK_RECIPES
-  );
+export default function Home() {
+  const [recipes, setRecipes] = useState([]);
+  const [status, setStatus] = useState('loading');
   const [searchTags, setSearchTags] = useState([]);
 
-  
   useEffect(() => {
-    if (Array.isArray(apiRecipes) && apiRecipes.length > 0) {
-      setRecipes(apiRecipes);
-      return;
-    }
-
-    const apiUrl = import.meta.env.VITE_API_URL;
-    if (!apiUrl) return;
-
     let isMounted = true;
-    fetch(`${apiUrl.replace(/\/$/, '')}/recipes`)
-      .then((res) => (res.ok ? res.json() : Promise.reject()))
-      .then((data) => {
-        const list = Array.isArray(data) ? data : data?.recipes || data?.data;
-        if (isMounted && Array.isArray(list) && list.length > 0) {
-          setRecipes(list);
-        }
+
+    getRecipes()
+      .then((list) => {
+        if (!isMounted) return;
+        setRecipes(list);
+        setStatus('done');
       })
       .catch(() => {
-        
+        if (isMounted) setStatus('error');
       });
 
     return () => {
       isMounted = false;
     };
-  }, [apiRecipes]);
+  }, []);
 
   
   const featuredRecipe = useMemo(() => getRecipeOfTheDay(recipes), [recipes]);
@@ -173,7 +162,13 @@ export default function Home({ apiRecipes }) {
       </section>
 
       <SearchBar tags={searchTags} onTagsChange={setSearchTags} />
-      <RecipeList recipes={searchedRecipes} />
+      {status === 'loading' && <p className="recipe-list__empty">Đang tải món ăn...</p>}
+{status === 'error' && (
+  <p className="recipe-list__empty">
+    Không tải được dữ liệu. Kiểm tra server đã chạy chưa.
+  </p>
+)}
+{status === 'done' && <RecipeList recipes={searchedRecipes} />}
     </div>
   );
 }
