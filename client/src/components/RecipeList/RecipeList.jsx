@@ -3,10 +3,14 @@ import RecipeCard from '../RecipeCard/RecipeCard';
 import './RecipeList.css';
 
 const DIFFICULTY_FILTERS = [
-  { id: 'all', label: 'Tất cả' },
-  { id: 'hard', label: 'Khó', match: 'khó' },
-  { id: 'medium', label: 'Trung Bình', match: 'trung bình' },
-  { id: 'easy', label: 'Dễ', match: 'dễ' },
+  { id: 'all', label: 'Tất cả', matches: [] },
+  { id: 'hard', label: 'Khó', matches: ['khó', 'kho', 'hard'] },
+  {
+    id: 'medium',
+    label: 'Trung Bình',
+    matches: ['trung bình', 'trung binh', 'medium'],
+  },
+  { id: 'easy', label: 'Dễ', matches: ['dễ', 'de', 'easy'] },
 ];
 
 export default function RecipeList({ recipes = [] }) {
@@ -18,8 +22,8 @@ export default function RecipeList({ recipes = [] }) {
     if (!target) return recipes;
 
     return recipes.filter((recipe) => {
-      const diff = (recipe.difficulty || '').toLowerCase().trim();
-      return diff === target.match || diff === target.id;
+      const diff = String(recipe?.difficulty || '').toLowerCase().trim();
+      return target.matches.includes(diff);
     });
   }, [recipes, activeFilter]);
 
@@ -56,15 +60,18 @@ export default function RecipeList({ recipes = [] }) {
 
       {filteredRecipes.length > 0 ? (
         <ul className="recipe-list__grid">
-          {filteredRecipes.map((recipe, index) => (
-            <li
-              key={recipe.id}
-              className="recipe-list__item"
-              style={{ animationDelay: `${index * 60}ms` }}
-            >
-              <RecipeCard recipe={recipe} />
-            </li>
-          ))}
+          {filteredRecipes.map((recipe, index) => {
+            const itemKey = recipe?._id || recipe?.id || `recipe-${index}`;
+            return (
+              <li
+                key={itemKey}
+                className="recipe-list__item"
+                style={{ animationDelay: `${index * 60}ms` }}
+              >
+                <RecipeCard recipe={recipe} />
+              </li>
+            );
+          })}
         </ul>
       ) : (
         <p className="recipe-list__empty">
