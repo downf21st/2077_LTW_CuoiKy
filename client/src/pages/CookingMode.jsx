@@ -154,6 +154,11 @@ export default function CookingMode() {
                 </button>
               </div>
             </section>
+            <div className="cooking-pagination" aria-hidden="true">
+              <span className="dot active"></span>
+              <span className="dot"></span>
+              <span className="dot"></span>
+            </div>
           </>
         )}
         {id &&
