@@ -7,7 +7,7 @@
     "cookingTime": 55,
     "difficulty": "Dễ",
     "authorId": "user-001",
-    "image": "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=1200&q=85",
+    "image": "https://cdn-i.vtcnews.vn/resize/UyS5Ytevv363eGE5da_V9zKATy3gvZK00/upload/2021/01/05/gakhogung-22460430.jpg",
     "servings": 4,
     "equipment": ["Dao", "Thớt", "Bát lớn", "Chảo sâu lòng", "Bếp"],
     "ingredients": [
@@ -58,7 +58,7 @@
     "cookingTime": 120,
     "difficulty": "Trung bình",
     "authorId": "user-001",
-    "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=1200&q=85",
+    "image": "https://afamilycdn.com/150157425591193600/2025/12/22/mon-an-1-17663287951681909016544-1766389491171-17663894920951576086442.jpg",
     "servings": 4,
     "equipment": ["Dao", "Thớt", "Nồi lớn", "Chảo", "Rây", "Bát"],
     "ingredients": [
@@ -110,7 +110,7 @@
     "cookingTime": 15,
     "difficulty": "Dễ",
     "authorId": "user-002",
-    "image": "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=1200&q=85",
+    "image": "https://cookwithchung.com/wp-content/uploads/2023/08/Vietnamese-Egg-Omelette--500x500.jpg",
     "servings": 2,
     "equipment": ["Bát", "Đũa", "Chảo chống dính", "Bếp"],
     "ingredients": [
