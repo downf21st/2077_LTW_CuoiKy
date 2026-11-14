@@ -851,3 +851,59 @@
     width: 100%;
   }
 }
+
+@media (max-width: 768px) {
+  .cooking-mode .cooking-picker__grid {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    gap: 12px !important;
+    max-height: 290px !important; 
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-right: 6px !important;
+    margin-bottom: 8px !important;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-default) transparent;
+  }
+
+  .cooking-mode .cooking-picker__grid::-webkit-scrollbar {
+    width: 4px;
+  }
+  .cooking-mode .cooking-picker__grid::-webkit-scrollbar-thumb {
+    background-color: var(--color-border-default);
+    border-radius: 4px;
+  }
+
+  .cooking-mode .cooking-picker__card {
+    width: 100% !important;
+    min-height: 84px;
+    flex-shrink: 0;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    padding: 10px !important;
+    border-radius: 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  .cooking-mode .cooking-picker__media {
+    width: 64px !important;
+    height: 64px !important;
+    flex-shrink: 0 !important;
+    border-radius: 8px !important;
+    overflow: hidden;
+  }
+
+  .cooking-mode .cooking-picker__card-body {
+    flex: 1;
+    min-width: 0;
+    padding: 0 0 0 12px !important;
+    gap: 6px !important;
+  }
+
+  .cooking-mode .cooking-picker__description {
+    display: none !important;
+  }
+}
