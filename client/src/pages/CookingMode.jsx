@@ -39,7 +39,8 @@ export default function CookingMode() {
         </Link>
         <div className="cooking-mode__exit-wrap">
           <Link className="cooking-mode__exit" to="/">
-            Thoát chế độ nấu
+            <span className="cooking-mode__exit-desktop">Thoát chế độ nấu</span>
+            <span className="cooking-mode__exit-mobile">Thoát</span>
           </Link>
         </div>
       </header>
@@ -59,6 +60,7 @@ export default function CookingMode() {
                   aria-label="Đóng chọn món"
                 >
                   <img src={closeIcon} alt="" />
+                  <span className="cooking-picker__close-label">Hủy</span>
                 </Link>
               </div>
               <label className="cooking-picker__search">
@@ -77,6 +79,7 @@ export default function CookingMode() {
                       Đã chọn: {selectedRecipe.title}
                     </p>
                   )}
+                  <p className="cooking-picker__suggestions">Gợi ý cho bạn</p>
                   <div
                     className="cooking-picker__grid"
                     role="radiogroup"
@@ -154,11 +157,6 @@ export default function CookingMode() {
                 </button>
               </div>
             </section>
-            <div className="cooking-pagination" aria-hidden="true">
-              <span className="dot active"></span>
-              <span className="dot"></span>
-              <span className="dot"></span>
-            </div>
           </>
         )}
         {id &&
@@ -221,6 +219,7 @@ export default function CookingMode() {
                 aria-labelledby="cooking-step-recipe"
               >
                 <div className="cooking-step__context">
+                  <p className="cooking-step__mobile-label">CHẾ ĐỘ NẤU</p>
                   <h1 id="cooking-step-recipe">{recipe.title}</h1>
                   <p>
                     {recipe.servings != null
@@ -236,7 +235,14 @@ export default function CookingMode() {
                         <span>
                           Bước {stepIndex + 1} / {recipe.steps.length}
                         </span>
-                        <span>{currentStep.title}</span>
+                        <span className="cooking-step__progress-title">
+                          {currentStep.title}
+                        </span>
+                        <span className="cooking-step__progress-servings">
+                          {recipe.servings != null
+                            ? `${recipe.servings} người`
+                            : "Chưa có khẩu phần"}
+                        </span>
                       </div>
                       <div
                         className="cooking-step__segments"
