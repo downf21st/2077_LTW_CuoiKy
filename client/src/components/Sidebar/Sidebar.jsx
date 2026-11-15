@@ -167,7 +167,7 @@ function Sidebar({ isOpen, onToggle, onClose, toggleRef }) {
           id="sidebar-panel"
           className={`sidebar__panel${preview ? " sidebar__panel--previewing" : ""}`}
           ref={panelRef}
-          inert={!isOpen ? "" : undefined}
+          inert={!isOpen}
         >
           <span className="sidebar__arrow" ref={arrowRef} aria-hidden="true">
             ›

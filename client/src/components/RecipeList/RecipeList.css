@@ -107,15 +107,15 @@
   font-size: var(--font-size-sm);
 }
 
-/*  RESPONSIVE TABLET & MOBILE */
-@media (max-width: 860px) {
+
+@media (max-width: 960px) {
   .recipe-list__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-5);
   }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 540px) {
   .recipe-list__header {
     flex-direction: column;
     align-items: flex-start;
@@ -133,6 +133,7 @@
 
   .filter-bar__chip {
     flex: 1;
+    min-width: 0;
     padding: 0 2px;
     justify-content: center;
     text-align: center;
