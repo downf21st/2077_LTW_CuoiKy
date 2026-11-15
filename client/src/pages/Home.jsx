@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { MOCK_RECIPES } from '../data/mockRecipes';
 import { getRecipes } from '../api';
 import SearchBar from '../components/SearchBar/SearchBar';
 import RecipeList from '../components/RecipeList/RecipeList';
 import './Home.css';
+
 
 function getRecipeOfTheDay(recipesList) {
   if (!Array.isArray(recipesList) || recipesList.length === 0) {
@@ -25,20 +25,21 @@ function getRecipeOfTheDay(recipesList) {
 }
 
 export default function Home() {
-  const [recipes, setRecipes] = useState(MOCK_RECIPES);
+  const [recipes, setRecipes] = useState([]);
+  const [status, setStatus] = useState('loading');
   const [searchTags, setSearchTags] = useState([]);
 
   useEffect(() => {
     let isMounted = true;
 
     getRecipes()
-      .then((data) => {
-        const list = Array.isArray(data) ? data : data?.data || data?.recipes;
-        if (isMounted && Array.isArray(list) && list.length > 0) {
-          setRecipes(list);
-        }
+      .then((list) => {
+        if (!isMounted) return;
+        setRecipes(list);
+        setStatus('done');
       })
       .catch(() => {
+        if (isMounted) setStatus('error');
       });
 
     return () => {
@@ -46,8 +47,9 @@ export default function Home() {
     };
   }, []);
 
+  
   const featuredRecipe = useMemo(() => getRecipeOfTheDay(recipes), [recipes]);
-  const featuredId = featuredRecipe?.id || featuredRecipe?._id || 'recipe-001';
+  const featuredId = featuredRecipe?._id || featuredRecipe?.id || 'recipe-001';
   const featuredTitle = featuredRecipe?.title || featuredRecipe?.name || 'Phở bò tái';
   const featuredImage =
     featuredRecipe?.image || featuredRecipe?.imageUrl || featuredRecipe?.thumbnail || '';
@@ -160,7 +162,13 @@ export default function Home() {
       </section>
 
       <SearchBar tags={searchTags} onTagsChange={setSearchTags} />
-      <RecipeList recipes={searchedRecipes} />
+      {status === 'loading' && <p className="recipe-list__empty">Đang tải món ăn...</p>}
+{status === 'error' && (
+  <p className="recipe-list__empty">
+    Không tải được dữ liệu. Kiểm tra server đã chạy chưa.
+  </p>
+)}
+{status === 'done' && <RecipeList recipes={searchedRecipes} />}
     </div>
   );
 }
