@@ -1,7 +1,8 @@
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import lockIcon from "../assets/lock-keyhole.svg";
 import StarRating, { StarInput } from "../components/StarRating/StarRating";
-import { MOCK_RECIPES } from "../data/mockRecipes";
+import { getRecipeById } from "../api";
 import "./RecipeDetail.css";
 
 function RecipeContent({ recipe }) {
@@ -331,16 +332,44 @@ function RecipeContent({ recipe }) {
 
 export default function RecipeDetail() {
   const { id } = useParams();
-  const recipe = MOCK_RECIPES.find((item) => item.id === id);
-  if (!recipe)
+  const [recipe, setRecipe] = useState(null);
+  const [status, setStatus] = useState("loading");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    getRecipeById(id)
+      .then((data) => {
+        if (!isMounted) return;
+        setRecipe(data);
+        setStatus("done");
+      })
+      .catch(() => {
+        if (isMounted) setStatus("error");
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
+
+  if (status === "loading")
+    return (
+      <div className="recipe-detail">
+        <p>Đang tải món ăn...</p>
+      </div>
+    );
+
+  if (status === "error" || !recipe)
     return (
       <div className="recipe-detail" key={id}>
         <h1>Không tìm thấy món ăn</h1>
-        <p>Món ăn này không có trong dữ liệu mẫu.</p>
+        <p>Món ăn này không tồn tại hoặc chưa kết nối được server.</p>
         <Link className="recipe-detail__back" to="/">
           Về trang chủ
         </Link>
       </div>
     );
+
   return <RecipeContent key={recipe.id} recipe={recipe} />;
 }
