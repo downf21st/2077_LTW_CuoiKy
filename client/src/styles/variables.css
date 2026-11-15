@@ -1,0 +1,174 @@
+/* ==========================================================================
+   Cooked - Design tokens
+   Nguồn: Foundation.pdf (Figma "Cook Design System")
+
+   Cách dùng: component CHỈ dùng token ngữ nghĩa (--color-*), không dùng
+   thẳng token gốc (--green-*, --orange-*...) và không hardcode mã hex.
+
+   Ghi chú độ chính xác:
+   - Màu: lấy mẫu từ ảnh JPEG trong PDF, đối chiếu với bảng "Màu" (có ghi hex)
+     nên đúng hoặc lệch tối đa ~2 đơn vị. Các màu cream, green-950, gray-*
+     chỉ có mẫu ảnh, không có hex ghi sẵn.
+   - Cỡ chữ, bo góc, đổ bóng: nhãn trong PDF quá mờ để đọc, giá trị bên dưới là
+     ước lượng từ khung 1440px. Chỗ nào có "ƯỚC LƯỢNG" thì kiểm tra lại trên Figma.
+   ========================================================================== */
+
+:root {
+  /* ----- Token gốc (Primitives) ----- */
+
+  /* Cream - nền */
+  --cream-100: #f7f3ea;
+  --cream-75: #faf8f2;
+  --cream-50: #faf8f3;
+  --cream-25: #fcfbf8;
+
+  --white: #ffffff;
+  --black: #000000;
+
+  /* Green - thương hiệu (bước 5 của bảng màu là #264838) */
+  --green-950: #0c170f;
+  --green-900: #1e3c2d;
+  --green-800: #264838;
+  --green-500: #628573;
+  --green-200: #bdcabf;
+
+  /* Orange / brown - điểm nhấn */
+  --brown-800: #7e4428;
+  --orange-500: #d27243;
+  --orange-400: #db8e69;
+
+  /* Yellow */
+  --yellow-400: #eece74;
+
+  /* Gray */
+  --gray-900: #323232;
+  --gray-500: #929292;
+  --gray-200: #d9d9d9;
+  --gray-100: #e5e5e5;
+
+  /* ----- Token ngữ nghĩa (Semantic) - đây mới là thứ component dùng ----- */
+
+  /* Nền */
+  --color-bg-page: var(--cream-100); /* nền trang */
+  --color-bg-surface: var(--cream-75); /* thẻ món, ô nhập, thanh lọc */
+  --color-bg-footer: var(--cream-25); /* khu footer */
+  --color-bg-elevated: var(--white); /* tấm thẻ trắng ở hero */
+  --color-bg-placeholder: var(--gray-200); /* khung ảnh chưa có ảnh */
+
+  /* Thương hiệu / hành động */
+  --color-brand: var(--green-800); /* nút chính, chip đang chọn, tag xanh */
+  --color-brand-hover: var(--green-900);
+  --color-on-brand: var(--cream-25); /* chữ trên nền xanh */
+
+  /* Điểm nhấn */
+  --color-accent: var(--orange-500); /* "memorable", link, "Quên mật khẩu?" */
+  --color-accent-soft: var(--orange-400); /* tag cam (Chiên...) */
+  --color-highlight: var(--yellow-400); /* tag vàng ("Công thức của ngày", Nấu) */
+  --color-on-accent: var(--brown-800);
+
+  /* Chữ */
+  --color-text: var(--green-950);
+  --color-text-muted: var(--gray-500);
+  --color-text-disabled: var(--gray-500);
+
+  /* Viền, đường kẻ */
+  --color-border: var(--gray-100);
+  --color-border-strong: var(--green-200);
+
+  /* Trạng thái */
+  --color-error: #b3382c; /* ƯỚC LƯỢNG: Figma không có token đỏ trong palette */
+  --color-disabled-bg: var(--gray-200); /* nút "Đang đăng nhập..." */
+
+    /* Sidebar và logo (theo handoff Figma) */
+  --color-bg-inverse: var(--green-900);
+  --color-text-brand: var(--green-900);
+  --color-text-on-primary: var(--cream-100);
+  --color-text-on-inverse: var(--white);
+  --color-border-default: var(--green-200);
+  
+  /* ----- Chữ ----- */
+
+  /* Bộ font của nhóm (khai báo @font-face trong fonts.css):
+     --font-display : Oi        - cực đậm: wordmark "Cooked", h1 hero, tiêu đề trang Login
+     --font-heading : VN Ultra  - slab đậm vừa: "memorable", tiêu đề mục, tên món, tiêu đề footer
+     --font-body    : SF Pro Display - chữ nội dung */
+  --font-display: "Oi", "VN Ultra", Georgia, serif;
+  --font-heading: "VN Ultra", Rockwell, "Roboto Slab", Georgia, serif;
+  --font-body: "SF Pro Display", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --font-weight-light: 300; /* mô tả món, chữ phụ trong thiết kế khá nhẹ */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500; /* nút, chip */
+  --font-weight-semibold: 600;
+  --font-weight-display: 400; /* Oi và VN Ultra chỉ có 1 độ đậm: đừng để trình duyệt tự in đậm thêm */
+
+  /* ƯỚC LƯỢNG theo khung 1440px */
+  --font-size-2xs: 0.625rem; /* 10px - chữ trong tag */
+  --font-size-xs: 0.75rem; /* 12px - chú thích, footer */
+  --font-size-sm: 0.875rem; /* 14px - mô tả, nút, chip */
+  --font-size-base: 1rem; /* 16px - chữ thường, ô nhập */
+  --font-size-lg: 1.25rem; /* 20px - tên món, wordmark */
+  --font-size-xl: 1.75rem; /* 28px - tiêu đề mục ("Món ăn trong ngày") */
+  --font-size-2xl: 3rem; /* 48px - tiêu đề hero ("Cook something...") */
+
+  --line-height-tight: 1.05; /* tiêu đề hero */
+  --line-height-heading: 1.2;
+  --line-height-body: 1.6;
+
+  /* ----- Bo góc ----- (ƯỚC LƯỢNG) */
+  --radius-sm: 8px; /* nút, ô nhập */
+  --radius-md: 12px;
+  --radius-lg: 14px; /* thẻ món, thẻ nổi bật */
+  --radius-xl: 20px;
+  --radius-pill: 999px; /* tag, chip, thanh lọc */
+
+  /* ----- Hiệu ứng ----- (ƯỚC LƯỢNG) */
+  --shadow-card-featured: 0 16px 40px rgba(38, 72, 56, 0.18), 0 2px 6px rgba(0, 0, 0, 0.06);
+  --shadow-sidebar-toggle: 2px 0 4px rgba(0, 0, 0, 0.1), 7px 0 7px rgba(0, 0, 0, 0.09);
+  /* ----- Khoảng cách (bước 4px) ----- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* ----- Layout ----- */
+  /* Nội dung Home trong Figma nằm trong cột hẹp ~860px giữa khung 1440px */
+  --container-max-width: 860px;
+  --container-padding: 1.5rem;
+  --header-height: 64px;
+
+  /* Breakpoint (var() không dùng được trong @media nên ghi ở đây cho cả nhóm thống nhất):
+     mobile < 640px | tablet 640px - 1023px | desktop >= 1024px */
+}
+
+/* ==========================================================================
+   Theme tối
+   Figma KHÔNG có bản tối. Block này chỉ đảo token ngữ nghĩa bằng chính palette
+   của dự án, để Context theme của Nam có cái để bật (đặt data-theme="dark"
+   lên <html>). Nếu nhóm không làm theme tối thì xóa cả block.
+   ========================================================================== */
+[data-theme="dark"] {
+  --color-bg-page: var(--green-950);
+  --color-bg-surface: var(--green-900);
+  --color-bg-footer: #0a120c;
+  --color-bg-elevated: var(--green-800);
+  --color-bg-placeholder: var(--gray-900);
+
+  --color-brand: var(--green-500);
+  --color-brand-hover: var(--green-200);
+  --color-on-brand: var(--green-950);
+
+  --color-text: var(--cream-100);
+  --color-text-muted: var(--green-200);
+  --color-text-disabled: var(--gray-500);
+
+  --color-border: var(--green-800);
+  --color-border-strong: var(--green-500);
+  --color-disabled-bg: var(--gray-900);
+
+  --shadow-card-featured: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
