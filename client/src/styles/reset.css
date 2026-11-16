@@ -1,0 +1,93 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+  color: var(--color-text);
+  background-color: var(--color-bg-page);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Tiêu đề: h1 dùng Oi (hero, trang Login), h2-h6 dùng VN Ultra (Món ăn trong ngày, tên món...).
+   Cả hai font chỉ có một độ đậm, nên ép weight về mức mặc định để tránh in đậm giả.
+   Wordmark "Cooked" là logo chứ không phải tiêu đề: component tự đặt font-family: var(--font-display).
+   Chữ cam "memorable" nằm trong h1 nhưng dùng VN Ultra: thêm font-family: var(--font-heading) cho span đó. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-display);
+  line-height: var(--line-height-heading);
+}
+
+h1 {
+  font-family: var(--font-display);
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Chỉ bỏ dấu đầu dòng của list có class, list thường (như các bước nấu) vẫn giữ số */
+ul[class],
+ol[class] {
+  list-style: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

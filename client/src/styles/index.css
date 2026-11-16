@@ -1,0 +1,5 @@
+/* Điểm vào duy nhất của CSS nền. main.jsx chỉ cần: import './styles/index.css'
+   Thứ tự: font, rồi token, rồi reset. */
+@import "./fonts.css";
+@import "./variables.css";
+@import "./reset.css";
