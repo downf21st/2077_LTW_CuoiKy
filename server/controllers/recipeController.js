@@ -85,7 +85,7 @@ const getRecipes = async (req, res) => {
   try {
     const page = parsePositiveInteger(req.query.page, 1);
     const limit = parsePositiveInteger(req.query.limit, 10);
-    const searchQuery = req.query.search;
+    const { search, category, maxTime, difficulty, ingredients, authorId } = req.query;
 
     if (page === null || limit === null) {
       return res.status(400).json({
@@ -101,35 +101,111 @@ const getRecipes = async (req, res) => {
       });
     }
 
-    if (searchQuery !== undefined && typeof searchQuery !== 'string') {
+    const stringFilters = { search, category, difficulty, ingredients, authorId };
+    if (Object.entries(stringFilters).some(
+      ([, value]) => value !== undefined && typeof value !== 'string'
+    )) {
       return res.status(400).json({
         success: false,
-        message: 'search phải là một chuỗi.'
+        message: 'Các bộ lọc tìm kiếm phải là chuỗi.'
+      });
+    }
+
+    const maxCookingTime = parsePositiveInteger(maxTime, null);
+    if (maxTime !== undefined && maxCookingTime === null) {
+      return res.status(400).json({
+        success: false,
+        message: 'maxTime phải là số nguyên dương.'
       });
     }
 
     const recipes = await readJsonArray(recipesFile, 'recipes.json');
-    const searchTerm = normalizeText(searchQuery?.trim() ?? '');
-    const filteredRecipes = searchTerm
-      ? recipes.filter((recipe) => {
-          const ingredients = Array.isArray(recipe.ingredients)
-            ? recipe.ingredients.map((item) =>
-                typeof item === 'string' ? item : item?.name
-              )
-            : [];
-          const fields = [
-            recipe.title,
-            recipe.description,
-            recipe.category,
-            ...ingredients
-          ];
+    const headerUserId = req.headers?.['x-user-id'];
+    let currentUser = null;
 
-          return fields.some(
-            (field) => typeof field === 'string'
-              && normalizeText(field).includes(searchTerm)
-          );
+    // Chỉ tin vai trò được tra từ dữ liệu server.
+    if (typeof headerUserId === 'string' && headerUserId.trim()) {
+      const users = await readJsonArray(usersFile, 'users.json');
+      currentUser = users.find((user) => String(user.id) === headerUserId.trim()) ?? null;
+    }
+
+    const searchTerm = normalizeText(search?.trim() ?? '');
+    const ingredientTerms = [...new Set(
+      (ingredients ?? '')
+        .split(',')
+        .map((item) => normalizeText(item.trim()))
+        .filter(Boolean)
+    )];
+
+    let filteredRecipes = recipes.filter((recipe) => {
+      const recipeStatus = recipe.status || 'approved';
+      const isOwner = currentUser
+        && String(recipe.authorId) === String(currentUser.id);
+      const isVisible = recipeStatus === 'approved'
+        || currentUser?.role === 'admin'
+        || isOwner;
+
+      if (!isVisible) return false;
+      if (authorId && String(recipe.authorId) !== authorId.trim()) return false;
+      if (category && normalizeText(String(recipe.category ?? '')) !== normalizeText(category.trim())) {
+        return false;
+      }
+      if (difficulty && normalizeText(String(recipe.difficulty ?? '')) !== normalizeText(difficulty.trim())) {
+        return false;
+      }
+      if (maxCookingTime !== null && Number(recipe.cookingTime) > maxCookingTime) {
+        return false;
+      }
+
+      const recipeIngredients = Array.isArray(recipe.ingredients)
+        ? recipe.ingredients.map((item) => (
+            typeof item === 'string' ? item : item?.name
+          )).filter((name) => typeof name === 'string')
+        : [];
+
+      if (searchTerm) {
+        const fields = [
+          recipe.title,
+          recipe.description,
+          recipe.category,
+          ...recipeIngredients
+        ];
+        const matchesSearch = fields.some(
+          (field) => typeof field === 'string'
+            && normalizeText(field).includes(searchTerm)
+        );
+        if (!matchesSearch) return false;
+      }
+
+
+      return true;
+    });
+
+    if (ingredientTerms.length > 0) {
+      filteredRecipes = filteredRecipes
+        .map((recipe) => {
+          const recipeIngredients = Array.isArray(recipe.ingredients)
+            ? recipe.ingredients.map((item) => (
+                typeof item === 'string' ? item : item?.name
+              )).filter((name) => typeof name === 'string')
+            : [];
+          const normalizedNames = recipeIngredients.map((name) => normalizeText(name));
+          const matchCount = ingredientTerms.filter((term) =>
+            normalizedNames.some((name) => name.includes(term))
+          ).length;
+
+          return { ...recipe, matchCount };
         })
-      : recipes;
+        .filter((recipe) => recipe.matchCount > 0)
+        .sort((a, b) => {
+          const countDifference = b.matchCount - a.matchCount;
+          if (countDifference !== 0) return countDifference;
+
+          const aCreatedAt = Date.parse(a.createdAt ?? '') || 0;
+          const bCreatedAt = Date.parse(b.createdAt ?? '') || 0;
+          return bCreatedAt - aCreatedAt;
+        });
+    }
 
     const totalItems = filteredRecipes.length;
     const totalPages = Math.ceil(totalItems / limit);
