@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import FormField from "../components/FormField/FormField";
 import EquipmentInput from "../components/EquipmentInput/EquipmentInput";
+import IngredientInput from "../components/IngredientInput/IngredientInput";
 import DifficultyTags from "../components/DifficultyTags/DifficultyTags";
 import {
   CATEGORY_OPTIONS,
@@ -204,6 +205,7 @@ export default function RecipeForm({
         <div className="recipe-form__basic-layout">
           <div className="recipe-form__fields">{fields.map(renderField)}</div>
         </div>
+        <IngredientInput />
         <section>
           <EquipmentInput
             rows={values.equipment}
