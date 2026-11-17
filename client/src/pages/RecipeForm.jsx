@@ -205,7 +205,23 @@ export default function RecipeForm({
         <div className="recipe-form__basic-layout">
           <div className="recipe-form__fields">{fields.map(renderField)}</div>
         </div>
-        <IngredientInput />
+        <IngredientInput
+          rows={values.ingredients}
+          onAdd={() => {
+            const row = { id: crypto.randomUUID(), name: "", quantity: "", unit: "" };
+            setValues((previous) => ({ ...previous, ingredients: [...previous.ingredients, row] }));
+          }}
+          onRemove={(rowId) => setValues((previous) => ({
+            ...previous,
+            ingredients: previous.ingredients.filter((row) => row.id !== rowId),
+          }))}
+          onChange={(rowId, field, value) => setValues((previous) => ({
+            ...previous,
+            ingredients: previous.ingredients.map((row) =>
+              row.id === rowId ? { ...row, [field]: value } : row,
+            ),
+          }))}
+        />
         <section>
           <EquipmentInput
             rows={values.equipment}

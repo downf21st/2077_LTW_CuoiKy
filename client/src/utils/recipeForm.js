@@ -18,6 +18,7 @@ export function createInitialValues() {
     cookingTime: "",
     difficulty: "",
     servings: "",
+    ingredients: [{ id: crypto.randomUUID(), name: "", quantity: "", unit: "" }],
     equipment: [
       { id: crypto.randomUUID(), value: "" },
       { id: crypto.randomUUID(), value: "" },
