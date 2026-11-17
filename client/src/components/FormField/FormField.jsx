@@ -3,7 +3,7 @@ import "./FormField.css";
 export default function FormField({ id, label, required, hint, error, children, className = "" }) {
   return (
     <div className={["form-field", className].filter(Boolean).join(" ")}>
-      <label className="form-field__label" htmlFor={id}>
+      <label id={`${id}-label`} className="form-field__label" htmlFor={id}>
         {label}
         {required && <span className="form-field__required" aria-hidden="true"> *</span>}
       </label>

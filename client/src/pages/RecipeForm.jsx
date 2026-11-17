@@ -1,9 +1,10 @@
 import { useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import FormField from "../components/FormField/FormField";
+import EquipmentInput from "../components/EquipmentInput/EquipmentInput";
+import DifficultyTags from "../components/DifficultyTags/DifficultyTags";
 import {
   CATEGORY_OPTIONS,
-  DIFFICULTY_OPTIONS,
   FIELD_LIMITS,
   createInitialValues,
   validateRecipeInfo,
@@ -20,7 +21,7 @@ const fields = [
   },
   {
     name: "description",
-    label: "Mô tả",
+    label: "Mô tả ngắn",
     type: "textarea",
     placeholder: "Nhập mô tả",
   },
@@ -31,14 +32,7 @@ const fields = [
     placeholder: "Chọn loại món",
     options: CATEGORY_OPTIONS,
   },
-  { name: "cookingTime", label: "Thời gian nấu (phút)", type: "number" },
-  {
-    name: "difficulty",
-    label: "Độ khó",
-    type: "select",
-    placeholder: "Chọn độ khó",
-    options: DIFFICULTY_OPTIONS,
-  },
+  { name: "cookingTime", label: "Thời gian nấu", type: "number", placeholder: "Nhập thời gian (phút)" },
   {
     name: "servings",
     label: "Khẩu phần",
@@ -46,6 +40,7 @@ const fields = [
     placeholder: "Ví dụ: 4",
     hint: "Số người ăn",
   },
+  { name: "difficulty", label: "Độ khó", type: "difficulty" },
 ];
 
 export default function RecipeForm({
@@ -75,26 +70,63 @@ export default function RecipeForm({
     }));
   };
 
+  const handleEquipmentChange = (nextRows) => {
+    const changedIds = new Set(
+      values.equipment
+        .filter((row) => !nextRows.some((next) => next.id === row.id && next.value === row.value))
+        .map((row) => row.id),
+    );
+    setValues((previous) => ({ ...previous, equipment: nextRows }));
+    setErrors((previous) => ({
+      ...previous,
+      equipment: Object.fromEntries(
+        Object.entries(previous.equipment ?? {}).filter(([id]) => !changedIds.has(id)),
+      ),
+    }));
+    setTouched((previous) => ({
+      ...previous,
+      equipment: Object.fromEntries(
+        Object.entries(previous.equipment ?? {}).filter(([id]) => nextRows.some((row) => row.id === id)),
+      ),
+    }));
+  };
+
+  const handleEquipmentBlur = (rowId) => {
+    const error = validateRecipeInfo(values).equipment?.[rowId];
+    setTouched((previous) => ({
+      ...previous,
+      equipment: { ...previous.equipment, [rowId]: true },
+    }));
+    setErrors((previous) => ({
+      ...previous,
+      equipment: { ...previous.equipment, [rowId]: error },
+    }));
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const nextErrors = validateRecipeInfo(values);
-    setTouched(Object.fromEntries(fields.map(({ name }) => [name, true])));
+    setTouched({
+      ...Object.fromEntries(fields.map(({ name }) => [name, true])),
+      equipment: Object.fromEntries(values.equipment.map(({ id }) => [id, true])),
+    });
     setErrors(nextErrors);
     const firstInvalid = fields.find(({ name }) => nextErrors[name]);
     if (firstInvalid) {
       refs.current[firstInvalid.name]?.focus();
       return;
     }
-    if (Object.keys(nextErrors).length) return;
+    if (nextErrors.equipment) {
+      const firstRow = values.equipment.find((row) => nextErrors.equipment[row.id]);
+      document.getElementById(`equipment-${firstRow.id}`)?.focus();
+      return;
+    }
     onSubmit(buildRecipePayload(values));
   };
 
   const renderField = ({ name, label, type, placeholder, options, hint }) => {
     const error = touched[name] ? errors[name] : undefined;
-    const fieldHint =
-      name === "description"
-        ? `${values.description.length}/${FIELD_LIMITS.description.max}`
-        : hint;
+    const fieldHint = hint;
     const describedBy =
       [error && `${name}-error`, fieldHint && `${name}-hint`]
         .filter(Boolean)
@@ -123,7 +155,16 @@ export default function RecipeForm({
         hint={fieldHint}
         error={error}
       >
-        {type === "select" ? (
+        {type === "difficulty" ? (
+          <DifficultyTags
+            id={name}
+            value={values.difficulty}
+            error={error}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            inputRef={(element) => { refs.current[name] = element; }}
+          />
+        ) : type === "select" ? (
           <select {...props}>
             <option value="" disabled>
               {placeholder}
@@ -152,21 +193,27 @@ export default function RecipeForm({
 
   return (
     <main className="recipe-form">
-      <h1 className="recipe-form__title">
-        {id ? "Sửa công thức" : "Thêm công thức"}
-      </h1>
+      <header className="recipe-form__header">
+        <nav className="recipe-form__breadcrumb" aria-label="Breadcrumb">
+          <Link to="/">Trang chủ</Link> / <span aria-current="page">{id ? "Sửa món ăn" : "Thêm món ăn"}</span>
+        </nav>
+        <h1 className="recipe-form__title">{id ? "Sửa món ăn" : "Thêm món ăn"}</h1>
+        <p className="recipe-form__subtitle">Chia sẻ công thức của bạn với mọi người.</p>
+      </header>
       <form className="recipe-form__form" onSubmit={handleSubmit} noValidate>
-        <section
-          className="recipe-form__card"
-          aria-labelledby="recipe-info-heading"
-        >
-          <h2 id="recipe-info-heading" className="recipe-form__heading">
-            Thông tin chung
-          </h2>
-          {fields.slice(0, 3).map(renderField)}
-          <div className="recipe-form__details">
-            {fields.slice(3).map(renderField)}
-          </div>
+        <div className="recipe-form__basic-layout">
+          <div className="recipe-form__fields">{fields.map(renderField)}</div>
+        </div>
+        <section>
+          <EquipmentInput
+            rows={values.equipment}
+            errors={Object.fromEntries(
+              Object.entries(errors.equipment ?? {}).filter(([id]) => touched.equipment?.[id]),
+            )}
+            onChange={handleEquipmentChange}
+            onBlur={handleEquipmentBlur}
+            disabled={isSubmitting}
+          />
         </section>
         <div className="recipe-form__actions">
           <button
