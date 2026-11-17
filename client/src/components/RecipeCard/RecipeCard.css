@@ -18,7 +18,7 @@
 .recipe-card:hover {
   transform: translateY(-6px);
   border-color: var(--color-accent);
-  box-shadow: 0 14px 28px rgba(38, 72, 56, 0.12);
+  box-shadow: var(--shadow-card-hover);
 }
 
 .recipe-card__link {
