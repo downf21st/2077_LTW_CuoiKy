@@ -52,13 +52,19 @@ export function validateRecipeInfo(values = {}) {
   }
 
   if (!category) errors.category = "Vui lòng chọn loại món";
-  if (!isIntegerInRange(values.cookingTime, FIELD_LIMITS.cookingTime)) {
+  if (!String(values.cookingTime ?? "").trim()) {
+    errors.cookingTime = "Vui lòng nhập thời gian nấu";
+  } else if (!isIntegerInRange(values.cookingTime, FIELD_LIMITS.cookingTime)) {
     errors.cookingTime = "Thời gian nấu phải là số nguyên từ 1 đến 1440 phút";
   }
-  if (!DIFFICULTY_OPTIONS.includes(difficulty)) {
+  if (!difficulty) {
+    errors.difficulty = "Vui lòng chọn độ khó";
+  } else if (!DIFFICULTY_OPTIONS.includes(difficulty)) {
     errors.difficulty = "Vui lòng chọn độ khó hợp lệ";
   }
-  if (!isIntegerInRange(values.servings, FIELD_LIMITS.servings)) {
+  if (!String(values.servings ?? "").trim()) {
+    errors.servings = "Vui lòng nhập khẩu phần";
+  } else if (!isIntegerInRange(values.servings, FIELD_LIMITS.servings)) {
     errors.servings = "Khẩu phần phải là số nguyên từ 1 đến 50";
   }
 

@@ -232,7 +232,7 @@ export default function RecipeForm({
               ? "Đang lưu..."
               : id
                 ? "Lưu thay đổi"
-                : "Đăng công thức"}
+                : "Đăng món"}
           </button>
         </div>
       </form>

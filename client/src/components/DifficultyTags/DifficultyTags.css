@@ -55,7 +55,11 @@
   opacity: 1;
 }
 
-.difficulty-tags__input:focus-visible + .difficulty-tags__pill {
+.difficulty-tags[aria-invalid="true"] .difficulty-tags__pill {
+  outline: 1px solid var(--color-error);
+}
+
+.difficulty-tags .difficulty-tags__input:focus-visible + .difficulty-tags__pill {
   outline: 2px solid var(--color-brand);
   outline-offset: 2px;
 }
