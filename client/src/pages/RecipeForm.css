@@ -1,0 +1,91 @@
+.recipe-form {
+  width: min(100% - 2 * var(--space-6), 880px);
+  margin: var(--space-12) auto;
+  color: var(--color-text);
+}
+.recipe-form__title {
+  margin: 0 0 var(--space-8);
+  color: var(--color-text-brand);
+  font-family: var(--font-heading);
+  font-size: var(--font-size-xl);
+}
+.recipe-form__form,
+.recipe-form__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.recipe-form__card {
+  padding: var(--space-8);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+}
+.recipe-form__heading {
+  margin: 0;
+  color: var(--color-text-brand);
+  font-family: var(--font-heading);
+  font-size: var(--font-size-lg);
+}
+.recipe-form__details {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+.recipe-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+.recipe-form__cancel,
+.recipe-form__submit {
+  min-width: 160px;
+  min-height: 48px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  cursor: pointer;
+}
+.recipe-form__cancel {
+  color: var(--color-text-brand);
+  background: var(--color-bg-surface);
+}
+.recipe-form__submit {
+  color: var(--color-text-on-primary);
+  background: var(--color-brand);
+  border-color: var(--color-brand);
+}
+.recipe-form__cancel:focus-visible,
+.recipe-form__submit:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+.recipe-form__submit:disabled {
+  background: var(--color-disabled-bg);
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+@media (max-width: 768px) {
+  .recipe-form__details {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 480px) {
+  .recipe-form {
+    width: calc(100% - 2 * var(--space-4));
+    margin-block: var(--space-6);
+  }
+  .recipe-form__card {
+    padding: var(--space-4);
+  }
+  .recipe-form__details {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .recipe-form__actions {
+    flex-direction: column;
+  }
+  .recipe-form__actions button {
+    width: 100%;
+  }
+}
