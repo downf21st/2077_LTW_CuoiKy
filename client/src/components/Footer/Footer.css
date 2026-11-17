@@ -204,7 +204,7 @@
   font-weight: var(--font-weight-light);
   line-height: 10px;
   color: var(--gray-500);
-  border-top: 1px solid color-mix(in srgb, var(--orange-400) 40%, rgba(219, 142, 105, 0.4));
+  border-top: 1px solid color-mix(in srgb, var(--color-accent-soft) 40%, transparent);
 }
 
 .footer__divider {
