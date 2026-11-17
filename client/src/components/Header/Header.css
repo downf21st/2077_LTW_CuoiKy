@@ -36,7 +36,7 @@
     padding: 0 16px !important; 
     justify-content: space-between; 
     z-index: 900; 
-    background-color: rgba(250, 246, 240, 0.88); 
+    background-color: var(--color-bg-header-glass); 
     backdrop-filter: blur(10px); 
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--color-border-default);
