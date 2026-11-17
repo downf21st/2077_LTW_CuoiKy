@@ -120,14 +120,7 @@ const getRecipes = async (req, res) => {
     }
 
     const recipes = await readJsonArray(recipesFile, 'recipes.json');
-    const headerUserId = req.headers?.['x-user-id'];
-    let currentUser = null;
-
-    // Chỉ tin vai trò được tra từ dữ liệu server.
-    if (typeof headerUserId === 'string' && headerUserId.trim()) {
-      const users = await readJsonArray(usersFile, 'users.json');
-      currentUser = users.find((user) => String(user.id) === headerUserId.trim()) ?? null;
-    }
+    const currentUser = req.user ?? null;
 
     const searchTerm = normalizeText(search?.trim() ?? '');
     const ingredientTerms = [...new Set(
@@ -223,6 +216,26 @@ const getRecipes = async (req, res) => {
   }
 };
 
+const getCategories = async (req, res) => {
+  try {
+    const recipes = await readJsonArray(recipesFile, 'recipes.json');
+    const categories = [...new Set(
+      recipes
+        .map((recipe) => (
+          typeof recipe.category === 'string' ? recipe.category.trim() : ''
+        ))
+        .filter(Boolean)
+    )].sort((a, b) => a.localeCompare(b, 'vi'));
+
+    return res.status(200).json({
+      success: true,
+      message: 'Lấy danh sách loại món thành công.',
+      data: categories
+    });
+  } catch (error) {
+    return sendServerError(res, 'Không thể đọc danh sách loại món.', error);
+  }
+};
 const getRecipeById = async (req, res) => {
   try {
     const recipes = await readJsonArray(recipesFile, 'recipes.json');
@@ -320,6 +333,7 @@ const deleteRecipe = async (req, res) => {
 
 module.exports = {
   getRecipes,
+  getCategories,
   getRecipeById,
   updateRecipe,
   deleteRecipe
