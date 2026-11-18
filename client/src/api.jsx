@@ -1,5 +1,20 @@
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
+export function buildQuery(params = {}) {
+  const search = new URLSearchParams()
+
+  Object.entries(params).forEach(([key, value]) => {
+    const text = Array.isArray(value)
+      ? value.map((item) => String(item).trim()).filter(Boolean).join(',')
+      : String(value ?? '').trim()
+
+    if (text !== '') search.set(key, text)
+  })
+
+  const query = search.toString()
+  return query ? `?${query}` : ''
+}
+
 async function request(path) {
   const res = await fetch(`${BASE_URL}${path}`)
   const json = await res.json()
@@ -7,10 +22,16 @@ async function request(path) {
   return json
 }
 
-export async function getRecipes({ search = '', page = 1, limit = 100 } = {}) {
-  const params = new URLSearchParams({ page, limit })
-  if (search) params.set('search', search)
-  const json = await request(`/recipes?${params}`)
+function recipesPath({ page = 1, limit = 100, ...filters } = {}) {
+  return `/recipes${buildQuery({ page, limit, ...filters })}`
+}
+
+export function getRecipesUrl(params) {
+  return `${BASE_URL}${recipesPath(params)}`
+}
+
+export async function getRecipes(params) {
+  const json = await request(recipesPath(params))
   return json.data
 }
 
