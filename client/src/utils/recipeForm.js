@@ -18,7 +18,12 @@ export function createInitialValues() {
     cookingTime: "",
     difficulty: "",
     servings: "",
-    ingredients: [{ id: crypto.randomUUID(), name: "", quantity: "", unit: "" }],
+    ingredients: [
+      { id: crypto.randomUUID(), name: "", quantity: "", unit: "" },
+    ],
+    steps: [
+      { id: crypto.randomUUID(), title: "", duration: "", instruction: "" },
+    ],
     equipment: [
       { id: crypto.randomUUID(), value: "" },
       { id: crypto.randomUUID(), value: "" },
@@ -42,13 +47,19 @@ export function validateRecipeInfo(values = {}) {
 
   if (!title) {
     errors.title = "Vui lòng nhập tên món";
-  } else if (title.length < FIELD_LIMITS.title.min || title.length > FIELD_LIMITS.title.max) {
+  } else if (
+    title.length < FIELD_LIMITS.title.min ||
+    title.length > FIELD_LIMITS.title.max
+  ) {
     errors.title = "Tên món cần từ 3 đến 100 ký tự";
   }
 
   if (!description) {
     errors.description = "Vui lòng nhập mô tả";
-  } else if (description.length < FIELD_LIMITS.description.min || description.length > FIELD_LIMITS.description.max) {
+  } else if (
+    description.length < FIELD_LIMITS.description.min ||
+    description.length > FIELD_LIMITS.description.max
+  ) {
     errors.description = "Mô tả cần từ 10 đến 500 ký tự";
   }
 
@@ -81,8 +92,41 @@ export function validateRecipeInfo(values = {}) {
       equipmentErrors[row.id] = "Chỉ được thêm tối đa 30 dụng cụ";
     }
   }
-  if (Object.keys(equipmentErrors).length > 0) errors.equipment = equipmentErrors;
+  if (Object.keys(equipmentErrors).length > 0)
+    errors.equipment = equipmentErrors;
 
+  return errors;
+}
+
+export function validateRecipe(values = {}) {
+  const errors = validateRecipeInfo(values);
+  const positive = (value) =>
+    String(value ?? "").trim() !== "" &&
+    Number.isFinite(Number(value)) &&
+    Number(value) > 0;
+  if (
+    !(values.ingredients ?? []).some(
+      (item) =>
+        item.name?.trim() && positive(item.quantity) && item.unit?.trim(),
+    )
+  ) {
+    errors.ingredients =
+      "Vui lòng nhập ít nhất một nguyên liệu đầy đủ, với số lượng lớn hơn 0.";
+  }
+  const steps = values.steps ?? [];
+  if (!steps.length) {
+    errors.steps = { _form: "Vui lòng thêm ít nhất một bước nấu." };
+  } else {
+    const stepErrors = Object.fromEntries(
+      steps
+        .filter((step) => !positive(step.duration))
+        .map((step) => [
+          step.id,
+          { duration: "Thời gian phải là số phút lớn hơn 0." },
+        ]),
+    );
+    if (Object.keys(stepErrors).length) errors.steps = stepErrors;
+  }
   return errors;
 }
 

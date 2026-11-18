@@ -1,6 +1,6 @@
 import { FIELD_LIMITS } from "../../utils/recipeForm";
 import "../FormField/FormField.css";
-import trashIcon from "./trash.svg";
+import trashIcon from "../../assets/trash.svg";
 import "./EquipmentInput.css";
 
 export default function EquipmentInput({ rows, errors = {}, onChange, onBlur, disabled = false }) {

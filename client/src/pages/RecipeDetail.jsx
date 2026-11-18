@@ -3,9 +3,11 @@ import { Link, useParams } from "react-router-dom";
 import lockIcon from "../assets/lock-keyhole.svg";
 import StarRating, { StarInput } from "../components/StarRating/StarRating";
 import { getRecipeById } from "../api";
+import useAuth from "../hooks/useAuth";
 import "./RecipeDetail.css";
 
 function RecipeContent({ recipe }) {
+  const { isLoggedIn } = useAuth();
   const ingredients = recipe.ingredients ?? [];
   const steps = recipe.steps ?? [];
   const equipment = recipe.equipment ?? [];
@@ -106,8 +108,10 @@ function RecipeContent({ recipe }) {
         aria-label="Tính năng dành cho thành viên"
       >
         <p className="recipe-detail__guest-message">
-          <img className="recipe-detail__lock-icon" src={lockIcon} alt="" />
-          Đăng nhập để lưu món yêu thích và lên thực đơn tuần.
+          {!isLoggedIn && <img className="recipe-detail__lock-icon" src={lockIcon} alt="" />}
+          {isLoggedIn
+            ? "Tính năng lưu món yêu thích và lên thực đơn tuần đang được phát triển."
+            : "Đăng nhập để lưu món yêu thích và lên thực đơn tuần."}
         </p>
         <div className="recipe-detail__guest-actions">
           <button
@@ -124,12 +128,12 @@ function RecipeContent({ recipe }) {
           >
             Thêm vào thực đơn tuần
           </button>
-          <Link
+          {!isLoggedIn && <Link
             className="recipe-detail__button recipe-detail__button--primary recipe-detail__button--login"
             to="/login"
           >
             Đăng nhập
-          </Link>
+          </Link>}
         </div>
       </section>
       <div className="recipe-detail__content">
