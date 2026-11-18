@@ -1,10 +1,30 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 import "./Login.css";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+const MOCK_USERS = [
+  {
+    id: "user-001",
+    name: "Thành viên",
+    email: "member@cooked.test",
+    role: "member",
+  },
+  {
+    id: "user-002",
+    name: "Admin",
+    email: "admin@cooked.test",
+    role: "admin",
+  },
+];
 
 export default function Login() {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
   const [formValues, setFormValues] = useState({
     email: "",
     password: "",
@@ -13,7 +33,6 @@ export default function Login() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  
   const [serverError, setServerError] = useState("");
 
   const handleChange = (event) => {
@@ -31,7 +50,7 @@ export default function Login() {
         [name]: "",
       }));
     }
-    
+
     if (serverError) {
       setServerError("");
     }
@@ -52,7 +71,7 @@ export default function Login() {
     return nextErrors;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const validationErrors = validate();
 
@@ -62,19 +81,67 @@ export default function Login() {
     }
 
     setErrors({});
-    setServerError(""); 
+    setServerError("");
     setIsLoading(true);
 
-    // Giả lập API gọi lên server
-    setTimeout(() => {
+    const normalizedEmail = formValues.email.trim().toLowerCase();
+
+    try {
+      let userData = null;
+
+      try {
+        const res = await fetch(`${API_BASE}/users/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: normalizedEmail,
+            password: formValues.password,
+          }),
+        });
+
+        if (res.status !== 404) {
+          const json = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            const err = new Error(json.message || "Đăng nhập thất bại");
+            err.status = res.status;
+            throw err;
+          }
+          const rawUser = json.data || json.user || json;
+          userData = {
+            id: rawUser.id || rawUser._id || "user-001",
+            name: rawUser.fullName || rawUser.name || rawUser.username || "Thành viên",
+            email: rawUser.email || normalizedEmail,
+            role: rawUser.role || "member",
+          };
+        }
+      } catch (networkOrApiErr) {
+        if (networkOrApiErr.status) {
+          throw networkOrApiErr;
+        }
+      }
+
+      if (!userData) {
+        await new Promise((r) => setTimeout(r, 600));
+        const matchedUser = MOCK_USERS.find((u) => u.email === normalizedEmail);
+
+        if (!matchedUser || formValues.password === "sai123") {
+          const err = new Error("Email hoặc mật khẩu không chính xác.");
+          err.status = 401;
+          throw err;
+        }
+        userData = matchedUser;
+      }
+      login(userData);
+      navigate("/");
+    } catch (error) {
+      if (error.status === 401 || error.message?.includes("401")) {
+        setServerError("Email hoặc mật khẩu không chính xác (Lỗi 401).");
+      } else {
+        setServerError(error.message || "Đã có lỗi xảy ra. Vui lòng thử lại sau.");
+      }
+    } finally {
       setIsLoading(false);
-      // GIẢ LẬP LỖI ĐỂ TEST UI: Tài khoản không tồn tại / Sai mật khẩu
-      setServerError("Tài khoản hoặc mật khẩu không chính xác. Vui lòng thử lại.");
-      
-      // MẸO: Khi nào nối API thật, chỗ này sẽ là:
-      // try { await loginAPI(formValues) } 
-      // catch (err) { setServerError(err.message) }
-    }, 1000);
+    }
   };
 
   return (
@@ -128,11 +195,7 @@ export default function Login() {
                 }`}
               />
               {errors.email && (
-                <p
-                  id="login-email-error"
-                  className="auth-form__error"
-                  role="alert"
-                >
+                <p id="login-email-error" className="auth-form__error" role="alert">
                   {errors.email}
                 </p>
               )}
@@ -153,14 +216,12 @@ export default function Login() {
                   onChange={handleChange}
                   disabled={isLoading}
                   aria-invalid={Boolean(errors.password)}
-                  aria-describedby={
-                    errors.password ? "login-password-error" : undefined
-                  }
+                  aria-describedby={errors.password ? "login-password-error" : undefined}
                   className={`auth-form__input auth-form__input--password ${
                     errors.password ? "auth-form__input--error" : ""
                   }`}
                 />
-                
+
                 <button
                   type="button"
                   className="auth-form__toggle-password"
@@ -181,13 +242,9 @@ export default function Login() {
                   )}
                 </button>
               </div>
-              
+
               {errors.password && (
-                <p
-                  id="login-password-error"
-                  className="auth-form__error"
-                  role="alert"
-                >
+                <p id="login-password-error" className="auth-form__error" role="alert">
                   {errors.password}
                 </p>
               )}
@@ -210,11 +267,7 @@ export default function Login() {
               <span>Ghi nhớ đăng nhập</span>
             </label>
 
-            <button
-              type="submit"
-              className="auth-form__submit"
-              disabled={isLoading}
-            >
+            <button type="submit" className="auth-form__submit" disabled={isLoading}>
               {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>
           </form>
@@ -223,11 +276,7 @@ export default function Login() {
             <span>hoặc</span>
           </div>
 
-          <button
-            type="button"
-            className="auth-card__oauth"
-            disabled={isLoading}
-          >
+          <button type="button" className="auth-card__oauth" disabled={isLoading}>
             Tiếp tục với Google
           </button>
 

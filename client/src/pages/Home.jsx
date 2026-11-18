@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getRecipes } from '../api';
 import SearchBar from '../components/SearchBar/SearchBar';
 import RecipeList from '../components/RecipeList/RecipeList';
+import FilterBar from '../components/FilterBar/FilterBar';
 import './Home.css';
 
 
@@ -80,6 +81,12 @@ export default function Home() {
       });
     });
   }, [recipes, searchTags]);
+
+  const handleRemoveSearchTag = (tagToRemove) => {
+    setSearchTags(prev => prev.filter(tag => tag.value !== tagToRemove.value));
+  };
+
+  const safeRecipeList = searchedRecipes || [];
 
   return (
     <div className="home-page">
@@ -162,13 +169,19 @@ export default function Home() {
       </section>
 
       <SearchBar tags={searchTags} onTagsChange={setSearchTags} />
+      <FilterBar 
+        searchTags={searchTags}
+        onRemoveSearchTag={handleRemoveSearchTag}
+        resultCount={safeRecipeList.length}
+      />
+      
       {status === 'loading' && <p className="recipe-list__empty">Đang tải món ăn...</p>}
-{status === 'error' && (
-  <p className="recipe-list__empty">
-    Không tải được dữ liệu. Kiểm tra server đã chạy chưa.
-  </p>
-)}
-{status === 'done' && <RecipeList recipes={searchedRecipes} />}
+      {status === 'error' && (
+        <p className="recipe-list__empty">
+          Không tải được dữ liệu. Kiểm tra server đã chạy chưa.
+        </p>
+      )}
+      {status === 'done' && <RecipeList recipes={safeRecipeList} />}
     </div>
   );
 }

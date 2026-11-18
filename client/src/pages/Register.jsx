@@ -1,10 +1,16 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 import "./Login.css";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const EXISTING_EMAILS = ["member@cooked.test", "admin@cooked.test"];
 
 export default function Register() {
+  const navigate = useNavigate();
+  const { login, register } = useAuth();
+
   const [formValues, setFormValues] = useState({
     name: "",
     email: "",
@@ -12,6 +18,8 @@ export default function Register() {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [serverError, setServerError] = useState("");
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -26,6 +34,10 @@ export default function Register() {
         ...prev,
         [name]: "",
       }));
+    }
+
+    if (serverError) {
+      setServerError("");
     }
   };
 
@@ -43,7 +55,7 @@ export default function Register() {
     return nextErrors;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const validationErrors = validate();
 
@@ -53,11 +65,84 @@ export default function Register() {
     }
 
     setErrors({});
+    setServerError("");
     setIsLoading(true);
 
-    setTimeout(() => {
+    const trimmedName = formValues.name.trim();
+    const normalizedEmail = formValues.email.trim().toLowerCase();
+
+    try {
+      let createdUser = null;
+
+      if (typeof register === "function") {
+        await register({
+          name: trimmedName,
+          email: normalizedEmail,
+          password: formValues.password,
+        });
+        navigate("/");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/users/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fullName: trimmedName,
+            name: trimmedName,
+            email: normalizedEmail,
+            password: formValues.password,
+          }),
+        });
+
+        if (res.status !== 404) {
+          const json = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            const err = new Error(json.message || "Đăng ký thất bại");
+            err.status = res.status;
+            throw err;
+          }
+          const rawUser = json.data || json.user || json;
+          createdUser = {
+            id: rawUser.id || rawUser._id || `user-${Date.now()}`,
+            name: rawUser.fullName || rawUser.name || trimmedName,
+            email: rawUser.email || normalizedEmail,
+            role: rawUser.role || "member",
+          };
+        }
+      } catch (networkOrApiErr) {
+        if (networkOrApiErr.status) {
+          throw networkOrApiErr;
+        }
+      }
+
+      if (!createdUser) {
+        await new Promise((r) => setTimeout(r, 600));
+        if (EXISTING_EMAILS.includes(normalizedEmail)) {
+          const err = new Error("Email này đã được sử dụng.");
+          err.status = 409;
+          throw err;
+        }
+        createdUser = {
+          id: `user-${Date.now()}`,
+          name: trimmedName,
+          email: normalizedEmail,
+          role: "member",
+        };
+      }
+
+      login(createdUser);
+      navigate("/");
+    } catch (error) {
+      if (error.status === 409 || error.message?.includes("409")) {
+        setServerError("Email này đã được sử dụng. Vui lòng chọn email khác (Lỗi 409).");
+      } else {
+        setServerError(error.message || "Đã có lỗi xảy ra. Vui lòng thử lại sau.");
+      }
+    } finally {
       setIsLoading(false);
-    }, 800);
+    }
   };
 
   return (
@@ -78,6 +163,17 @@ export default function Register() {
           <p className="auth-card__subtitle">
             Đăng ký để chia sẻ công thức và lưu những món ăn yêu thích.
           </p>
+
+          {serverError && (
+            <div className="auth-alert auth-alert--error" role="alert">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span>{serverError}</span>
+            </div>
+          )}
 
           <form className="auth-form" onSubmit={handleSubmit} noValidate>
             <div className="auth-form__field">
@@ -100,11 +196,7 @@ export default function Register() {
                 }`}
               />
               {errors.name && (
-                <p
-                  id="register-name-error"
-                  className="auth-form__error"
-                  role="alert"
-                >
+                <p id="register-name-error" className="auth-form__error" role="alert">
                   {errors.name}
                 </p>
               )}
@@ -124,19 +216,13 @@ export default function Register() {
                 onChange={handleChange}
                 disabled={isLoading}
                 aria-invalid={Boolean(errors.email)}
-                aria-describedby={
-                  errors.email ? "register-email-error" : undefined
-                }
+                aria-describedby={errors.email ? "register-email-error" : undefined}
                 className={`auth-form__input ${
                   errors.email ? "auth-form__input--error" : ""
                 }`}
               />
               {errors.email && (
-                <p
-                  id="register-email-error"
-                  className="auth-form__error"
-                  role="alert"
-                >
+                <p id="register-email-error" className="auth-form__error" role="alert">
                   {errors.email}
                 </p>
               )}
@@ -146,39 +232,52 @@ export default function Register() {
               <label htmlFor="register-password" className="auth-form__label">
                 Mật khẩu
               </label>
-              <input
-                id="register-password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                placeholder="••••••••"
-                value={formValues.password}
-                onChange={handleChange}
-                disabled={isLoading}
-                aria-invalid={Boolean(errors.password)}
-                aria-describedby={
-                  errors.password ? "register-password-error" : undefined
-                }
-                className={`auth-form__input ${
-                  errors.password ? "auth-form__input--error" : ""
-                }`}
-              />
-              {errors.password && (
-                <p
-                  id="register-password-error"
-                  className="auth-form__error"
-                  role="alert"
+              <div className="auth-form__input-wrapper">
+                <input
+                  id="register-password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder="••••••••"
+                  value={formValues.password}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                  aria-invalid={Boolean(errors.password)}
+                  aria-describedby={errors.password ? "register-password-error" : undefined}
+                  className={`auth-form__input auth-form__input--password ${
+                    errors.password ? "auth-form__input--error" : ""
+                  }`}
+                />
+
+                <button
+                  type="button"
+                  className="auth-form__toggle-password"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  disabled={isLoading}
                 >
+                  {showPassword ? (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                  ) : (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  )}
+                </button>
+              </div>
+
+              {errors.password && (
+                <p id="register-password-error" className="auth-form__error" role="alert">
                   {errors.password}
                 </p>
               )}
             </div>
 
-            <button
-              type="submit"
-              className="auth-form__submit"
-              disabled={isLoading}
-            >
+            <button type="submit" className="auth-form__submit" disabled={isLoading}>
               {isLoading ? "Đang đăng ký..." : "Đăng ký"}
             </button>
           </form>
@@ -187,11 +286,7 @@ export default function Register() {
             <span>hoặc</span>
           </div>
 
-          <button
-            type="button"
-            className="auth-card__oauth"
-            disabled={isLoading}
-          >
+          <button type="button" className="auth-card__oauth" disabled={isLoading}>
             Tiếp tục với Google
           </button>
 
