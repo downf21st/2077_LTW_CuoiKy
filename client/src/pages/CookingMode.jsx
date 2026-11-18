@@ -6,10 +6,13 @@ import timerIcon from "../assets/cooking-mode/timer.svg";
 import closeIcon from "../assets/cooking-mode/close.svg";
 import "./CookingMode.css";
 
+const RECIPES_PER_PAGE = 8;
+
 export default function CookingMode() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const [visibleCount, setVisibleCount] = useState(RECIPES_PER_PAGE);
   const [selectedId, setSelectedId] = useState("");
   const [progress, setProgress] = useState({ recipeId: null, index: 0 });
   const [recipes, setRecipes] = useState([]);
@@ -106,7 +109,11 @@ export default function CookingMode() {
                   type="search"
                   placeholder="Tìm món ăn..."
                   value={search}
-                  onChange={(event) => setSearch(event.target.value)}
+                  onChange={(event) => {
+                    setSearch(event.target.value);
+                    setVisibleCount(RECIPES_PER_PAGE);
+                    setSelectedId("");
+                  }}
                 />
               </label>
               {filteredRecipes.length > 0 ? (
@@ -122,7 +129,7 @@ export default function CookingMode() {
                     role="radiogroup"
                     aria-label="Chọn món để nấu"
                   >
-                    {filteredRecipes.map((item) => (
+                    {filteredRecipes.slice(0, visibleCount).map((item) => (
                       <label
                         className={`cooking-picker__card${selectedId === item.id ? " cooking-picker__card--selected" : ""}`}
                         key={item.id}
@@ -169,6 +176,11 @@ export default function CookingMode() {
                       </label>
                     ))}
                   </div>
+                  {visibleCount < filteredRecipes.length && (
+                    <button className="cooking-picker__more" type="button" onClick={() => setVisibleCount((count) => count + RECIPES_PER_PAGE)}>
+                      Hiển thị thêm
+                    </button>
+                  )}
                 </>
               ) : (
                 <div className="cooking-picker__empty" role="status">
@@ -243,6 +255,7 @@ export default function CookingMode() {
                         setProgress({ recipeId: null, index: 0 });
                         setSelectedId("");
                         setSearch("");
+                        setVisibleCount(RECIPES_PER_PAGE);
                       }}
                     >
                       Chọn món tiếp theo
