@@ -1,11 +1,19 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { getRecipes } from '../api';
+import * as mockData from '../data/mockRecipes';
 import SearchBar from '../components/SearchBar/SearchBar';
 import RecipeList from '../components/RecipeList/RecipeList';
 import FilterBar from '../components/FilterBar/FilterBar';
 import './Home.css';
 
+const FALLBACK_RECIPES = Array.isArray(mockData.default)
+  ? mockData.default
+  : Array.isArray(mockData.mockRecipes)
+  ? mockData.mockRecipes
+  : Array.isArray(mockData.recipes)
+  ? mockData.recipes
+  : [];
 
 function getRecipeOfTheDay(recipesList) {
   if (!Array.isArray(recipesList) || recipesList.length === 0) {
@@ -25,10 +33,26 @@ function getRecipeOfTheDay(recipesList) {
   return recipesList[dayIndex % recipesList.length];
 }
 
+function parseMinutes(recipe) {
+  const raw = recipe?.cookingTime ?? recipe?.duration ?? recipe?.prepTime ?? recipe?.time ?? 0;
+  if (typeof raw === 'number') return raw;
+  const str = String(raw).toLowerCase();
+  if (str.includes('giờ') || str.includes('hour')) {
+    const num = parseFloat(str) || 1;
+    return num * 60;
+  }
+  return parseInt(str.replace(/\D/g, ''), 10) || 0;
+}
+
 export default function Home() {
   const [recipes, setRecipes] = useState([]);
   const [status, setStatus] = useState('loading');
   const [searchTags, setSearchTags] = useState([]);
+  const [filters, setFilters] = useState({
+    category: '',
+    cookingTime: '',
+    difficulty: '',
+  });
 
   useEffect(() => {
     let isMounted = true;
@@ -36,11 +60,21 @@ export default function Home() {
     getRecipes()
       .then((list) => {
         if (!isMounted) return;
-        setRecipes(list);
+        if (Array.isArray(list) && list.length > 0) {
+          setRecipes(list);
+        } else {
+          setRecipes(FALLBACK_RECIPES);
+        }
         setStatus('done');
       })
       .catch(() => {
-        if (isMounted) setStatus('error');
+        if (!isMounted) return;
+        if (FALLBACK_RECIPES.length > 0) {
+          setRecipes(FALLBACK_RECIPES);
+          setStatus('done');
+        } else {
+          setStatus('error');
+        }
       });
 
     return () => {
@@ -48,7 +82,6 @@ export default function Home() {
     };
   }, []);
 
-  
   const featuredRecipe = useMemo(() => getRecipeOfTheDay(recipes), [recipes]);
   const featuredId = featuredRecipe?._id || featuredRecipe?.id || 'recipe-001';
   const featuredTitle = featuredRecipe?.title || featuredRecipe?.name || 'Phở bò tái';
@@ -64,29 +97,49 @@ export default function Home() {
   const featuredDifficulty = featuredRecipe?.difficulty || 'Trung bình';
 
   const searchedRecipes = useMemo(() => {
-    if (searchTags.length === 0) return recipes;
-
     return recipes.filter((recipe) => {
-      return searchTags.every((tag) => {
-        const keyword = tag.value.toLowerCase();
-        if (tag.type === 'ingredient') {
-          return recipe.ingredients?.some((ing) => {
-            const ingName = typeof ing === 'string' ? ing : ing?.name || '';
-            return ingName.toLowerCase().includes(keyword);
-          });
-        }
-        const title = (recipe.title || recipe.name || '').toLowerCase();
-        const desc = (recipe.description || recipe.summary || '').toLowerCase();
-        return title.includes(keyword) || desc.includes(keyword);
-      });
+      const matchesTags =
+        searchTags.length === 0 ||
+        searchTags.every((tag) => {
+          const keyword = tag.value.toLowerCase();
+          if (tag.type === 'ingredient') {
+            return recipe.ingredients?.some((ing) => {
+              const ingName = typeof ing === 'string' ? ing : ing?.name || '';
+              return ingName.toLowerCase().includes(keyword);
+            });
+          }
+          const title = (recipe.title || recipe.name || '').toLowerCase();
+          const desc = (recipe.description || recipe.summary || '').toLowerCase();
+          return title.includes(keyword) || desc.includes(keyword);
+        });
+
+      const recipeCat = recipe.category || recipe.type || recipe.dishType || '';
+      const matchesCategory =
+        !filters.category ||
+        recipeCat.toLowerCase() === filters.category.toLowerCase();
+
+      const minutes = parseMinutes(recipe);
+      const maxMinutes = filters.cookingTime ? parseInt(filters.cookingTime, 10) : null;
+      const matchesTime = !maxMinutes || (minutes > 0 && minutes <= maxMinutes);
+
+      const recipeDiff = recipe.difficulty || recipe.level || '';
+      const matchesDifficulty =
+        !filters.difficulty ||
+        recipeDiff.toLowerCase() === filters.difficulty.toLowerCase();
+
+      return matchesTags && matchesCategory && matchesTime && matchesDifficulty;
     });
-  }, [recipes, searchTags]);
+  }, [recipes, searchTags, filters]);
 
   const handleRemoveSearchTag = (tagToRemove) => {
-    setSearchTags(prev => prev.filter(tag => tag.value !== tagToRemove.value));
+    setSearchTags((prev) => prev.filter((tag) => tag.value !== tagToRemove.value));
   };
 
   const safeRecipeList = searchedRecipes || [];
+  
+  const isFiltering = searchTags.length > 0 || Object.values(filters).some(val => val !== '');
+  const hasResults = safeRecipeList.length > 0;
+  const showMobileEmptyToast = isFiltering && !hasResults;
 
   return (
     <div className="home-page">
@@ -169,19 +222,39 @@ export default function Home() {
       </section>
 
       <SearchBar tags={searchTags} onTagsChange={setSearchTags} />
-      <FilterBar 
+      
+      <FilterBar
+        value={filters}
+        onChange={setFilters}
         searchTags={searchTags}
         onRemoveSearchTag={handleRemoveSearchTag}
         resultCount={safeRecipeList.length}
       />
-      
+
       {status === 'loading' && <p className="recipe-list__empty">Đang tải món ăn...</p>}
+      
       {status === 'error' && (
-        <p className="recipe-list__empty">
-          Không tải được dữ liệu. Kiểm tra server đã chạy chưa.
-        </p>
+        <div style={{ marginTop: '32px', textAlign: 'center' }}>
+          <p className="recipe-list__empty">
+            Không tải được dữ liệu. Kiểm tra server đã chạy chưa.
+          </p>
+        </div>
       )}
-      {status === 'done' && <RecipeList recipes={safeRecipeList} />}
+      
+      {status === 'done' && (
+        <>
+          <style>
+            {`
+              @media (max-width: 768px) {
+                .hide-native-list-on-mobile { display: none !important; }
+              }
+            `}
+          </style>
+          <div className={showMobileEmptyToast ? "hide-native-list-on-mobile" : ""}>
+            <RecipeList recipes={safeRecipeList} />
+          </div>
+        </>
+      )}
     </div>
   );
 }
