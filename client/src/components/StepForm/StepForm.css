@@ -100,3 +100,43 @@
     width: 100%;
   }
 }
+
+.step-form__icon {
+  position: relative;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease;
+}
+@media (hover: hover) {
+  .step-form__icon:hover:not(:disabled) {
+    color: var(--color-brand);
+    border-color: var(--color-brand);
+    background: var(--color-surface-hover);
+  }
+  .step-form__icon--remove:hover:not(:disabled) {
+    color: var(--color-error);
+    border-color: var(--color-error);
+    background: color-mix(
+      in srgb,
+      var(--color-error) 8%,
+      var(--color-bg-surface)
+    );
+  }
+  .step-form__icon--remove:hover:not(:disabled) img {
+    opacity: 0;
+  }
+  .step-form__icon--remove:hover:not(:disabled)::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: var(--color-error);
+    mask: url("../../assets/trash.svg") center / contain no-repeat;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .step-form__icon {
+    transition: none;
+  }
+}
