@@ -19,6 +19,7 @@ export function createInitialValues() {
     difficulty: "",
     servings: "",
     ingredients: [{ id: crypto.randomUUID(), name: "", quantity: "", unit: "" }],
+    steps: [{ id: crypto.randomUUID(), title: "", duration: "", instruction: "" }],
     equipment: [
       { id: crypto.randomUUID(), value: "" },
       { id: crypto.randomUUID(), value: "" },

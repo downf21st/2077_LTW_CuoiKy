@@ -275,7 +275,53 @@ export default function RecipeForm({
             disabled={isSubmitting}
           />
         </section>
-        <StepForm />
+        <StepForm
+          rows={values.steps}
+          onChange={(id, field, value) =>
+            setValues((previous) => ({
+              ...previous,
+              steps: previous.steps.map((step) =>
+                step.id === id ? { ...step, [field]: value } : step,
+              ),
+            }))
+          }
+          onAdd={() => {
+            const step = {
+              id: crypto.randomUUID(),
+              title: "",
+              duration: "",
+              instruction: "",
+            };
+            setValues((previous) => ({
+              ...previous,
+              steps: [...previous.steps, step],
+            }));
+          }}
+          onRemove={(id) =>
+            setValues((previous) => ({
+              ...previous,
+              steps: previous.steps.filter((step) => step.id !== id),
+            }))
+          }
+          onMove={(id, direction) =>
+            setValues((previous) => {
+              const index = previous.steps.findIndex((step) => step.id === id);
+              const target = index + direction;
+              if (index < 0 || target < 0 || target >= previous.steps.length)
+                return previous;
+              return {
+                ...previous,
+                steps: previous.steps.map((step, position) =>
+                  position === index
+                    ? previous.steps[target]
+                    : position === target
+                      ? previous.steps[index]
+                      : step,
+                ),
+              };
+            })
+          }
+        />
         <div className="recipe-form__actions">
           <button
             className="recipe-form__cancel"
