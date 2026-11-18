@@ -1,0 +1,154 @@
+[
+  {
+    "id": "recipe-001",
+    "title": "Gà kho gừng",
+    "description": "Gà kho mềm với gừng thơm, nước màu và nước mắm, thích hợp ăn cùng cơm nóng.",
+    "category": "Món chính",
+    "cookingTime": 55,
+    "difficulty": "Dễ",
+    "authorId": "user-001",
+    "image": "https://cdn-i.vtcnews.vn/resize/UyS5Ytevv363eGE5da_V9zKATy3gvZK00/upload/2021/01/05/gakhogung-22460430.jpg",
+    "servings": 4,
+    "equipment": ["Dao", "Thớt", "Bát lớn", "Chảo sâu lòng", "Bếp"],
+    "ingredients": [
+      { "name": "Thịt gà", "quantity": 700, "unit": "g" },
+      { "name": "Gừng", "quantity": 50, "unit": "g" },
+      { "name": "Hành tím", "quantity": 2, "unit": "củ" },
+      { "name": "Nước mắm", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Đường", "quantity": 1, "unit": "muỗng canh" },
+      { "name": "Nước dừa", "quantity": 200, "unit": "ml" },
+      { "name": "Dầu ăn", "quantity": 1, "unit": "muỗng canh" },
+      { "name": "Tiêu xay", "quantity": 1, "unit": "muỗng cà phê" }
+    ],
+    "steps": [
+      {
+        "title": "Sơ chế nguyên liệu",
+        "duration": 8,
+        "instruction": "Rửa sạch gà, để ráo rồi chặt miếng vừa ăn. Gọt vỏ gừng, thái sợi; bóc vỏ và băm nhỏ hành tím."
+      },
+      {
+        "title": "Ướp thịt gà",
+        "duration": 15,
+        "instruction": "Trộn gà với nước mắm, một nửa lượng gừng, hành tím và tiêu. Để thịt thấm gia vị trong 15 phút."
+      },
+      {
+        "title": "Tạo nước màu",
+        "duration": 5,
+        "instruction": "Làm nóng dầu trong chảo, cho đường vào đun nhỏ lửa đến khi chuyển màu cánh gián."
+      },
+      {
+        "title": "Xào săn thịt",
+        "duration": 7,
+        "instruction": "Cho gà đã ướp vào chảo nước màu, đảo đều đến khi các mặt thịt săn lại."
+      },
+      {
+        "title": "Kho gà",
+        "duration": 20,
+        "instruction": "Thêm nước dừa và phần gừng còn lại. Đậy nắp, kho nhỏ lửa khoảng 20 phút đến khi gà chín mềm và nước sốt sánh lại."
+      }
+    ],
+    "reviews": [],
+    "averageRating": 0,
+    "status": "approved",
+    "createdAt": "2026-11-14T10:00:00.000Z"
+  },
+  {
+    "id": "recipe-002",
+    "title": "Phở bò",
+    "description": "Phở bò với nước dùng thơm từ xương, gừng và gia vị, ăn cùng bánh phở và rau thơm.",
+    "category": "Món nước",
+    "cookingTime": 120,
+    "difficulty": "Trung bình",
+    "authorId": "user-001",
+    "image": "https://afamilycdn.com/150157425591193600/2025/12/22/mon-an-1-17663287951681909016544-1766389491171-17663894920951576086442.jpg",
+    "servings": 4,
+    "equipment": ["Dao", "Thớt", "Nồi lớn", "Chảo", "Rây", "Bát"],
+    "ingredients": [
+      { "name": "Xương bò", "quantity": 1000, "unit": "g" },
+      { "name": "Thịt bò phi lê", "quantity": 300, "unit": "g" },
+      { "name": "Bánh phở", "quantity": 500, "unit": "g" },
+      { "name": "Gừng", "quantity": 50, "unit": "g" },
+      { "name": "Hành tây", "quantity": 1, "unit": "củ" },
+      { "name": "Hoa hồi", "quantity": 3, "unit": "cánh" },
+      { "name": "Quế", "quantity": 1, "unit": "thanh" },
+      { "name": "Nước mắm", "quantity": 2, "unit": "muỗng canh" },
+      { "name": "Hành lá", "quantity": 20, "unit": "g" }
+    ],
+    "steps": [
+      {
+        "title": "Sơ chế xương",
+        "duration": 10,
+        "instruction": "Rửa sạch xương bò, chần trong nước sôi khoảng 5 phút rồi đổ bỏ nước và rửa lại xương."
+      },
+      {
+        "title": "Nướng gừng và hành",
+        "duration": 10,
+        "instruction": "Nướng gừng và hành tây trên chảo hoặc bếp đến khi dậy mùi thơm. Rang hoa hồi và quế trên chảo khô."
+      },
+      {
+        "title": "Ninh nước dùng",
+        "duration": 80,
+        "instruction": "Cho xương vào nồi cùng 2,5 lít nước, gừng, hành tây, hoa hồi và quế. Ninh nhỏ lửa, thường xuyên vớt bọt để nước dùng trong."
+      },
+      {
+        "title": "Chuẩn bị thịt và bánh phở",
+        "duration": 15,
+        "instruction": "Thái thịt bò thành lát mỏng, thái nhỏ hành lá. Trụng bánh phở trong nước sôi rồi chia vào các bát."
+      },
+      {
+        "title": "Hoàn thành món phở",
+        "duration": 5,
+        "instruction": "Nêm nước dùng với nước mắm cho vừa ăn. Xếp thịt bò lên bánh phở, chan nước dùng đang sôi và thêm hành lá."
+      }
+    ],
+    "reviews": [],
+    "averageRating": 0,
+    "status": "approved",
+    "createdAt": "2026-11-15T10:00:00.000Z"
+  },
+  {
+    "id": "recipe-003",
+    "title": "Trứng chiên hành",
+    "description": "Trứng chiên mềm thơm với hành lá, nêm gia vị vừa ăn và dùng nóng với cơm.",
+    "category": "Món chính",
+    "cookingTime": 15,
+    "difficulty": "Dễ",
+    "authorId": "user-002",
+    "image": "https://cookwithchung.com/wp-content/uploads/2023/08/Vietnamese-Egg-Omelette--500x500.jpg",
+    "servings": 2,
+    "equipment": ["Bát", "Đũa", "Chảo chống dính", "Bếp"],
+    "ingredients": [
+      { "name": "Trứng gà", "quantity": 4, "unit": "quả" },
+      { "name": "Hành lá", "quantity": 15, "unit": "g" },
+      { "name": "Nước mắm", "quantity": 1, "unit": "muỗng cà phê" },
+      { "name": "Tiêu xay", "quantity": 0.5, "unit": "muỗng cà phê" },
+      { "name": "Dầu ăn", "quantity": 1, "unit": "muỗng canh" }
+    ],
+    "steps": [
+      {
+        "title": "Sơ chế hành lá",
+        "duration": 3,
+        "instruction": "Rửa sạch hành lá, để ráo rồi thái nhỏ."
+      },
+      {
+        "title": "Đánh trứng",
+        "duration": 3,
+        "instruction": "Đập trứng vào bát, thêm nước mắm và tiêu. Đánh đều rồi trộn hành lá vào."
+      },
+      {
+        "title": "Chiên trứng",
+        "duration": 7,
+        "instruction": "Làm nóng chảo với dầu ăn. Đổ trứng vào, chiên lửa vừa đến khi mặt dưới vàng và mặt trên vừa se lại."
+      },
+      {
+        "title": "Gấp và hoàn thành",
+        "duration": 2,
+        "instruction": "Gấp trứng làm đôi, chiên thêm khoảng một phút rồi tắt bếp và dùng nóng."
+      }
+    ],
+    "reviews": [],
+    "averageRating": 0,
+    "status": "approved",
+    "createdAt": "2026-11-16T10:00:00.000Z"
+  }
+]

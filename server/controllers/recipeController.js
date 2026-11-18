@@ -42,6 +42,8 @@ const parsePositiveInteger = (value, fallback) => {
 };
 
 const normalizeText = (value) => value
+  .trim()
+  .replace(/\s+/g, ' ')
   .normalize('NFD')
   .replace(/[\u0300-\u036f]/g, '')
   .replace(/đ/g, 'd')
@@ -183,9 +185,9 @@ const getRecipes = async (req, res) => {
               )).filter((name) => typeof name === 'string')
             : [];
           const normalizedNames = recipeIngredients.map((name) => normalizeText(name));
-          const matchCount = ingredientTerms.filter((term) =>
-            normalizedNames.some((name) => name.includes(term))
-          ).length;
+          const matchCount = ingredientTerms.reduce((count, term) =>
+            count + (normalizedNames.some((name) => name.includes(term)) ? 1 : 0), 0
+          );
 
           return { ...recipe, matchCount };
         })
