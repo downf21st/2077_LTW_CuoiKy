@@ -31,6 +31,9 @@ export default function RecipeCard({ recipe }) {
     cookingTime,
     time,
     difficulty = 'easy',
+    matchCount,
+    totalIngredients,
+    ingredients,
   } = recipe || {};
 
   const recipeId = _id || id || 'recipe-001';
@@ -47,6 +50,12 @@ export default function RecipeCard({ recipe }) {
       ? String(rawTime)
       : `${rawTime} phút`
     : '30 phút';
+
+  const hasMatchCount = typeof matchCount === 'number' && matchCount > 0;
+  const totalIngCount =
+    totalIngredients ||
+    (Array.isArray(ingredients) ? ingredients.length : 0) ||
+    matchCount;
 
   return (
     <article className="recipe-card">
@@ -91,6 +100,12 @@ export default function RecipeCard({ recipe }) {
             >
               {diffConfig.label}
             </span>
+
+            {hasMatchCount && (
+              <span className="recipe-card__badge recipe-card__badge--match">
+                Khớp {matchCount}/{totalIngCount} nguyên liệu
+              </span>
+            )}
           </div>
 
           <h3 className="recipe-card__title" title={displayTitle}>

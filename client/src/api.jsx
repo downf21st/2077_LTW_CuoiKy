@@ -7,9 +7,22 @@ async function request(path) {
   return json
 }
 
-export async function getRecipes({ search = '', page = 1, limit = 100 } = {}) {
+export async function getRecipes({
+  search = '',
+  ingredients = '',
+  category = '',
+  cookingTime = '',
+  difficulty = '',
+  page = 1,
+  limit = 100,
+} = {}) {
   const params = new URLSearchParams({ page, limit })
   if (search) params.set('search', search)
+  if (ingredients) params.set('ingredients', ingredients)
+  if (category) params.set('category', category)
+  if (cookingTime) params.set('cookingTime', cookingTime)
+  if (difficulty) params.set('difficulty', difficulty)
+
   const json = await request(`/recipes?${params}`)
   return json.data
 }

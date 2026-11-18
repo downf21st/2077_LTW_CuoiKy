@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createPortal } from "react-dom"; // TUYỆT CHIÊU PORTAL Ở ĐÂY
+import { createPortal } from "react-dom";
 import "./FilterBar.css";
 
 const CATEGORY_OPTIONS = [
@@ -26,11 +26,7 @@ const FilterIcon = () => (
       <path d="M5.83519 4.99992H14.1685L9.99352 10.2499L5.83519 4.99992ZM3.54352 4.67492C5.22686 6.83325 8.33519 10.8333 8.33519 10.8333V15.8333C8.33519 16.2916 8.71019 16.6666 9.16852 16.6666H10.8352C11.2935 16.6666 11.6685 16.2916 11.6685 15.8333V10.8333C11.6685 10.8333 14.7685 6.83325 16.4519 4.67492C16.8769 4.12492 16.4852 3.33325 15.7935 3.33325H4.20186C3.51019 3.33325 3.11852 4.12492 3.54352 4.67492Z" fill="#323232"/>
       <path opacity="0.3" d="M5.83203 5H14.1654L9.99036 10.25L5.83203 5Z" fill="#323232"/>
     </g>
-    <defs>
-      <clipPath id="clip0_586_4428">
-        <rect width="20" height="20" fill="white"/>
-      </clipPath>
-    </defs>
+    <defs><clipPath id="clip0_586_4428"><rect width="20" height="20" fill="white"/></clipPath></defs>
   </svg>
 );
 
@@ -48,25 +44,15 @@ export default function FilterBar({
   resultCount = 0,
   onChange
 }) {
-  const [internalFilters, setInternalFilters] = useState({
-    category: "",
-    cookingTime: "",
-    difficulty: "",
-  });
+  const [internalFilters, setInternalFilters] = useState({ category: "", cookingTime: "", difficulty: "" });
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const filters = value || internalFilters;
 
-  const hasActiveFilters = Boolean(
-    filters.category || filters.cookingTime || filters.difficulty
-  );
-  
+  const hasActiveFilters = Boolean(filters.category || filters.cookingTime || filters.difficulty);
   const isActivelyFiltering = hasActiveFilters || searchTags.length > 0;
-
-  const activeFilterCount =
-    (filters.category ? 1 : 0) +
-    (filters.cookingTime ? 1 : 0) +
-    (filters.difficulty ? 1 : 0);
+  
+  const activeDropdownCount = (filters.category ? 1 : 0) + (filters.cookingTime ? 1 : 0) + (filters.difficulty ? 1 : 0);
+  const totalSelectedTags = activeDropdownCount + searchTags.length;
 
   const updateFilter = (name, selectedVal) => {
     const finalValue = selectedVal === "all" ? "" : selectedVal;
@@ -75,152 +61,75 @@ export default function FilterBar({
     if (onChange) onChange(nextFilters);
   };
 
-  const handleDropdownChange = (event) => {
-    updateFilter(event.target.name, event.target.value);
-  };
-
   const handleClearAll = () => {
     const resetFilters = { category: "", cookingTime: "", difficulty: "" };
     setInternalFilters(resetFilters);
     if (onChange) onChange(resetFilters);
   };
 
-  const handleClearMobile = () => {
-    handleClearAll();
-    setIsModalOpen(false);
-  };
-
-  const removeDropdownFilter = (name) => {
-    updateFilter(name, "all");
-  };
-
   return (
     <div className="home-filter-section">
-      {/* ================= GIAO DIỆN DESKTOP ================= */}
       <div className="home-filter-bar-desktop">
         <div className="home-filter-bar" role="region" aria-label="Bộ lọc món ăn">
           <div className="home-filter-bar__item">
-            <select
-              name="category"
-              value={filters.category || "all"}
-              onChange={handleDropdownChange}
-              className="home-filter-bar__select"
-            >
-              <option value="all">Loại món</option>
+            <select name="category" value={filters.category || ""} onChange={(e) => updateFilter(e.target.name, e.target.value)} className="home-filter-bar__select">
+              <option value="" hidden>Loại món</option>
               {CATEGORY_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
-                  {filters.category === opt.value ? `Loại món: ${opt.label}` : opt.label}
+                  {opt.label}
                 </option>
               ))}
             </select>
           </div>
 
           <div className="home-filter-bar__item">
-            <select
-              name="cookingTime"
-              value={filters.cookingTime || "all"}
-              onChange={handleDropdownChange}
-              className="home-filter-bar__select"
-            >
-              <option value="all">Thời gian</option>
+            <select name="cookingTime" value={filters.cookingTime || ""} onChange={(e) => updateFilter(e.target.name, e.target.value)} className="home-filter-bar__select">
+              <option value="" hidden>Thời gian</option>
               {TIME_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
-                  {filters.cookingTime === opt.value ? `Thời gian: ${opt.label}` : opt.label}
+                  {opt.label}
                 </option>
               ))}
             </select>
           </div>
 
           <div className="home-filter-bar__item">
-            <select
-              name="difficulty"
-              value={filters.difficulty || "all"}
-              onChange={handleDropdownChange}
-              className="home-filter-bar__select"
-            >
-              <option value="all">Độ khó</option>
+            <select name="difficulty" value={filters.difficulty || ""} onChange={(e) => updateFilter(e.target.name, e.target.value)} className="home-filter-bar__select">
+              <option value="" hidden>Độ khó</option>
               {DIFFICULTY_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
-                  {filters.difficulty === opt.value ? `Độ khó: ${opt.label}` : opt.label}
+                  {opt.label}
                 </option>
               ))}
             </select>
           </div>
         </div>
-
-        {hasActiveFilters && (
-          <button
-            type="button"
-            className="home-filter-bar__clear"
-            onClick={handleClearAll}
-          >
-            Xóa bộ lọc
-          </button>
-        )}
+        {hasActiveFilters && <button type="button" className="home-filter-bar__clear" onClick={handleClearAll}>Xóa bộ lọc</button>}
       </div>
 
-      {/* ================= GIAO DIỆN NÚT BỘ LỌC MOBILE ================= */}
       <div className="home-filter-bar-mobile">
-        <button
-          type="button"
-          className="home-filter-mobile-btn"
-          onClick={() => setIsModalOpen(true)}
-        >
+        <button type="button" className="home-filter-mobile-btn" onClick={() => setIsModalOpen(true)}>
           <FilterIcon />
-          <span>Bộ lọc{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}</span>
+          <span>Bộ lọc{totalSelectedTags > 0 ? ` (${totalSelectedTags})` : ""}</span>
         </button>
       </div>
 
-      {/* ================= HÀNG CHIP TAGS ================= */}
       {isActivelyFiltering && (
         <div className={`home-filter-chips ${resultCount === 0 ? "hide-on-mobile" : ""}`}>
           <div className="home-filter-chips__list">
             {searchTags.map((tag, index) => (
-              <button
-                type="button"
-                key={`tag-${index}`}
-                className="home-filter-chip"
-                onClick={() => onRemoveSearchTag && onRemoveSearchTag(tag)}
-              >
+              <button type="button" key={`tag-${index}`} className="home-filter-chip" onClick={() => onRemoveSearchTag && onRemoveSearchTag(tag)}>
                 {tag.value} <span aria-hidden="true">×</span>
               </button>
             ))}
-            {filters.category && (
-              <button
-                type="button"
-                className="home-filter-chip"
-                onClick={() => removeDropdownFilter("category")}
-              >
-                {filters.category} <span aria-hidden="true">×</span>
-              </button>
-            )}
-            {filters.cookingTime && (
-              <button
-                type="button"
-                className="home-filter-chip"
-                onClick={() => removeDropdownFilter("cookingTime")}
-              >
-                {TIME_OPTIONS.find((o) => o.value === filters.cookingTime)?.label}{" "}
-                <span aria-hidden="true">×</span>
-              </button>
-            )}
-            {filters.difficulty && (
-              <button
-                type="button"
-                className="home-filter-chip"
-                onClick={() => removeDropdownFilter("difficulty")}
-              >
-                {filters.difficulty} <span aria-hidden="true">×</span>
-              </button>
-            )}
+            {filters.category && <button type="button" className="home-filter-chip" onClick={() => updateFilter("category", "all")}>{filters.category} <span aria-hidden="true">×</span></button>}
+            {filters.cookingTime && <button type="button" className="home-filter-chip" onClick={() => updateFilter("cookingTime", "all")}>{TIME_OPTIONS.find((o) => o.value === filters.cookingTime)?.label} <span aria-hidden="true">×</span></button>}
+            {filters.difficulty && <button type="button" className="home-filter-chip" onClick={() => updateFilter("difficulty", "all")}>{filters.difficulty} <span aria-hidden="true">×</span></button>}
           </div>
-          <span className="home-filter-chips__count">
-            Tìm thấy {resultCount} món
-          </span>
+          <span className="home-filter-chips__count">Tìm thấy {resultCount} món</span>
         </div>
       )}
 
-      {/* ================= KHUNG EMPTY STATE (MOBILE) ================= */}
       {isActivelyFiltering && resultCount === 0 && (
         <div className="home-filter-empty">
           <h2 className="home-filter-empty__title">Món ăn trong ngày</h2>
@@ -228,123 +137,49 @@ export default function FilterBar({
             <EmptyToastIcon />
             <p className="home-filter-empty__desc">Không tìm thấy món phù hợp</p>
             <p className="home-filter-empty__hint">Thử bỏ bớt bộ lọc hoặc đổi từ khóa tìm kiếm</p>
-            <button 
-              type="button" 
-              className="home-filter-empty__clear-btn"
-              onClick={handleClearAll}
-            >
-              Xóa bộ lọc
-            </button>
+            <button type="button" className="home-filter-empty__clear-btn" onClick={handleClearAll}>Xóa bộ lọc</button>
           </div>
         </div>
       )}
 
-      {/* ================= BOTTOM SHEET MODAL DÙNG PORTAL ================= */}
       {isModalOpen && createPortal(
         <>
-          <div
-            className="filter-modal-backdrop"
-            onClick={() => setIsModalOpen(false)}
-            aria-hidden="true"
-          />
+          <div className="filter-modal-backdrop" onClick={() => setIsModalOpen(false)} aria-hidden="true"/>
           <div className="filter-modal-sheet" role="dialog" aria-label="Bộ lọc món ăn">
-            <div
-              className="filter-modal-handle-area"
-              onClick={() => setIsModalOpen(false)}
-            >
-              <div className="filter-modal-handle" />
-            </div>
-
-            <div className="filter-modal-header">
-              <h3>Bộ lọc</h3>
-            </div>
-
+            <div className="filter-modal-handle-area" onClick={() => setIsModalOpen(false)}><div className="filter-modal-handle" /></div>
+            <div className="filter-modal-header"><h3>Bộ lọc</h3></div>
             <div className="filter-modal-body">
               <div className="filter-modal-group">
                 <h4>Loại món</h4>
                 <div className="filter-modal-options">
-                  <button
-                    type="button"
-                    className={`filter-modal-opt ${!filters.category ? "active" : ""}`}
-                    onClick={() => updateFilter("category", "all")}
-                  >
-                    Tất cả
-                  </button>
+                  <button type="button" className={`filter-modal-opt ${!filters.category ? "active" : ""}`} onClick={() => updateFilter("category", "all")}>Tất cả</button>
                   {CATEGORY_OPTIONS.map((opt) => (
-                    <button
-                      type="button"
-                      key={opt.value}
-                      className={`filter-modal-opt ${filters.category === opt.value ? "active" : ""}`}
-                      onClick={() => updateFilter("category", opt.value)}
-                    >
-                      {opt.label}
-                    </button>
+                    <button type="button" key={opt.value} className={`filter-modal-opt ${filters.category === opt.value ? "active" : ""}`} onClick={() => updateFilter("category", opt.value)}>{opt.label}</button>
                   ))}
                 </div>
               </div>
-
               <div className="filter-modal-group">
                 <h4>Thời gian</h4>
                 <div className="filter-modal-options">
-                  <button
-                    type="button"
-                    className={`filter-modal-opt ${!filters.cookingTime ? "active" : ""}`}
-                    onClick={() => updateFilter("cookingTime", "all")}
-                  >
-                    Tất cả
-                  </button>
+                  <button type="button" className={`filter-modal-opt ${!filters.cookingTime ? "active" : ""}`} onClick={() => updateFilter("cookingTime", "all")}>Tất cả</button>
                   {TIME_OPTIONS.map((opt) => (
-                    <button
-                      type="button"
-                      key={opt.value}
-                      className={`filter-modal-opt ${filters.cookingTime === opt.value ? "active" : ""}`}
-                      onClick={() => updateFilter("cookingTime", opt.value)}
-                    >
-                      {opt.label}
-                    </button>
+                    <button type="button" key={opt.value} className={`filter-modal-opt ${filters.cookingTime === opt.value ? "active" : ""}`} onClick={() => updateFilter("cookingTime", opt.value)}>{opt.label}</button>
                   ))}
                 </div>
               </div>
-
               <div className="filter-modal-group">
                 <h4>Độ khó</h4>
                 <div className="filter-modal-options">
-                  <button
-                    type="button"
-                    className={`filter-modal-opt ${!filters.difficulty ? "active" : ""}`}
-                    onClick={() => updateFilter("difficulty", "all")}
-                  >
-                    Tất cả
-                  </button>
+                  <button type="button" className={`filter-modal-opt ${!filters.difficulty ? "active" : ""}`} onClick={() => updateFilter("difficulty", "all")}>Tất cả</button>
                   {DIFFICULTY_OPTIONS.map((opt) => (
-                    <button
-                      type="button"
-                      key={opt.value}
-                      className={`filter-modal-opt ${filters.difficulty === opt.value ? "active" : ""}`}
-                      onClick={() => updateFilter("difficulty", opt.value)}
-                    >
-                      {opt.label}
-                    </button>
+                    <button type="button" key={opt.value} className={`filter-modal-opt ${filters.difficulty === opt.value ? "active" : ""}`} onClick={() => updateFilter("difficulty", opt.value)}>{opt.label}</button>
                   ))}
                 </div>
               </div>
             </div>
-
             <div className="filter-modal-footer">
-              <button
-                type="button"
-                className="filter-modal-btn-clear"
-                onClick={handleClearMobile}
-              >
-                Xóa bộ lọc
-              </button>
-              <button
-                type="button"
-                className="filter-modal-btn-apply"
-                onClick={() => setIsModalOpen(false)}
-              >
-                Xem kết quả
-              </button>
+              <button type="button" className="filter-modal-btn-clear" onClick={() => { handleClearAll(); setIsModalOpen(false); }}>Xóa bộ lọc</button>
+              <button type="button" className="filter-modal-btn-apply" onClick={() => setIsModalOpen(false)}>Xem kết quả</button>
             </div>
           </div>
         </>,
