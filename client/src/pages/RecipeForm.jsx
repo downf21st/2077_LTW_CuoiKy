@@ -3,12 +3,14 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import FormField from "../components/FormField/FormField";
 import EquipmentInput from "../components/EquipmentInput/EquipmentInput";
 import IngredientInput from "../components/IngredientInput/IngredientInput";
+import StepForm from "../components/StepForm/StepForm";
 import DifficultyTags from "../components/DifficultyTags/DifficultyTags";
 import {
   CATEGORY_OPTIONS,
   FIELD_LIMITS,
   createInitialValues,
   validateRecipeInfo,
+  validateRecipe,
   buildRecipePayload,
 } from "../utils/recipeForm";
 import "./RecipeForm.css";
@@ -33,7 +35,12 @@ const fields = [
     placeholder: "Chọn loại món",
     options: CATEGORY_OPTIONS,
   },
-  { name: "cookingTime", label: "Thời gian nấu", type: "number", placeholder: "Nhập thời gian (phút)" },
+  {
+    name: "cookingTime",
+    label: "Thời gian nấu",
+    type: "number",
+    placeholder: "Nhập thời gian (phút)",
+  },
   {
     name: "servings",
     label: "Khẩu phần",
@@ -53,6 +60,7 @@ export default function RecipeForm({
   const [values, setValues] = useState(createInitialValues);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+  const [submitted, setSubmitted] = useState(false);
   const refs = useRef({});
 
   // TODO: Tải công thức hiện có khi chỉnh sửa ở bước kết nối API.
@@ -74,20 +82,29 @@ export default function RecipeForm({
   const handleEquipmentChange = (nextRows) => {
     const changedIds = new Set(
       values.equipment
-        .filter((row) => !nextRows.some((next) => next.id === row.id && next.value === row.value))
+        .filter(
+          (row) =>
+            !nextRows.some(
+              (next) => next.id === row.id && next.value === row.value,
+            ),
+        )
         .map((row) => row.id),
     );
     setValues((previous) => ({ ...previous, equipment: nextRows }));
     setErrors((previous) => ({
       ...previous,
       equipment: Object.fromEntries(
-        Object.entries(previous.equipment ?? {}).filter(([id]) => !changedIds.has(id)),
+        Object.entries(previous.equipment ?? {}).filter(
+          ([id]) => !changedIds.has(id),
+        ),
       ),
     }));
     setTouched((previous) => ({
       ...previous,
       equipment: Object.fromEntries(
-        Object.entries(previous.equipment ?? {}).filter(([id]) => nextRows.some((row) => row.id === id)),
+        Object.entries(previous.equipment ?? {}).filter(([id]) =>
+          nextRows.some((row) => row.id === id),
+        ),
       ),
     }));
   };
@@ -106,10 +123,13 @@ export default function RecipeForm({
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const nextErrors = validateRecipeInfo(values);
+    const nextErrors = validateRecipe(values);
+    setSubmitted(true);
     setTouched({
       ...Object.fromEntries(fields.map(({ name }) => [name, true])),
-      equipment: Object.fromEntries(values.equipment.map(({ id }) => [id, true])),
+      equipment: Object.fromEntries(
+        values.equipment.map(({ id }) => [id, true]),
+      ),
     });
     setErrors(nextErrors);
     const firstInvalid = fields.find(({ name }) => nextErrors[name]);
@@ -118,8 +138,31 @@ export default function RecipeForm({
       return;
     }
     if (nextErrors.equipment) {
-      const firstRow = values.equipment.find((row) => nextErrors.equipment[row.id]);
+      const firstRow = values.equipment.find(
+        (row) => nextErrors.equipment[row.id],
+      );
       document.getElementById(`equipment-${firstRow.id}`)?.focus();
+      return;
+    }
+    if (nextErrors.ingredients) {
+      document
+        .getElementById(
+          values.ingredients[0]
+            ? `ingredient-name-${values.ingredients[0].id}`
+            : "ingredient-add",
+        )
+        ?.focus();
+      return;
+    }
+    if (nextErrors.steps) {
+      const invalidStep = values.steps.find(
+        (step) => nextErrors.steps[step.id],
+      );
+      document
+        .getElementById(
+          invalidStep ? `step-duration-${invalidStep.id}` : "step-add",
+        )
+        ?.focus();
       return;
     }
     onSubmit(buildRecipePayload(values));
@@ -163,7 +206,9 @@ export default function RecipeForm({
             error={error}
             onChange={handleChange}
             onBlur={handleBlur}
-            inputRef={(element) => { refs.current[name] = element; }}
+            inputRef={(element) => {
+              refs.current[name] = element;
+            }}
           />
         ) : type === "select" ? (
           <select {...props}>
@@ -196,43 +241,113 @@ export default function RecipeForm({
     <main className="recipe-form">
       <header className="recipe-form__header">
         <nav className="recipe-form__breadcrumb" aria-label="Breadcrumb">
-          <Link to="/">Trang chủ</Link> / <span aria-current="page">{id ? "Sửa món ăn" : "Thêm món ăn"}</span>
+          <Link to="/">Trang chủ</Link> /{" "}
+          <span aria-current="page">{id ? "Sửa món ăn" : "Thêm món ăn"}</span>
         </nav>
-        <h1 className="recipe-form__title">{id ? "Sửa món ăn" : "Thêm món ăn"}</h1>
-        <p className="recipe-form__subtitle">Chia sẻ công thức của bạn với mọi người.</p>
+        <h1 className="recipe-form__title">
+          {id ? "Sửa món ăn" : "Thêm món ăn"}
+        </h1>
+        <p className="recipe-form__subtitle">
+          Chia sẻ công thức của bạn với mọi người.
+        </p>
       </header>
       <form className="recipe-form__form" onSubmit={handleSubmit} noValidate>
         <div className="recipe-form__basic-layout">
           <div className="recipe-form__fields">{fields.map(renderField)}</div>
         </div>
         <IngredientInput
+          error={submitted ? validateRecipe(values).ingredients : undefined}
           rows={values.ingredients}
           onAdd={() => {
-            const row = { id: crypto.randomUUID(), name: "", quantity: "", unit: "" };
-            setValues((previous) => ({ ...previous, ingredients: [...previous.ingredients, row] }));
+            const row = {
+              id: crypto.randomUUID(),
+              name: "",
+              quantity: "",
+              unit: "",
+            };
+            setValues((previous) => ({
+              ...previous,
+              ingredients: [...previous.ingredients, row],
+            }));
           }}
-          onRemove={(rowId) => setValues((previous) => ({
-            ...previous,
-            ingredients: previous.ingredients.filter((row) => row.id !== rowId),
-          }))}
-          onChange={(rowId, field, value) => setValues((previous) => ({
-            ...previous,
-            ingredients: previous.ingredients.map((row) =>
-              row.id === rowId ? { ...row, [field]: value } : row,
-            ),
-          }))}
+          onRemove={(rowId) =>
+            setValues((previous) => ({
+              ...previous,
+              ingredients: previous.ingredients.filter(
+                (row) => row.id !== rowId,
+              ),
+            }))
+          }
+          onChange={(rowId, field, value) =>
+            setValues((previous) => ({
+              ...previous,
+              ingredients: previous.ingredients.map((row) =>
+                row.id === rowId ? { ...row, [field]: value } : row,
+              ),
+            }))
+          }
         />
         <section>
           <EquipmentInput
             rows={values.equipment}
             errors={Object.fromEntries(
-              Object.entries(errors.equipment ?? {}).filter(([id]) => touched.equipment?.[id]),
+              Object.entries(errors.equipment ?? {}).filter(
+                ([id]) => touched.equipment?.[id],
+              ),
             )}
             onChange={handleEquipmentChange}
             onBlur={handleEquipmentBlur}
             disabled={isSubmitting}
           />
         </section>
+        <StepForm
+          errors={submitted ? validateRecipe(values).steps : undefined}
+          rows={values.steps}
+          onChange={(id, field, value) =>
+            setValues((previous) => ({
+              ...previous,
+              steps: previous.steps.map((step) =>
+                step.id === id ? { ...step, [field]: value } : step,
+              ),
+            }))
+          }
+          onAdd={() => {
+            const step = {
+              id: crypto.randomUUID(),
+              title: "",
+              duration: "",
+              instruction: "",
+            };
+            setValues((previous) => ({
+              ...previous,
+              steps: [...previous.steps, step],
+            }));
+          }}
+          onRemove={(id) =>
+            setValues((previous) => ({
+              ...previous,
+              steps: previous.steps.filter((step) => step.id !== id),
+            }))
+          }
+          onMove={(id, direction) =>
+            setValues((previous) => {
+              const index = previous.steps.findIndex((step) => step.id === id);
+              const target = index + direction;
+              if (index < 0 || target < 0 || target >= previous.steps.length)
+                return previous;
+              return {
+                ...previous,
+                steps: previous.steps.map((step, position) =>
+                  position === index
+                    ? previous.steps[target]
+                    : position === target
+                      ? previous.steps[index]
+                      : step,
+                ),
+              };
+            })
+          }
+        />
         <div className="recipe-form__actions">
           <button
             className="recipe-form__cancel"
@@ -246,11 +361,7 @@ export default function RecipeForm({
             type="submit"
             disabled={isSubmitting}
           >
-            {isSubmitting
-              ? "Đang lưu..."
-              : id
-                ? "Lưu thay đổi"
-                : "Đăng món"}
+            {isSubmitting ? "Đang lưu..." : id ? "Lưu thay đổi" : "Đăng món"}
           </button>
         </div>
       </form>

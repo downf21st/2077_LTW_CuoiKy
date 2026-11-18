@@ -1,26 +1,63 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Footer from "../components/Footer/Footer";
-import { MOCK_RECIPES } from "../data/mockRecipes";
+import { getRecipes, getRecipeById } from "../api";
 import timerIcon from "../assets/cooking-mode/timer.svg";
 import closeIcon from "../assets/cooking-mode/close.svg";
 import "./CookingMode.css";
+
+const RECIPES_PER_PAGE = 8;
 
 export default function CookingMode() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const [visibleCount, setVisibleCount] = useState(RECIPES_PER_PAGE);
   const [selectedId, setSelectedId] = useState("");
   const [progress, setProgress] = useState({ recipeId: null, index: 0 });
-  const recipe = MOCK_RECIPES.find((item) => item.id === id);
+  const [recipes, setRecipes] = useState([]);
+  const [recipe, setRecipe] = useState(null);
+  const [loadState, setLoadState] = useState("loading");
+  const [retry, setRetry] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    async function load() {
+      setLoadState("loading");
+      setRecipe(null);
+      try {
+        if (id) {
+          const data = await getRecipeById(id);
+          if (!active) return;
+          setRecipe({ ...data, steps: Array.isArray(data.steps) ? data.steps.map((step) => typeof step === "string" ? { title: "Hướng dẫn", instruction: step } : step) : [], ingredients: Array.isArray(data.ingredients) ? data.ingredients.map((item) => typeof item === "string" ? { name: item } : item).filter(Boolean) : [], equipment: Array.isArray(data.equipment) ? data.equipment : [] });
+        } else {
+          const all = [];
+          let page = 1;
+          let batch;
+          do {
+            batch = await getRecipes({ page, limit: 100 });
+            if (!active) return;
+            all.push(...batch);
+            page += 1;
+          } while (batch.length === 100);
+          setRecipes(all);
+        }
+        if (active) setLoadState("ready");
+      } catch (error) {
+        if (active) setLoadState(id && error.message === "Không tìm thấy công thức." ? "not-found" : "error");
+      }
+    }
+    load();
+    return () => { active = false; };
+  }, [id, retry]);
   const stepIndex = progress.recipeId === id ? progress.index : 0;
   const isComplete =
     recipe && recipe.steps.length > 0 && stepIndex === recipe.steps.length;
   const currentStep = recipe?.steps[stepIndex];
   const nextStep = recipe?.steps[stepIndex + 1];
-  const selectedRecipe = MOCK_RECIPES.find((item) => item.id === selectedId);
-  const filteredRecipes = MOCK_RECIPES.filter((item) =>
-    item.title
+  const selectedRecipe = recipes.find((item) => item.id === selectedId);
+  const filteredRecipes = recipes.filter((item) =>
+    (item.title || "")
       .toLocaleLowerCase("vi")
       .includes(search.trim().toLocaleLowerCase("vi")),
   );
@@ -45,7 +82,10 @@ export default function CookingMode() {
         </div>
       </header>
       <main className="cooking-mode__workspace" key={id || "empty"}>
-        {!id && (
+        {loadState === "loading" && <p role="status">Đang tải công thức...</p>}
+        {loadState === "error" && <div role="alert"><p>Không thể tải công thức. Vui lòng thử lại.</p><button type="button" onClick={() => setRetry((value) => value + 1)}>Thử lại</button></div>}
+        {loadState === "not-found" && <div className="cooking-step__not-found"><h1>Không tìm thấy món ăn</h1><Link to="/cooking-mode-emty">Chọn món để nấu</Link></div>}
+        {!id && loadState === "ready" && (
           <>
             <h1 className="cooking-mode__title">Khu vực nấu ăn</h1>
             <section
@@ -69,7 +109,11 @@ export default function CookingMode() {
                   type="search"
                   placeholder="Tìm món ăn..."
                   value={search}
-                  onChange={(event) => setSearch(event.target.value)}
+                  onChange={(event) => {
+                    setSearch(event.target.value);
+                    setVisibleCount(RECIPES_PER_PAGE);
+                    setSelectedId("");
+                  }}
                 />
               </label>
               {filteredRecipes.length > 0 ? (
@@ -85,7 +129,7 @@ export default function CookingMode() {
                     role="radiogroup"
                     aria-label="Chọn món để nấu"
                   >
-                    {filteredRecipes.map((item) => (
+                    {filteredRecipes.slice(0, visibleCount).map((item) => (
                       <label
                         className={`cooking-picker__card${selectedId === item.id ? " cooking-picker__card--selected" : ""}`}
                         key={item.id}
@@ -132,6 +176,11 @@ export default function CookingMode() {
                       </label>
                     ))}
                   </div>
+                  {visibleCount < filteredRecipes.length && (
+                    <button className="cooking-picker__more" type="button" onClick={() => setVisibleCount((count) => count + RECIPES_PER_PAGE)}>
+                      Hiển thị thêm
+                    </button>
+                  )}
                 </>
               ) : (
                 <div className="cooking-picker__empty" role="status">
@@ -159,7 +208,7 @@ export default function CookingMode() {
             </section>
           </>
         )}
-        {id &&
+        {id && loadState === "ready" && recipe?.id === id &&
           (recipe ? (
             isComplete ? (
               <section
@@ -206,6 +255,7 @@ export default function CookingMode() {
                         setProgress({ recipeId: null, index: 0 });
                         setSelectedId("");
                         setSearch("");
+                        setVisibleCount(RECIPES_PER_PAGE);
                       }}
                     >
                       Chọn món tiếp theo
