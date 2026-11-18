@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import FormField from "../components/FormField/FormField";
 import EquipmentInput from "../components/EquipmentInput/EquipmentInput";
 import IngredientInput from "../components/IngredientInput/IngredientInput";
+import StepForm from "../components/StepForm/StepForm";
 import DifficultyTags from "../components/DifficultyTags/DifficultyTags";
 import {
   CATEGORY_OPTIONS,
@@ -33,7 +34,12 @@ const fields = [
     placeholder: "Chọn loại món",
     options: CATEGORY_OPTIONS,
   },
-  { name: "cookingTime", label: "Thời gian nấu", type: "number", placeholder: "Nhập thời gian (phút)" },
+  {
+    name: "cookingTime",
+    label: "Thời gian nấu",
+    type: "number",
+    placeholder: "Nhập thời gian (phút)",
+  },
   {
     name: "servings",
     label: "Khẩu phần",
@@ -74,20 +80,29 @@ export default function RecipeForm({
   const handleEquipmentChange = (nextRows) => {
     const changedIds = new Set(
       values.equipment
-        .filter((row) => !nextRows.some((next) => next.id === row.id && next.value === row.value))
+        .filter(
+          (row) =>
+            !nextRows.some(
+              (next) => next.id === row.id && next.value === row.value,
+            ),
+        )
         .map((row) => row.id),
     );
     setValues((previous) => ({ ...previous, equipment: nextRows }));
     setErrors((previous) => ({
       ...previous,
       equipment: Object.fromEntries(
-        Object.entries(previous.equipment ?? {}).filter(([id]) => !changedIds.has(id)),
+        Object.entries(previous.equipment ?? {}).filter(
+          ([id]) => !changedIds.has(id),
+        ),
       ),
     }));
     setTouched((previous) => ({
       ...previous,
       equipment: Object.fromEntries(
-        Object.entries(previous.equipment ?? {}).filter(([id]) => nextRows.some((row) => row.id === id)),
+        Object.entries(previous.equipment ?? {}).filter(([id]) =>
+          nextRows.some((row) => row.id === id),
+        ),
       ),
     }));
   };
@@ -109,7 +124,9 @@ export default function RecipeForm({
     const nextErrors = validateRecipeInfo(values);
     setTouched({
       ...Object.fromEntries(fields.map(({ name }) => [name, true])),
-      equipment: Object.fromEntries(values.equipment.map(({ id }) => [id, true])),
+      equipment: Object.fromEntries(
+        values.equipment.map(({ id }) => [id, true]),
+      ),
     });
     setErrors(nextErrors);
     const firstInvalid = fields.find(({ name }) => nextErrors[name]);
@@ -118,7 +135,9 @@ export default function RecipeForm({
       return;
     }
     if (nextErrors.equipment) {
-      const firstRow = values.equipment.find((row) => nextErrors.equipment[row.id]);
+      const firstRow = values.equipment.find(
+        (row) => nextErrors.equipment[row.id],
+      );
       document.getElementById(`equipment-${firstRow.id}`)?.focus();
       return;
     }
@@ -163,7 +182,9 @@ export default function RecipeForm({
             error={error}
             onChange={handleChange}
             onBlur={handleBlur}
-            inputRef={(element) => { refs.current[name] = element; }}
+            inputRef={(element) => {
+              refs.current[name] = element;
+            }}
           />
         ) : type === "select" ? (
           <select {...props}>
@@ -196,10 +217,15 @@ export default function RecipeForm({
     <main className="recipe-form">
       <header className="recipe-form__header">
         <nav className="recipe-form__breadcrumb" aria-label="Breadcrumb">
-          <Link to="/">Trang chủ</Link> / <span aria-current="page">{id ? "Sửa món ăn" : "Thêm món ăn"}</span>
+          <Link to="/">Trang chủ</Link> /{" "}
+          <span aria-current="page">{id ? "Sửa món ăn" : "Thêm món ăn"}</span>
         </nav>
-        <h1 className="recipe-form__title">{id ? "Sửa món ăn" : "Thêm món ăn"}</h1>
-        <p className="recipe-form__subtitle">Chia sẻ công thức của bạn với mọi người.</p>
+        <h1 className="recipe-form__title">
+          {id ? "Sửa món ăn" : "Thêm món ăn"}
+        </h1>
+        <p className="recipe-form__subtitle">
+          Chia sẻ công thức của bạn với mọi người.
+        </p>
       </header>
       <form className="recipe-form__form" onSubmit={handleSubmit} noValidate>
         <div className="recipe-form__basic-layout">
@@ -208,31 +234,48 @@ export default function RecipeForm({
         <IngredientInput
           rows={values.ingredients}
           onAdd={() => {
-            const row = { id: crypto.randomUUID(), name: "", quantity: "", unit: "" };
-            setValues((previous) => ({ ...previous, ingredients: [...previous.ingredients, row] }));
+            const row = {
+              id: crypto.randomUUID(),
+              name: "",
+              quantity: "",
+              unit: "",
+            };
+            setValues((previous) => ({
+              ...previous,
+              ingredients: [...previous.ingredients, row],
+            }));
           }}
-          onRemove={(rowId) => setValues((previous) => ({
-            ...previous,
-            ingredients: previous.ingredients.filter((row) => row.id !== rowId),
-          }))}
-          onChange={(rowId, field, value) => setValues((previous) => ({
-            ...previous,
-            ingredients: previous.ingredients.map((row) =>
-              row.id === rowId ? { ...row, [field]: value } : row,
-            ),
-          }))}
+          onRemove={(rowId) =>
+            setValues((previous) => ({
+              ...previous,
+              ingredients: previous.ingredients.filter(
+                (row) => row.id !== rowId,
+              ),
+            }))
+          }
+          onChange={(rowId, field, value) =>
+            setValues((previous) => ({
+              ...previous,
+              ingredients: previous.ingredients.map((row) =>
+                row.id === rowId ? { ...row, [field]: value } : row,
+              ),
+            }))
+          }
         />
         <section>
           <EquipmentInput
             rows={values.equipment}
             errors={Object.fromEntries(
-              Object.entries(errors.equipment ?? {}).filter(([id]) => touched.equipment?.[id]),
+              Object.entries(errors.equipment ?? {}).filter(
+                ([id]) => touched.equipment?.[id],
+              ),
             )}
             onChange={handleEquipmentChange}
             onBlur={handleEquipmentBlur}
             disabled={isSubmitting}
           />
         </section>
+        <StepForm />
         <div className="recipe-form__actions">
           <button
             className="recipe-form__cancel"
@@ -246,11 +289,7 @@ export default function RecipeForm({
             type="submit"
             disabled={isSubmitting}
           >
-            {isSubmitting
-              ? "Đang lưu..."
-              : id
-                ? "Lưu thay đổi"
-                : "Đăng món"}
+            {isSubmitting ? "Đang lưu..." : id ? "Lưu thay đổi" : "Đăng món"}
           </button>
         </div>
       </form>
