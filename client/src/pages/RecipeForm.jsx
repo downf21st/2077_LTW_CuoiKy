@@ -10,6 +10,7 @@ import {
   FIELD_LIMITS,
   createInitialValues,
   validateRecipeInfo,
+  validateRecipe,
   buildRecipePayload,
 } from "../utils/recipeForm";
 import "./RecipeForm.css";
@@ -59,6 +60,7 @@ export default function RecipeForm({
   const [values, setValues] = useState(createInitialValues);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+  const [submitted, setSubmitted] = useState(false);
   const refs = useRef({});
 
   // TODO: Tải công thức hiện có khi chỉnh sửa ở bước kết nối API.
@@ -121,7 +123,8 @@ export default function RecipeForm({
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const nextErrors = validateRecipeInfo(values);
+    const nextErrors = validateRecipe(values);
+    setSubmitted(true);
     setTouched({
       ...Object.fromEntries(fields.map(({ name }) => [name, true])),
       equipment: Object.fromEntries(
@@ -139,6 +142,27 @@ export default function RecipeForm({
         (row) => nextErrors.equipment[row.id],
       );
       document.getElementById(`equipment-${firstRow.id}`)?.focus();
+      return;
+    }
+    if (nextErrors.ingredients) {
+      document
+        .getElementById(
+          values.ingredients[0]
+            ? `ingredient-name-${values.ingredients[0].id}`
+            : "ingredient-add",
+        )
+        ?.focus();
+      return;
+    }
+    if (nextErrors.steps) {
+      const invalidStep = values.steps.find(
+        (step) => nextErrors.steps[step.id],
+      );
+      document
+        .getElementById(
+          invalidStep ? `step-duration-${invalidStep.id}` : "step-add",
+        )
+        ?.focus();
       return;
     }
     onSubmit(buildRecipePayload(values));
@@ -232,6 +256,7 @@ export default function RecipeForm({
           <div className="recipe-form__fields">{fields.map(renderField)}</div>
         </div>
         <IngredientInput
+          error={submitted ? validateRecipe(values).ingredients : undefined}
           rows={values.ingredients}
           onAdd={() => {
             const row = {
@@ -276,6 +301,7 @@ export default function RecipeForm({
           />
         </section>
         <StepForm
+          errors={submitted ? validateRecipe(values).steps : undefined}
           rows={values.steps}
           onChange={(id, field, value) =>
             setValues((previous) => ({

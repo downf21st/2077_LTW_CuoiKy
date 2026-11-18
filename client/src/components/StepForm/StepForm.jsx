@@ -2,7 +2,7 @@ import FormField from "../FormField/FormField";
 import trashIcon from "../../assets/trash.svg";
 import "./StepForm.css";
 
-export default function StepForm({ rows, onChange, onAdd, onRemove, onMove }) {
+export default function StepForm({ rows, onChange, onAdd, onRemove, onMove, errors = {} }) {
   return (
     <section className="step-form" aria-labelledby="step-form-heading">
       <h2 className="step-form__heading" id="step-form-heading">
@@ -25,10 +25,12 @@ export default function StepForm({ rows, onChange, onAdd, onRemove, onMove }) {
                 }
               />
             </FormField>
-            <FormField id={`step-duration-${row.id}`} label="Thời gian (phút)">
+            <FormField id={`step-duration-${row.id}`} label="Thời gian (phút)" error={errors[row.id]?.duration}>
               <input
-                className="form-field__input"
+                className={`form-field__input${errors[row.id]?.duration ? " form-field__input--error" : ""}`}
                 id={`step-duration-${row.id}`}
+                aria-invalid={Boolean(errors[row.id]?.duration)}
+                aria-describedby={errors[row.id]?.duration ? `step-duration-${row.id}-error` : undefined}
                 type="number"
                 min="0"
                 placeholder="Ví dụ: 5"
@@ -80,7 +82,8 @@ export default function StepForm({ rows, onChange, onAdd, onRemove, onMove }) {
           </div>
         </div>
       ))}
-      <button className="step-form__add" type="button" onClick={onAdd}>
+      {errors._form && <p className="form-field__error" role="alert">{errors._form}</p>}
+      <button id="step-add" className="step-form__add" type="button" onClick={onAdd}>
         + Thêm bước
       </button>
       <p className="step-form__notice">

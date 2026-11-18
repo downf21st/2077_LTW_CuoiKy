@@ -4,7 +4,13 @@ import "./IngredientInput.css";
 
 const UNIT_OPTIONS = ["g", "ml", "củ", "muỗng canh", "muỗng cà phê"];
 
-export default function IngredientInput({ rows, onChange, onAdd, onRemove }) {
+export default function IngredientInput({
+  rows,
+  onChange,
+  onAdd,
+  onRemove,
+  error,
+}) {
   return (
     <section className="ingredient-input" aria-labelledby="ingredients-heading">
       <h2 className="ingredient-input__heading" id="ingredients-heading">
@@ -78,7 +84,17 @@ export default function IngredientInput({ rows, onChange, onAdd, onRemove }) {
           </button>
         </div>
       ))}
-      <button className="ingredient-input__add" type="button" onClick={onAdd}>
+      {error && (
+        <p className="form-field__error" role="alert">
+          {error}
+        </p>
+      )}
+      <button
+        id="ingredient-add"
+        className="ingredient-input__add"
+        type="button"
+        onClick={onAdd}
+      >
         + Thêm nguyên liệu
       </button>
       <p className="ingredient-input__notice">
