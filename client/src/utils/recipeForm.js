@@ -141,3 +141,40 @@ export function buildRecipePayload(values) {
     equipment: values.equipment.map((row) => row.value.trim()).filter(Boolean),
   };
 }
+
+export function buildFormData(values, imageFile) {
+  const formData = new FormData();
+  const { equipment, ...fields } = buildRecipePayload(values);
+  const numericValue = (value) => {
+    const text = String(value ?? "").trim();
+    const number = Number(text);
+    return text !== "" && Number.isFinite(number) ? number : text;
+  };
+
+  Object.entries(fields).forEach(([name, value]) => {
+    formData.append(name, String(value));
+  });
+  formData.append("equipment", JSON.stringify(equipment));
+  formData.append(
+    "ingredients",
+    JSON.stringify(
+      values.ingredients.map((item) => ({
+        name: item.name.trim(),
+        quantity: numericValue(item.quantity),
+        unit: item.unit.trim(),
+      })),
+    ),
+  );
+  formData.append(
+    "steps",
+    JSON.stringify(
+      values.steps.map((step) => ({
+        title: step.title.trim(),
+        duration: numericValue(step.duration),
+        instruction: step.instruction.trim(),
+      })),
+    ),
+  );
+  if (imageFile) formData.append("image", imageFile);
+  return formData;
+}
