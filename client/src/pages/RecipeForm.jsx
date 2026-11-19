@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import FormField from "../components/FormField/FormField";
 import EquipmentInput from "../components/EquipmentInput/EquipmentInput";
@@ -15,6 +15,9 @@ import {
   buildRecipePayload,
 } from "../utils/recipeForm";
 import "./RecipeForm.css";
+
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png"];
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 
 const fields = [
   {
@@ -62,8 +65,42 @@ export default function RecipeForm({
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [imageError, setImageError] = useState("");
   const refs = useRef({});
   const imageInputRef = useRef(null);
+  const imageButtonRef = useRef(null);
+  const imagePreviewRef = useRef(null);
+
+  useEffect(() => {
+    if (!imageFile) return;
+    const url = URL.createObjectURL(imageFile);
+    imagePreviewRef.current.src = url;
+    return () => URL.revokeObjectURL(url);
+  }, [imageFile]);
+
+  const handleImageChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    event.target.value = "";
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      setImageError("Vui lòng chọn ảnh JPG hoặc PNG.");
+      return;
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      setImageError("Ảnh không được vượt quá 2 MB.");
+      return;
+    }
+    setImageError("");
+    setImageFile(file);
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImageError("");
+    if (imageInputRef.current) imageInputRef.current.value = "";
+    imageButtonRef.current?.focus();
+  };
 
   // TODO: Tải công thức hiện có khi chỉnh sửa ở bước kết nối API.
   const handleChange = (event) => {
@@ -125,6 +162,10 @@ export default function RecipeForm({
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    if (imageError) {
+      imageButtonRef.current?.focus();
+      return;
+    }
     const nextErrors = validateRecipe(values);
     setSubmitted(true);
     setTouched({
@@ -255,11 +296,29 @@ export default function RecipeForm({
       </header>
       <form className="recipe-form__form" onSubmit={handleSubmit} noValidate>
         <div className="recipe-form__basic-layout">
-          <section className="recipe-form__image-picker" aria-labelledby="recipe-image-heading">
-            <img className="recipe-form__image-icon" src={imageIcon} alt="" />
-            <h2 className="recipe-form__image-heading" id="recipe-image-heading">Ảnh món ăn</h2>
+          <section
+            className="recipe-form__image-picker"
+            aria-labelledby="recipe-image-heading"
+          >
+            {imageFile ? (
+              <img
+                ref={imagePreviewRef}
+                className="recipe-form__image-preview"
+                alt="Ảnh xem trước của món ăn"
+              />
+            ) : (
+              <img className="recipe-form__image-icon" src={imageIcon} alt="" />
+            )}
+            <h2
+              className="recipe-form__image-heading"
+              id="recipe-image-heading"
+            >
+              Ảnh món ăn
+            </h2>
             <p className="recipe-form__image-text">Chọn ảnh món ăn của bạn.</p>
-            <p className="recipe-form__image-hint" id="recipe-image-hint">JPG hoặc PNG, tối đa 2 MB.</p>
+            <p className="recipe-form__image-hint" id="recipe-image-hint">
+              JPG hoặc PNG, tối đa 2 MB.
+            </p>
             <input
               ref={imageInputRef}
               className="recipe-form__image-input"
@@ -267,16 +326,46 @@ export default function RecipeForm({
               type="file"
               accept="image/jpeg,image/png"
               aria-label="Ảnh món ăn"
-              aria-describedby="recipe-image-hint"
+              aria-invalid={Boolean(imageError)}
+              aria-describedby={
+                imageError
+                  ? "recipe-image-hint recipe-image-error"
+                  : "recipe-image-hint"
+              }
+              onChange={handleImageChange}
               tabIndex={-1}
             />
             <button
+              ref={imageButtonRef}
               className="recipe-form__image-button"
               type="button"
+              aria-describedby={
+                imageError
+                  ? "recipe-image-hint recipe-image-error"
+                  : "recipe-image-hint"
+              }
               onClick={() => imageInputRef.current?.click()}
             >
               Chọn ảnh
             </button>
+            {imageError && (
+              <p
+                className="recipe-form__image-error"
+                id="recipe-image-error"
+                role="alert"
+              >
+                {imageError}
+              </p>
+            )}
+            {(imageFile || imageError) && (
+              <button
+                className="recipe-form__image-remove"
+                type="button"
+                onClick={handleRemoveImage}
+              >
+                Xóa ảnh
+              </button>
+            )}
           </section>
           <div className="recipe-form__fields">{fields.map(renderField)}</div>
         </div>
