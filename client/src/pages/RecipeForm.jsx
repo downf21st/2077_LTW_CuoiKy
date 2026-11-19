@@ -12,7 +12,7 @@ import {
   createInitialValues,
   validateRecipeInfo,
   validateRecipe,
-  buildRecipePayload,
+  buildFormData,
 } from "../utils/recipeForm";
 import "./RecipeForm.css";
 
@@ -208,7 +208,7 @@ export default function RecipeForm({
         ?.focus();
       return;
     }
-    onSubmit(buildRecipePayload(values));
+    onSubmit(buildFormData(values, imageFile));
   };
 
   const renderField = ({ name, label, type, placeholder, options, hint }) => {
