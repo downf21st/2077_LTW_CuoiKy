@@ -1,55 +1,67 @@
 @media (min-width: 901px) {
   .register-page {
-    grid-template-columns: minmax(0, 1fr) min(50%, 80vh);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 }
+
 .register-page .auth-page__panel {
   grid-column: 1;
   grid-row: 1;
   padding: var(--space-6);
 }
+
 .register-page .auth-card {
   max-width: 400px;
 }
+
 .register-page .auth-card__title {
   font-size: 24px;
 }
+
 .register-page .auth-form__input,
 .register-page .auth-form__submit,
 .register-page .auth-card__oauth {
   height: 48px;
 }
+
 .register-page .auth-form__input {
   border-color: var(--color-border-default);
   padding-left: var(--space-2);
 }
+
 .register-page__hint {
   margin: 0;
   font-size: var(--font-size-2xs);
   color: var(--color-text-muted);
 }
+
 .register-page__terms {
   align-items: flex-start;
   line-height: 1.5;
 }
+
 .register-page__terms > input {
   flex: 0 0 18px;
   width: 18px;
   height: 18px;
 }
+
 .register-page__terms span span {
   color: var(--color-accent);
 }
+
 .register-page__hero {
   grid-column: 2;
   grid-row: 1;
   min-width: 0;
+  height: 100%;
   overflow: hidden;
   background: var(--color-bg-inverse);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
 }
+
 .register-page__art {
   position: relative;
   width: 100%;
@@ -58,15 +70,18 @@
   overflow: hidden;
   container-type: inline-size;
 }
+
 .register-page__dish {
   position: absolute;
   overflow: hidden;
 }
+
 .register-page__dish img {
   position: absolute;
   height: 100%;
   max-width: none;
 }
+
 .register-page__dish--bun {
   left: 65.31%;
   top: -13.03%;
@@ -74,9 +89,11 @@
   height: 44.35%;
   transform: rotate(27.96deg);
 }
+
 .register-page__dish--bun img {
   width: 114.29%;
 }
+
 .register-page__dish--tofu {
   left: -15.8%;
   top: -6.34%;
@@ -84,29 +101,35 @@
   height: 35.83%;
   transform: rotate(16.29deg);
 }
+
 .register-page__dish--tofu img {
   width: 107.91%;
 }
+
 .register-page__dish--pork {
   left: 16.1%;
   top: 17.35%;
   width: 57.9%;
   height: 51.2%;
 }
+
 .register-page__dish--pork img {
   left: 4.42%;
   top: -0.6%;
   width: 110.56%;
 }
+
 .register-page__dish--egg {
   left: 54.6%;
   top: 55.35%;
   width: 42.6%;
   height: 47.2%;
 }
+
 .register-page__dish--egg img {
   width: 138.25%;
 }
+
 .register-page__dish--bowl {
   left: 72.8%;
   top: 29.7%;
@@ -114,22 +137,26 @@
   height: 35.8%;
   border-radius: 50%;
 }
+
 .register-page__dish--bowl img {
   left: 7.58%;
   top: 5.17%;
   width: 121.21%;
 }
+
 .register-page__dish--greens {
   left: -12.4%;
   top: 32.1%;
   width: 58.1%;
   height: 66.6%;
 }
+
 .register-page__dish--greens img {
   top: 17.92%;
   height: 82.05%;
   width: 117.66%;
 }
+
 .register-page__slogan {
   position: absolute;
   left: 6.67%;
@@ -142,15 +169,16 @@
   font-size: 3.333cqw;
   line-height: var(--line-height-heading);
 }
+
 @media (max-width: 900px) {
-  @media (min-width: 901px) {
   .register-page {
-    grid-template-columns: minmax(0, 1fr) min(50%, 80vh);
+    grid-template-columns: 1fr;
   }
-}
-.register-page .auth-page__panel {
+
+  .register-page .auth-page__panel {
     grid-column: 1;
   }
+
   .register-page__hero {
     display: none;
   }

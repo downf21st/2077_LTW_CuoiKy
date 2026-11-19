@@ -1,19 +1,24 @@
 import { useState } from 'react'
 import { AuthContext } from './AuthContext'
-import { STORAGE_KEY, readStoredUser } from './authStorage'
+import {
+  readStoredUser,
+  writeStoredUser,
+  clearStoredUser,
+} from './authStorage'
 
 export default function AuthProvider({ children }) {
   const [user, setUser] = useState(readStoredUser)
 
-  const login = ({ id, name, email, role }) => {
+  const login = ({ id, name, email, role }, options = {}) => {
     const nextUser = { id, name, email, role }
+    const remember = options.remember ?? true
     setUser(nextUser)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextUser))
+    writeStoredUser(nextUser, remember)
   }
 
   const logout = () => {
     setUser(null)
-    localStorage.removeItem(STORAGE_KEY)
+    clearStoredUser()
   }
 
   const value = {

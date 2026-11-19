@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { NavLink, useLocation, useMatch, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 
@@ -154,6 +154,25 @@ function Sidebar({ isOpen, onToggle, onClose, toggleRef }) {
   const cookingPath = recipePath
     ? `${recipePath}/cooking-mode`
     : "/cooking-mode-emty";
+
+  useEffect(() => {
+    if (!isOpen || typeof onClose !== "function") return;
+
+    const handleOutsidePointerDown = (event) => {
+      const target = event.target;
+      if (panelRef.current && panelRef.current.contains(target)) return;
+      if (toggleRef?.current && toggleRef.current.contains(target)) return;
+      if (target instanceof Element && target.closest(".sidebar__toggle")) return;
+      onClose();
+    };
+
+    document.addEventListener("mousedown", handleOutsidePointerDown);
+    document.addEventListener("touchstart", handleOutsidePointerDown);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsidePointerDown);
+      document.removeEventListener("touchstart", handleOutsidePointerDown);
+    };
+  }, [isOpen, onClose, toggleRef]);
 
   useLayoutEffect(() => {
     const panel = panelRef.current;
