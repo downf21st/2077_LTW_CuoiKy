@@ -5,6 +5,7 @@ import EquipmentInput from "../components/EquipmentInput/EquipmentInput";
 import IngredientInput from "../components/IngredientInput/IngredientInput";
 import StepForm from "../components/StepForm/StepForm";
 import DifficultyTags from "../components/DifficultyTags/DifficultyTags";
+import imageIcon from "../assets/image-icon.svg";
 import {
   CATEGORY_OPTIONS,
   FIELD_LIMITS,
@@ -62,6 +63,7 @@ export default function RecipeForm({
   const [touched, setTouched] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const refs = useRef({});
+  const imageInputRef = useRef(null);
 
   // TODO: Tải công thức hiện có khi chỉnh sửa ở bước kết nối API.
   const handleChange = (event) => {
@@ -253,6 +255,29 @@ export default function RecipeForm({
       </header>
       <form className="recipe-form__form" onSubmit={handleSubmit} noValidate>
         <div className="recipe-form__basic-layout">
+          <section className="recipe-form__image-picker" aria-labelledby="recipe-image-heading">
+            <img className="recipe-form__image-icon" src={imageIcon} alt="" />
+            <h2 className="recipe-form__image-heading" id="recipe-image-heading">Ảnh món ăn</h2>
+            <p className="recipe-form__image-text">Chọn ảnh món ăn của bạn.</p>
+            <p className="recipe-form__image-hint" id="recipe-image-hint">JPG hoặc PNG, tối đa 2 MB.</p>
+            <input
+              ref={imageInputRef}
+              className="recipe-form__image-input"
+              id="recipe-image"
+              type="file"
+              accept="image/jpeg,image/png"
+              aria-label="Ảnh món ăn"
+              aria-describedby="recipe-image-hint"
+              tabIndex={-1}
+            />
+            <button
+              className="recipe-form__image-button"
+              type="button"
+              onClick={() => imageInputRef.current?.click()}
+            >
+              Chọn ảnh
+            </button>
+          </section>
           <div className="recipe-form__fields">{fields.map(renderField)}</div>
         </div>
         <IngredientInput
