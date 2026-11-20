@@ -61,3 +61,12 @@ export async function updateRecipe(id, formData) {
   })
   return json.data
 }
+export async function deleteRecipe(id) {
+  await request(`/recipes/${encodeURIComponent(id)}`, { method: 'DELETE' })
+}
+
+export async function getMyRecipes(userId) {
+  if (!userId) return []
+  const json = await request(recipesPath({ authorId: userId }))
+  return json.data
+}
