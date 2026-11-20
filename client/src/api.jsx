@@ -70,3 +70,24 @@ export async function getMyRecipes(userId) {
   const json = await request(recipesPath({ authorId: userId }))
   return json.data
 }
+export async function getFavorites(userId) {
+  if (!userId) return []
+  const json = await request(`/users/${encodeURIComponent(userId)}/favorites`)
+  return json.data
+}
+
+export async function addFavorite(userId, recipeId) {
+  const json = await request(`/users/${encodeURIComponent(userId)}/favorites`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ recipeId }),
+  })
+  return json.data
+}
+
+export async function removeFavorite(userId, recipeId) {
+  await request(
+    `/users/${encodeURIComponent(userId)}/favorites/${encodeURIComponent(recipeId)}`,
+    { method: 'DELETE' },
+  )
+}
