@@ -83,7 +83,10 @@ export default function RecipeForm({
     const file = event.target.files?.[0];
     if (!file) return;
     event.target.value = "";
-    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+    const validExtension =
+      (file.type === "image/jpeg" && /\.jpg$/i.test(file.name)) ||
+      (file.type === "image/png" && /\.png$/i.test(file.name));
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type) || !validExtension) {
       setImageError("Vui lòng chọn ảnh JPG hoặc PNG.");
       return;
     }
@@ -166,6 +169,11 @@ export default function RecipeForm({
       imageButtonRef.current?.focus();
       return;
     }
+    if (!id && !imageFile) {
+      setImageError("Vui lòng chọn ảnh JPG hoặc PNG.");
+      imageButtonRef.current?.focus();
+      return;
+    }
     const nextErrors = validateRecipe(values);
     setSubmitted(true);
     setTouched({
@@ -201,9 +209,11 @@ export default function RecipeForm({
       const invalidStep = values.steps.find(
         (step) => nextErrors.steps[step.id],
       );
+      const field =
+        invalidStep && Object.keys(nextErrors.steps[invalidStep.id])[0];
       document
         .getElementById(
-          invalidStep ? `step-duration-${invalidStep.id}` : "step-add",
+          invalidStep ? `step-${field}-${invalidStep.id}` : "step-add",
         )
         ?.focus();
       return;
@@ -317,7 +327,7 @@ export default function RecipeForm({
             </h2>
             <p className="recipe-form__image-text">Chọn ảnh món ăn của bạn.</p>
             <p className="recipe-form__image-hint" id="recipe-image-hint">
-              JPG hoặc PNG, tối đa 2 MB.
+              Ảnh bắt buộc khi tạo món. Chọn file .jpg hoặc .png, tối đa 2 MB.
             </p>
             <input
               ref={imageInputRef}

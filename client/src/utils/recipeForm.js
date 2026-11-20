@@ -104,27 +104,27 @@ export function validateRecipe(values = {}) {
     String(value ?? "").trim() !== "" &&
     Number.isFinite(Number(value)) &&
     Number(value) > 0;
-  if (
-    !(values.ingredients ?? []).some(
-      (item) =>
-        item.name?.trim() && positive(item.quantity) && item.unit?.trim(),
-    )
-  ) {
+  const units = ["g", "ml", "muỗng canh", "muỗng cà phê"];
+  const ingredients = values.ingredients ?? [];
+  if (!ingredients.length || !ingredients.every((item) =>
+    item.name?.trim() && positive(item.quantity) && units.includes(item.unit?.trim()),
+  )) {
     errors.ingredients =
-      "Vui lòng nhập ít nhất một nguyên liệu đầy đủ, với số lượng lớn hơn 0.";
+      "Mỗi nguyên liệu cần có tên, số lượng lớn hơn 0 và đơn vị hợp lệ.";
   }
   const steps = values.steps ?? [];
   if (!steps.length) {
     errors.steps = { _form: "Vui lòng thêm ít nhất một bước nấu." };
   } else {
-    const stepErrors = Object.fromEntries(
-      steps
-        .filter((step) => !positive(step.duration))
-        .map((step) => [
-          step.id,
-          { duration: "Thời gian phải là số phút lớn hơn 0." },
-        ]),
-    );
+    const stepErrors = Object.fromEntries(steps.flatMap((step) => {
+      const rowErrors = {};
+      if (!step.title?.trim()) rowErrors.title = "Vui lòng nhập tên bước.";
+      if (!step.instruction?.trim()) rowErrors.instruction = "Vui lòng nhập hướng dẫn.";
+      if (!positive(step.duration) || !Number.isInteger(Number(step.duration))) {
+        rowErrors.duration = "Thời gian phải là số phút nguyên dương.";
+      }
+      return Object.keys(rowErrors).length ? [[step.id, rowErrors]] : [];
+    }));
     if (Object.keys(stepErrors).length) errors.steps = stepErrors;
   }
   return errors;

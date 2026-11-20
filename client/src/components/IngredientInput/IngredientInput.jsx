@@ -2,7 +2,7 @@ import FormField from "../FormField/FormField";
 import trashIcon from "../../assets/trash.svg";
 import "./IngredientInput.css";
 
-const UNIT_OPTIONS = ["g", "ml", "củ", "muỗng canh", "muỗng cà phê"];
+const UNIT_OPTIONS = ["g", "ml", "muỗng canh", "muỗng cà phê"];
 
 export default function IngredientInput({
   rows,
