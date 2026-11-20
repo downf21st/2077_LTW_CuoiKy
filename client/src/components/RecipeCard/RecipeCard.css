@@ -1,4 +1,5 @@
 .recipe-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -144,4 +145,21 @@
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.recipe-card__overlay-action {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+}
+
+.recipe-card__author {
+  margin: auto 0 0;
+  padding-top: 10px;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: var(--font-weight-light);
+  line-height: 1.3;
 }

@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import dishEgg from "../assets/banner/0001.png";
+import dishPork from "../assets/banner/0002.png";
+import dishBun from "../assets/banner/0003.png";
+import dishBowl from "../assets/banner/0004.png";
+import dishGreens from "../assets/banner/0005.png";
+import dishTofu from "../assets/banner/0006.png";
 import "./Login.css";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -84,7 +90,7 @@ export default function Login() {
         };
       }
 
-      login(userData);
+      login(userData, { remember: formValues.rememberMe });
       navigate("/");
     } catch (error) {
       setServerError("Email hoặc mật khẩu không chính xác.");
@@ -96,7 +102,27 @@ export default function Login() {
   return (
     <main className="auth-page auth-page--login">
       <aside className="auth-page__banner auth-page__banner--login" aria-hidden="true">
-        <p className="auth-page__slogan">Mỗi ngày một món ăn</p>
+        <div className="login-banner__art">
+          <div className="login-banner__dish login-banner__dish--tofu">
+            <img src={dishTofu} alt="" />
+          </div>
+          <div className="login-banner__dish login-banner__dish--pork">
+            <img src={dishPork} alt="" />
+          </div>
+          <div className="login-banner__dish login-banner__dish--egg">
+            <img src={dishEgg} alt="" />
+          </div>
+          <div className="login-banner__dish login-banner__dish--greens">
+            <img src={dishGreens} alt="" />
+          </div>
+          <div className="login-banner__dish login-banner__dish--bowl">
+            <img src={dishBowl} alt="" />
+          </div>
+          <div className="login-banner__dish login-banner__dish--bun">
+            <img src={dishBun} alt="" />
+          </div>
+          <p className="login-banner__slogan">Mỗi ngày một món ăn</p>
+        </div>
       </aside>
 
       <section className="auth-page__panel" aria-labelledby="login-heading">
