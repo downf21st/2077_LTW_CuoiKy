@@ -6,7 +6,7 @@ import IngredientInput from "../components/IngredientInput/IngredientInput";
 import StepForm from "../components/StepForm/StepForm";
 import DifficultyTags from "../components/DifficultyTags/DifficultyTags";
 import imageIcon from "../assets/image-icon.svg";
-import { getRecipeById } from "../api";
+import { getRecipeById, updateRecipe } from "../api";
 import {
   CATEGORY_OPTIONS,
   FIELD_LIMITS,
@@ -124,6 +124,9 @@ function RecipeFormEditor({
   const [submitted, setSubmitted] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [imageError, setImageError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
+  const savingRef = useRef(false);
   const refs = useRef({});
   const imageInputRef = useRef(null);
   const imageButtonRef = useRef(null);
@@ -156,7 +159,6 @@ function RecipeFormEditor({
   };
 
   const handleRemoveImage = () => {
-    setExistingImage("");
     setImageFile(null);
     setImageError("");
     if (imageInputRef.current) imageInputRef.current.value = "";
@@ -220,9 +222,10 @@ function RecipeFormEditor({
     }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    if (id) return;
+    if (savingRef.current || isSubmitting) return;
+    setSaveMessage("");
     if (imageError) {
       imageButtonRef.current?.focus();
       return;
@@ -276,7 +279,30 @@ function RecipeFormEditor({
         ?.focus();
       return;
     }
-    onSubmit(buildFormData(values, imageFile));
+    const formData = buildFormData(values, imageFile);
+    if (!id) {
+      onSubmit(formData);
+      return;
+    }
+    savingRef.current = true;
+    setSaving(true);
+    try {
+      const updated = await updateRecipe(id, formData);
+      if (updated?.image) setExistingImage(updated.image);
+      setImageFile(null);
+      setSaveMessage(
+        updated?.status === "pending"
+          ? "Đã lưu thay đổi. Công thức đang chờ duyệt."
+          : "Đã lưu thay đổi.",
+      );
+    } catch (error) {
+      setSaveMessage(
+        error.message || "Không thể lưu thay đổi. Vui lòng thử lại.",
+      );
+    } finally {
+      savingRef.current = false;
+      setSaving(false);
+    }
   };
 
   const renderField = ({ name, label, type, placeholder, options, hint }) => {
@@ -442,7 +468,7 @@ function RecipeFormEditor({
                 {imageError}
               </p>
             )}
-            {(imageFile || imageError || existingImage) && (
+            {(imageFile || imageError) && (
               <button
                 className="recipe-form__image-remove"
                 type="button"
@@ -548,6 +574,11 @@ function RecipeFormEditor({
           }
         />
         <div className="recipe-form__actions">
+          {saveMessage && (
+            <p role="status" aria-live="polite">
+              {saveMessage}
+            </p>
+          )}
           <button
             className="recipe-form__cancel"
             type="button"
@@ -558,12 +589,12 @@ function RecipeFormEditor({
           <button
             className="recipe-form__submit"
             type="submit"
-            disabled={isSubmitting || Boolean(id)}
+            disabled={isSubmitting || saving}
           >
-            {isSubmitting
+            {isSubmitting || saving
               ? "Đang lưu..."
               : id
-                ? "Lưu thay đổi (chưa kết nối)"
+                ? "Lưu thay đổi"
                 : "Đăng món"}
           </button>
         </div>
