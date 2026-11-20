@@ -1,70 +1,178 @@
-import { Link, useLocation } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { getMyRecipes, deleteRecipe } from "../../api";
+import useAuth from "../../hooks/useAuth";
 import RecipeCard from "../../components/RecipeCard/RecipeCard";
-import { MOCK_RECIPES } from "../../data/mockRecipes";
 import emptyIcon from "../../assets/recipe-empty.svg";
 import "./MyRecipes.css";
 
-const examples = MOCK_RECIPES.slice(0, 6).map((recipe, index) => ({
-  ...recipe,
-  status: index % 2 ? "pending" : "approved",
-}));
-
 export default function MyRecipes() {
-  const { search } = useLocation();
-  const recipes =
-    import.meta.env.DEV && new URLSearchParams(search).has("empty")
-      ? []
-      : examples;
-
+  const { user } = useAuth();
+  const userId = user?.id;
+  const [attempt, setAttempt] = useState(0);
+  const [recipes, setRecipes] = useState([]);
+  const [status, setStatus] = useState("loading");
+  const [message, setMessage] = useState("");
+  const [selected, setSelected] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const dialog = useRef(null);
+  const trigger = useRef(null);
+  const heading = useRef(null);
+  useEffect(() => {
+    let active = true;
+    const request = userId
+      ? getMyRecipes(userId)
+      : Promise.reject(new Error("Không xác định được tài khoản."));
+    request
+      .then((list) => {
+        if (!Array.isArray(list))
+          throw new Error("Dữ liệu công thức không hợp lệ.");
+        if (!active) return;
+        setRecipes(
+          list.filter((item) => String(item.authorId) === String(userId)),
+        );
+        setStatus("done");
+      })
+      .catch((error) => {
+        if (!active) return;
+        setMessage(error.message || "Không thể tải công thức.");
+        setStatus("error");
+      });
+    return () => {
+      active = false;
+    };
+  }, [userId, attempt]);
+  useEffect(() => {
+    if (selected && !dialog.current.open) dialog.current.showModal();
+  }, [selected]);
+  const close = () => {
+    if (!deleting) dialog.current?.close();
+  };
+  const remove = async () => {
+    if (deleting) return;
+    setDeleting(true);
+    setMessage("");
+    try {
+      await deleteRecipe(selected.id);
+      setRecipes((items) => items.filter((item) => item.id !== selected.id));
+      dialog.current.close();
+      setMessage("Đã xóa công thức.");
+    } catch (error) {
+      setMessage(error.message || "Không thể xóa công thức.");
+    } finally {
+      setDeleting(false);
+    }
+  };
   return (
     <main className="my-recipes">
       <nav className="my-recipes__breadcrumb" aria-label="Đường dẫn">
         <Link to="/">Trang chủ</Link> / Công thức của tôi
       </nav>
       <header className="my-recipes__header">
-        <h1>Công thức của tôi</h1>
+        <h1 ref={heading} tabIndex={-1}>
+          Công thức của tôi
+        </h1>
         <p>Quản lý các món bạn đã đăng.</p>
-        <p>Dữ liệu mẫu để xem giao diện, chưa kết nối tài khoản.</p>
       </header>
-      {recipes.length ? (
-        <div className="my-recipes__grid">
-          {recipes.map((recipe) => (
-            <div className="my-recipes__item" key={recipe.id}>
-              <RecipeCard
-                recipe={recipe}
-                overlayAction={
-                  <span
-                    className={`my-recipes__status my-recipes__status--${recipe.status}`}
-                  >
-                    {recipe.status === "approved" ? "Đã duyệt" : "Chờ duyệt"}
-                  </span>
-                }
-              />
-              <div className="my-recipes__actions">
-                <button
-                  type="button"
-                  aria-disabled="true"
-                  title="Chức năng đang được phát triển"
-                >
-                  Sửa
-                </button>
-                <button
-                  type="button"
-                  aria-disabled="true"
-                  title="Chức năng đang được phát triển"
-                >
-                  Xóa
-                </button>
-              </div>
-            </div>
-          ))}
+      {status === "loading" && <p role="status">Đang tải công thức...</p>}
+      {status === "error" && (
+        <div role="alert">
+          <p>{message}</p>
+          <button
+            type="button"
+            onClick={() => {
+              setStatus("loading");
+              setMessage("");
+              setAttempt((value) => value + 1);
+            }}
+          >
+            Thử lại
+          </button>
         </div>
-      ) : (
-        <section className="my-recipes__empty">
-          <img src={emptyIcon} alt="" />
-          <p>Bạn chưa đăng món nào.</p>
-          <Link to="/recipe/create">Đăng món đầu tiên</Link>
-        </section>
+      )}
+      {status === "done" && !selected && message && (
+        <p role="status">{message}</p>
+      )}
+      {status === "done" && recipes.length >= 100 && (
+        <p>Hiển thị tối đa 100 công thức đầu tiên.</p>
+      )}
+      {status === "done" &&
+        (recipes.length ? (
+          <div className="my-recipes__grid">
+            {recipes.map((recipe) => (
+              <div className="my-recipes__item" key={recipe.id}>
+                <RecipeCard
+                  recipe={recipe}
+                  overlayAction={
+                    <span
+                      className={`my-recipes__status my-recipes__status--${recipe.status}`}
+                    >
+                      {recipe.status === "approved"
+                        ? "Đã duyệt"
+                        : recipe.status === "pending"
+                          ? "Chờ duyệt"
+                          : "Chưa có trạng thái"}
+                    </span>
+                  }
+                />
+                <div className="my-recipes__actions">
+                  <Link to={`/recipe/edit/${encodeURIComponent(recipe.id)}`}>
+                    Sửa
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      trigger.current = event.currentTarget;
+                      setMessage("");
+                      setSelected(recipe);
+                    }}
+                  >
+                    Xóa
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <section className="my-recipes__empty">
+            <img src={emptyIcon} alt="" />
+            <p>Bạn chưa đăng món nào.</p>
+            <Link to="/recipe/create">Đăng món đầu tiên</Link>
+          </section>
+        ))}
+      {selected && (
+        <dialog
+          ref={dialog}
+          className="my-recipes__dialog"
+          aria-labelledby="delete-title"
+          aria-describedby="delete-description"
+          onCancel={(event) => {
+            if (deleting) event.preventDefault();
+          }}
+          onClose={() => {
+            setSelected(null);
+            requestAnimationFrame(() =>
+              (trigger.current?.isConnected
+                ? trigger.current
+                : heading.current
+              )?.focus(),
+            );
+          }}
+        >
+          <h2 id="delete-title">Xóa công thức?</h2>
+          <p id="delete-description">
+            Món “{selected.title}” sẽ bị xóa vĩnh viễn và không thể khôi phục.
+          </p>
+          {message && <p role="alert">{message}</p>}
+          <div className="my-recipes__dialog-actions">
+            <button type="button" autoFocus disabled={deleting} onClick={close}>
+              Hủy
+            </button>
+            <button type="button" disabled={deleting} onClick={remove}>
+              {deleting ? "Đang xóa..." : "Xóa"}
+            </button>
+          </div>
+        </dialog>
       )}
     </main>
   );

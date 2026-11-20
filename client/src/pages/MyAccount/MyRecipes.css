@@ -126,3 +126,53 @@
     grid-template-columns: 1fr;
   }
 }
+.my-recipes__actions a {
+  flex: 1;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--green-500);
+  border-radius: 4px;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.my-recipes__dialog {
+  width: min(480px, calc(100% - 32px));
+  box-sizing: border-box;
+  padding: 24px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  color: var(--color-text);
+}
+.my-recipes__dialog::backdrop {
+  background: var(--color-overlay);
+}
+.my-recipes__dialog h2 {
+  margin: 0 0 12px;
+  font: 400 24px/1.2 var(--font-heading);
+  color: var(--color-text-brand);
+}
+.my-recipes__dialog-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+.my-recipes__dialog-actions button {
+  flex: 1;
+  min-height: 44px;
+  border: 1px solid var(--green-500);
+  background: transparent;
+  color: var(--color-text);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.my-recipes__dialog-actions button:last-child {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+.my-recipes__dialog button:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
