@@ -22,9 +22,12 @@ function getUserHeaders() {
   return user && user.id ? { 'x-user-id': user.id } : {}
 }
 
-async function request(path) {
-  const res = await fetch(`${BASE_URL}${path}`, { headers: getUserHeaders() })
-  const json = await res.json()
+async function request(path, { headers, ...options } = {}) {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...options,
+    headers: { ...getUserHeaders(), ...headers },
+  })
+  const json = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error(json.message || `Lỗi ${res.status}`)
   return json
 }
