@@ -49,3 +49,15 @@ export async function getRecipeById(id) {
   const json = await request(`/recipes/${id}`)
   return json.data
 }
+export async function createRecipe(formData) {
+  const json = await request('/recipes', { method: 'POST', body: formData })
+  return json.data
+}
+
+export async function updateRecipe(id, formData) {
+  const json = await request(`/recipes/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    body: formData,
+  })
+  return json.data
+}
