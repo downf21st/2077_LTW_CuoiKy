@@ -1,20 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { getRecipes } from '../api';
-import * as mockData from '../data/mockRecipes';
 import useDebounce from '../hooks/useDebounce';
 import SearchBar from '../components/SearchBar/SearchBar';
 import RecipeList from '../components/RecipeList/RecipeList';
 import FilterBar from '../components/FilterBar/FilterBar';
 import './Home.css';
-
-const FALLBACK_RECIPES = Array.isArray(mockData.default)
-  ? mockData.default
-  : Array.isArray(mockData.mockRecipes)
-  ? mockData.mockRecipes
-  : Array.isArray(mockData.recipes)
-  ? mockData.recipes
-  : [];
 
 function getRecipeOfTheDay(recipesList) {
   if (!Array.isArray(recipesList) || recipesList.length === 0) {
@@ -45,8 +36,9 @@ function parseMinutes(recipe) {
 }
 
 export default function Home() {
-  const [allRecipes, setAllRecipes] = useState([]); // Giữ nguyên danh sách tổng
-  const [status, setStatus] = useState('loading');
+  const [allRecipes, setAllRecipes] = useState([]);
+  const [status, setStatus] = useState('loading'); 
+  const [errorMessage, setErrorMessage] = useState('');
   const [searchTags, setSearchTags] = useState([]);
   const [searchInput, setSearchInput] = useState('');
   const [searchMode, setSearchMode] = useState('name');
@@ -56,25 +48,36 @@ export default function Home() {
     difficulty: '',
   });
 
+  const requestIdRef = useRef(0);
   const debouncedInput = useDebounce(searchInput, 500);
 
-  useEffect(() => {
-    let isMounted = true;
-    getRecipes()
-      .then((list) => {
-        if (!isMounted) return;
-        setAllRecipes(Array.isArray(list) && list.length > 0 ? list : FALLBACK_RECIPES);
-        setStatus('done');
-      })
-      .catch(() => {
-        if (!isMounted) return;
-        setAllRecipes(FALLBACK_RECIPES.length > 0 ? FALLBACK_RECIPES : []);
-        setStatus(FALLBACK_RECIPES.length > 0 ? 'done' : 'error');
-      });
-    return () => { isMounted = false; };
-  }, []); // Chỉ lấy danh sách 1 lần khi load trang, không load lại khi filter
+  const fetchRecipes = useCallback(async () => {
+    const currentId = ++requestIdRef.current;
+    setStatus('loading');
+    setErrorMessage('');
 
-  // Cố định Món của ngày dựa trên allRecipes, không bị ảnh hưởng bởi thanh tìm kiếm
+    try {
+      const list = await getRecipes({ page: 1, limit: 100 });
+      if (currentId !== requestIdRef.current) return;
+      setAllRecipes(Array.isArray(list) ? list : []);
+      setStatus('done');
+    } catch (err) {
+      if (currentId !== requestIdRef.current) return;
+      setAllRecipes([]);
+      setErrorMessage(
+        err?.message || 'Không thể tải danh sách món ăn. Vui lòng kiểm tra server và thử lại.'
+      );
+      setStatus('error');
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchRecipes();
+    return () => {
+      requestIdRef.current += 1;
+    };
+  }, [fetchRecipes]);
+
   const featuredRecipe = useMemo(() => getRecipeOfTheDay(allRecipes), [allRecipes]);
   const featuredId = featuredRecipe?._id || featuredRecipe?.id || 'recipe-001';
   const featuredTitle = featuredRecipe?.title || featuredRecipe?.name || 'Phở bò tái';
@@ -99,9 +102,13 @@ export default function Home() {
     const trimmedLive = debouncedInput.trim().toLowerCase();
     if (trimmedLive) {
       if (searchMode === 'ingredient') {
-        trimmedLive.split(',').map((s) => s.trim()).filter(Boolean).forEach((kw) => {
-          if (!ingredientKeywords.includes(kw)) ingredientKeywords.push(kw);
-        });
+        trimmedLive
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .forEach((kw) => {
+            if (!ingredientKeywords.includes(kw)) ingredientKeywords.push(kw);
+          });
       } else {
         nameKeywords.push(trimmedLive);
       }
@@ -109,14 +116,17 @@ export default function Home() {
 
     const result = [];
 
-    for (const recipe of allRecipes) { // Lọc từ danh sách tổng
+    for (const recipe of allRecipes) {
       const title = (recipe.title || recipe.name || '').toLowerCase();
       const desc = (recipe.description || recipe.summary || '').toLowerCase();
-      const matchesName = nameKeywords.length === 0 || nameKeywords.every((kw) => title.includes(kw) || desc.includes(kw));
+      const matchesName =
+        nameKeywords.length === 0 ||
+        nameKeywords.every((kw) => title.includes(kw) || desc.includes(kw));
       if (!matchesName) continue;
 
       const recipeCat = recipe.category || recipe.type || recipe.dishType || '';
-      const matchesCategory = !filters.category || recipeCat.toLowerCase() === filters.category.toLowerCase();
+      const matchesCategory =
+        !filters.category || recipeCat.toLowerCase() === filters.category.toLowerCase();
       if (!matchesCategory) continue;
 
       const minutes = parseMinutes(recipe);
@@ -125,7 +135,8 @@ export default function Home() {
       if (!matchesTime) continue;
 
       const recipeDiff = recipe.difficulty || recipe.level || '';
-      const matchesDifficulty = !filters.difficulty || recipeDiff.toLowerCase() === filters.difficulty.toLowerCase();
+      const matchesDifficulty =
+        !filters.difficulty || recipeDiff.toLowerCase() === filters.difficulty.toLowerCase();
       if (!matchesDifficulty) continue;
 
       if (ingredientKeywords.length > 0) {
@@ -157,12 +168,21 @@ export default function Home() {
   }, [allRecipes, searchTags, debouncedInput, searchMode, filters]);
 
   const handleRemoveSearchTag = (tagToRemove) => {
-    setSearchTags((prev) => prev.filter((tag) => !(tag.type === tagToRemove.type && tag.value === tagToRemove.value)));
+    setSearchTags((prev) =>
+      prev.filter((tag) => !(tag.type === tagToRemove.type && tag.value === tagToRemove.value))
+    );
   };
 
-  const isFiltering = searchTags.length > 0 || debouncedInput.trim() !== '' || Object.values(filters).some((val) => val !== '');
-  const hasResults = searchedRecipes.length > 0;
-  const showMobileEmptyToast = isFiltering && !hasResults;
+  const handleResetFilters = () => {
+    setSearchTags([]);
+    setSearchInput('');
+    setFilters({ category: '', cookingTime: '', difficulty: '' });
+  };
+
+  const isFiltering =
+    searchTags.length > 0 ||
+    debouncedInput.trim() !== '' ||
+    Object.values(filters).some((val) => val !== '');
 
   return (
     <div className="home-page">
@@ -181,7 +201,9 @@ export default function Home() {
             <span className="home-hero__title-line">today</span>
           </h1>
           <p className="home-hero__description">Cẩm nang nấu ăn tại gia — nơi tổng hợp các công thức nấu ăn viết bằng giọng điệu gần gũi như một người bạn trên bàn bếp.</p>
-          <Link to={`/recipe/${featuredId}`} className="home-hero__cta">Nấu ăn ngay <span className="home-hero__cta-arrow" aria-hidden="true">→</span></Link>
+          <Link to={`/recipe/${featuredId}`} className="home-hero__cta">
+            Nấu ăn ngay <span className="home-hero__cta-arrow" aria-hidden="true">→</span>
+          </Link>
         </div>
 
         <div className="home-hero__visual">
@@ -215,24 +237,17 @@ export default function Home() {
         onChange={setFilters}
         searchTags={searchTags}
         onRemoveSearchTag={handleRemoveSearchTag}
-        resultCount={searchedRecipes.length}
+        resultCount={status === 'done' ? searchedRecipes.length : 0}
       />
 
-      {status === 'loading' && <p className="recipe-list__empty">Đang tải món ăn...</p>}
-      {status === 'error' && (
-        <div style={{ marginTop: '32px', textAlign: 'center' }}>
-          <p className="recipe-list__empty">Không tải được dữ liệu. Kiểm tra server đã chạy chưa.</p>
-        </div>
-      )}
-      
-      {status === 'done' && (
-        <>
-          <style>{`@media (max-width: 768px) { .hide-native-list-on-mobile { display: none !important; } }`}</style>
-          <div className={showMobileEmptyToast ? 'hide-native-list-on-mobile' : ''}>
-            <RecipeList recipes={searchedRecipes} />
-          </div>
-        </>
-      )}
+      <RecipeList
+        recipes={searchedRecipes}
+        status={status}
+        errorMessage={errorMessage}
+        onRetry={fetchRecipes}
+        isFiltering={isFiltering}
+        onResetFilters={handleResetFilters}
+      />
     </div>
   );
 }

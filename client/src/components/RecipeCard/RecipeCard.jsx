@@ -14,7 +14,11 @@ const DIFFICULTY_MAP = {
   de: { label: 'Dễ', modifier: 'easy' },
 };
 
-export default function RecipeCard({ recipe }) {
+export default function RecipeCard({
+  recipe,
+  overlayAction = null,
+  showAuthor = false,
+}) {
   const [imgError, setImgError] = useState(false);
 
   const {
@@ -34,6 +38,9 @@ export default function RecipeCard({ recipe }) {
     matchCount,
     totalIngredients,
     ingredients,
+    author,
+    authorName,
+    authorId,
   } = recipe || {};
 
   const recipeId = _id || id || 'recipe-001';
@@ -57,8 +64,20 @@ export default function RecipeCard({ recipe }) {
     (Array.isArray(ingredients) ? ingredients.length : 0) ||
     matchCount;
 
+  const displayAuthor =
+    authorName ||
+    (typeof author === 'string'
+      ? author
+      : author?.name || author?.fullName) ||
+    authorId ||
+    '';
+
   return (
     <article className="recipe-card">
+      {overlayAction && (
+        <div className="recipe-card__overlay-action">{overlayAction}</div>
+      )}
+
       <Link to={`/recipe/${recipeId}`} className="recipe-card__link">
         <div className="recipe-card__media">
           {displayImage && !imgError ? (
@@ -112,6 +131,10 @@ export default function RecipeCard({ recipe }) {
             {displayTitle}
           </h3>
           <p className="recipe-card__description">{displayDesc}</p>
+
+          {showAuthor && displayAuthor && (
+            <p className="recipe-card__author">Đăng bởi {displayAuthor}</p>
+          )}
         </div>
       </Link>
     </article>
