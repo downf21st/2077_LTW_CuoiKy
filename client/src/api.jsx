@@ -22,9 +22,12 @@ function getUserHeaders() {
   return user && user.id ? { 'x-user-id': user.id } : {}
 }
 
-async function request(path) {
-  const res = await fetch(`${BASE_URL}${path}`, { headers: getUserHeaders() })
-  const json = await res.json()
+async function request(path, { headers, ...options } = {}) {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...options,
+    headers: { ...getUserHeaders(), ...headers },
+  })
+  const json = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error(json.message || `Lỗi ${res.status}`)
   return json
 }
@@ -44,5 +47,26 @@ export async function getRecipes(params) {
 
 export async function getRecipeById(id) {
   const json = await request(`/recipes/${id}`)
+  return json.data
+}
+export async function createRecipe(formData) {
+  const json = await request('/recipes', { method: 'POST', body: formData })
+  return json.data
+}
+
+export async function updateRecipe(id, formData) {
+  const json = await request(`/recipes/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    body: formData,
+  })
+  return json.data
+}
+export async function deleteRecipe(id) {
+  await request(`/recipes/${encodeURIComponent(id)}`, { method: 'DELETE' })
+}
+
+export async function getMyRecipes(userId) {
+  if (!userId) return []
+  const json = await request(recipesPath({ authorId: userId }))
   return json.data
 }
