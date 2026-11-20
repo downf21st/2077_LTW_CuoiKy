@@ -38,6 +38,23 @@
   width: 23px;
   height: 24px;
 }
+.sidebar__avatar--photo {
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.sidebar__avatar--initial {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: var(--color-bg-placeholder, #EAECE6);
+  color: var(--color-text-brand, #1D3B2A);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
 .sidebar__nav {
   flex: 1;
   min-height: 0;

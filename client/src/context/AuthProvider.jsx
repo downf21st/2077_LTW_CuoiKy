@@ -1,19 +1,44 @@
 import { useState } from 'react'
 import { AuthContext } from './AuthContext'
-import { STORAGE_KEY, readStoredUser } from './authStorage'
+import {
+  readStoredUser,
+  readCachedProfile,
+  writeStoredUser,
+  updateStoredUser,
+  clearStoredUser,
+} from './authStorage'
 
 export default function AuthProvider({ children }) {
   const [user, setUser] = useState(readStoredUser)
 
-  const login = ({ id, name, email, role }) => {
-    const nextUser = { id, name, email, role }
+  const login = (userData, options = {}) => {
+    const cached = readCachedProfile(userData?.id || userData?.email) || {}
+    const nextUser = {
+      id: userData.id,
+      name: userData.name || userData.fullName || cached.name || '',
+      email: userData.email || '',
+      role: userData.role || 'member',
+      username: userData.username ?? cached.username ?? '',
+      bio: userData.bio ?? cached.bio ?? '',
+      avatar: userData.avatar ?? cached.avatar ?? '',
+    }
+    const remember = options.remember ?? true
     setUser(nextUser)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextUser))
+    writeStoredUser(nextUser, remember)
+  }
+
+  const updateUser = (patch) => {
+    setUser((prev) => {
+      if (!prev) return prev
+      const nextUser = { ...prev, ...patch }
+      updateStoredUser(nextUser)
+      return nextUser
+    })
   }
 
   const logout = () => {
     setUser(null)
-    localStorage.removeItem(STORAGE_KEY)
+    clearStoredUser()
   }
 
   const value = {
@@ -21,6 +46,7 @@ export default function AuthProvider({ children }) {
     role: user ? user.role : 'guest',
     isLoggedIn: user !== null,
     login,
+    updateUser,
     logout,
   }
 

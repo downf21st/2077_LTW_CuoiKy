@@ -1,4 +1,3 @@
-/* ================= PAGE TRANSITION ANIMATIONS ================= */
 @keyframes authPageFadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -14,10 +13,9 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ================= MAIN LAYOUT (LOGIN vs REGISTER) ================= */
 .auth-page {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   min-height: 100vh;
   width: 100%;
   max-width: 100%;
@@ -31,43 +29,92 @@
 .auth-page--register .auth-page__panel { order: 1; }
 .auth-page--register .auth-page__banner { order: 2; }
 
-/* ================= BANNER SIDE ================= */
 .auth-page__banner {
   position: relative;
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: var(--space-12);
-  background-color: #1D3B2A;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 100vh;
+  background-color: var(--color-bg-inverse, #1D3B2A);
   box-sizing: border-box;
   overflow: hidden;
   animation: authBannerSlide 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.auth-page__banner--login {
-  background-image: url('/images/auth-login-banner.png');
-}
-
-.auth-page__banner--register {
-  background-image: url('/images/auth-register-banner.png');
-}
-
-/* Cỡ chữ và vị trí cho câu khẩu hiệu góc dưới bên trái */
-.auth-page__slogan {
+.login-banner__art {
   position: relative;
-  z-index: 1;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  flex: none;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+.login-banner__dish {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+}
+
+.login-banner__dish img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.login-banner__dish--tofu {
+  left: -13%;
+  top: -7%;
+  width: 39%;
+}
+
+.login-banner__dish--pork {
+  left: 57%;
+  top: -11%;
+  width: 53%;
+}
+
+.login-banner__dish--egg {
+  left: 20%;
+  top: 17%;
+  width: 51%;
+}
+
+.login-banner__dish--greens {
+  left: 75%;
+  top: 29%;
+  width: 37%;
+}
+
+.login-banner__dish--bowl {
+  left: -5%;
+  top: 46%;
+  width: 40%;
+}
+
+.login-banner__dish--bun {
+  left: 44%;
+  top: 53%;
+  width: 54%;
+}
+
+.login-banner__slogan {
+  position: absolute;
+  left: 4.5%;
+  right: 6%;
+  top: 89.5%;
+  z-index: 2;
   margin: 0;
-  color: #FAF6F0;
+  color: var(--color-text-on-primary, #FAF6F0);
   font-family: var(--font-display);
-  font-size: 1.25rem;
+  font-size: 3.333cqw;
   font-weight: var(--font-weight-display);
   line-height: var(--line-height-heading);
+  text-shadow: 0 2px 10px rgba(29, 59, 42, 0.45);
 }
 
-/* ================= FORM PANEL SIDE ================= */
 .auth-page__panel {
   display: flex;
   align-items: center;
@@ -119,7 +166,6 @@
 }
 .auth-card__subtitle strong { color: var(--color-text); font-weight: 600; }
 
-/* ================= FORM CONTROLS ================= */
 .auth-form {
   display: flex;
   flex-direction: column;
@@ -192,6 +238,16 @@
   color: var(--color-text);
 }
 
+.auth-form__toggle-password:focus-visible,
+.auth-form__submit:focus-visible,
+.auth-card__oauth:focus-visible,
+.auth-card__brand:focus-visible,
+.auth-card__switch-link:focus-visible,
+.auth-form__forgot:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
 .auth-form__hint {
   margin: 0;
   color: var(--color-text-muted);
@@ -219,7 +275,6 @@
 }
 .auth-form__forgot:hover { text-decoration: underline; }
 
-/* ================= CHECKBOXES ================= */
 .auth-form__remember {
   display: inline-flex;
   align-items: center;
@@ -258,7 +313,6 @@
 .auth-form__checkbox:checked { background-color: var(--color-brand); border-color: var(--color-brand); }
 .auth-form__checkbox:checked::before { transform: rotate(-45deg) scale(1); }
 
-/* ================= BUTTONS ================= */
 .auth-form__submit {
   width: 100%;
   height: 44px;
@@ -309,9 +363,17 @@
 .auth-card__switch-link { color: #D9534F; text-decoration: none; }
 .auth-card__switch-link:hover { text-decoration: underline; }
 
-/* ================= RESPONSIVE MOBILE ================= */
 @media (max-width: 900px) {
   .auth-page { grid-template-columns: 1fr; }
   .auth-page__banner { display: none; }
   .auth-page__panel { padding: 40px 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-page,
+  .auth-page__banner,
+  .auth-card,
+  .auth-card--success {
+    animation: none;
+  }
 }
