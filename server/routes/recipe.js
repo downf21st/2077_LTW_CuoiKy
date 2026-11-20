@@ -16,7 +16,7 @@ router.use(attachUser);
 router.get('/', getRecipes);
 router.post('/', requireUser, upload.single('image'), createRecipe);
 router.get('/:id', getRecipeById);
-router.put('/:id', updateRecipe);
-router.delete('/:id', deleteRecipe);
+router.put('/:id', requireUser, upload.single('image'), updateRecipe);
+router.delete('/:id', requireUser, deleteRecipe);
 
 module.exports = router;

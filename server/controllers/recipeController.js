@@ -3,7 +3,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 
 const recipesFile = path.join(__dirname, '..', 'data', 'recipes.json');
-const usersFile = path.join(__dirname, '..', 'data', 'users.json');
+const uploadsDirectory = path.join(__dirname, '..', 'public', 'uploads');
 const maxPageSize = 100;
 
 const readJsonArray = async (filePath, fileName) => {
@@ -81,25 +81,78 @@ const removeUploadedFile = async (req) => {
   if (req.file?.path) await fs.unlink(req.file.path).catch(() => {});
 };
 
-// Xác minh userId và role từ users.json, không tin role gửi từ client.
-const authorizeRecipeMutation = async (req, recipe) => {
-  const headerUserId = req.headers?.['x-user-id'];
-  const bodyUserId = req.body?.userId;
-  const userId = (typeof headerUserId === 'string' && headerUserId.trim())
-    || (typeof bodyUserId === 'string' && bodyUserId.trim());
+const removeRecipeImage = async (image) => {
+  if (typeof image !== 'string') return;
+  const match = /^\/uploads\/([^/?#]+)$/.exec(image);
+  if (!match) return;
 
-  if (!userId) {
+  let filename;
+  try {
+    filename = decodeURIComponent(match[1]);
+  } catch {
+    return;
+  }
+  if (path.basename(filename) !== filename) return;
+
+  try {
+    await fs.unlink(path.join(uploadsDirectory, filename));
+  } catch (error) {
+    if (error.code !== 'ENOENT') console.error('Không thể xóa ảnh công thức cũ.', error);
+  }
+};
+
+const parseRecipeIngredients = (value) => {
+  const allowedUnits = new Set(['g', 'ml', 'muỗng canh', 'muỗng cà phê']);
+  return parseFormArray(value, 'ingredients').map((ingredient) => {
+    const quantity = Number(ingredient?.quantity);
+    const unit = typeof ingredient?.unit === 'string' ? ingredient.unit.trim() : '';
+    const name = typeof ingredient?.name === 'string' ? ingredient.name.trim() : '';
+
+    if (!name || !Number.isFinite(quantity) || quantity <= 0 || !allowedUnits.has(unit)) {
+      throw createBadRequest('Mỗi nguyên liệu cần có tên, số lượng dương và đơn vị hợp lệ.');
+    }
+
+    return { name, quantity, unit };
+  });
+};
+
+const parseRecipeSteps = (value) => parseFormArray(value, 'steps').map((step) => {
+  const title = typeof step?.title === 'string' ? step.title.trim() : '';
+  const instruction = typeof step?.instruction === 'string'
+    ? step.instruction.trim()
+    : '';
+  const duration = Number(step?.duration);
+
+  if (!title || !instruction || !Number.isInteger(duration) || duration <= 0) {
+    throw createBadRequest('Mỗi bước cần có tiêu đề, hướng dẫn và thời gian dương.');
+  }
+
+  return { title, duration, instruction };
+});
+
+const parseRecipeEquipment = (value, optional = false) => {
+  const equipment = parseFormArray(value, 'equipment', optional);
+  if (!equipment.every((item) => typeof item === 'string' && item.trim())) {
+    throw createBadRequest('equipment phải là mảng tên dụng cụ dạng chuỗi.');
+  }
+  return equipment.map((item) => item.trim());
+};
+
+const parsePositiveIntegerField = (value, fieldName) => {
+  const number = Number(value);
+  if (!Number.isInteger(number) || number <= 0) {
+    throw createBadRequest(`${fieldName} phải là số nguyên dương.`);
+  }
+  return number;
+};
+
+// attachUser đã xác minh định danh và role từ users.json.
+const authorizeRecipeMutation = (req, recipe) => {
+  if (!req.user) {
     return { status: 401, message: 'Vui lòng cung cấp userId.' };
   }
 
-  const users = await readJsonArray(usersFile, 'users.json');
-  const user = users.find((item) => String(item.id) === userId);
-
-  if (!user) {
-    return { status: 401, message: 'Không tìm thấy người dùng.' };
-  }
-
-  if (user.role !== 'admin' && String(recipe.authorId) !== String(user.id)) {
+  if (req.user.role !== 'admin' && String(recipe.authorId) !== String(req.user.id)) {
     return {
       status: 403,
       message: 'Bạn không có quyền chỉnh sửa/xóa món ăn này'
@@ -300,55 +353,18 @@ const createRecipe = async (req, res) => {
     if (!title) throw createBadRequest('Tên món ăn là bắt buộc.');
     if (!req.file) throw createBadRequest('Vui lòng tải ảnh công thức lên.');
 
-    const ingredients = parseFormArray(body.ingredients, 'ingredients');
-    const steps = parseFormArray(body.steps, 'steps');
-    const equipment = parseFormArray(body.equipment, 'equipment', true);
-    const allowedUnits = new Set(['g', 'ml', 'muỗng canh', 'muỗng cà phê']);
-
-    const cleanIngredients = ingredients.map((ingredient) => {
-      const quantity = Number(ingredient?.quantity);
-      const unit = typeof ingredient?.unit === 'string' ? ingredient.unit.trim() : '';
-      const name = typeof ingredient?.name === 'string' ? ingredient.name.trim() : '';
-
-      if (!name || !Number.isFinite(quantity) || quantity <= 0 || !allowedUnits.has(unit)) {
-        throw createBadRequest('Mỗi nguyên liệu cần có tên, số lượng dương và đơn vị hợp lệ.');
-      }
-
-      return { name, quantity, unit };
-    });
-
-    const cleanSteps = steps.map((step) => {
-      const title = typeof step?.title === 'string' ? step.title.trim() : '';
-      const instruction = typeof step?.instruction === 'string'
-        ? step.instruction.trim()
-        : '';
-      const duration = Number(step?.duration);
-
-      if (!title || !instruction || !Number.isInteger(duration) || duration <= 0) {
-        throw createBadRequest('Mỗi bước cần có tiêu đề, hướng dẫn và thời gian dương.');
-      }
-
-      return { title, duration, instruction };
-    });
-
-    if (!equipment.every((item) => typeof item === 'string' && item.trim())) {
-      throw createBadRequest('equipment phải là mảng tên dụng cụ dạng chuỗi.');
-    }
+    const cleanIngredients = parseRecipeIngredients(body.ingredients);
+    const cleanSteps = parseRecipeSteps(body.steps);
+    const equipment = parseRecipeEquipment(body.equipment, true);
 
     const cookingTime = body.cookingTime === undefined || body.cookingTime === ''
       ? cleanSteps.reduce((total, step) => total + step.duration, 0)
-      : Number(body.cookingTime);
+      : parsePositiveIntegerField(body.cookingTime, 'cookingTime');
     const servings = body.servings === undefined || body.servings === ''
       ? 4
-      : Number(body.servings);
+      : parsePositiveIntegerField(body.servings, 'servings');
     const difficulty = body.difficulty || 'Dễ';
 
-    if (!Number.isInteger(cookingTime) || cookingTime <= 0) {
-      throw createBadRequest('cookingTime phải là số nguyên dương.');
-    }
-    if (!Number.isInteger(servings) || servings <= 0) {
-      throw createBadRequest('servings phải là số nguyên dương.');
-    }
     if (!['Dễ', 'Trung bình', 'Khó'].includes(difficulty)) {
       throw createBadRequest('difficulty phải là Dễ, Trung bình hoặc Khó.');
     }
@@ -364,7 +380,7 @@ const createRecipe = async (req, res) => {
         : 'Món chính',
       cookingTime,
       servings,
-      equipment: equipment.map((item) => item.trim()),
+      equipment,
       difficulty,
       ingredients: cleanIngredients,
       steps: cleanSteps,
@@ -390,13 +406,6 @@ const createRecipe = async (req, res) => {
 
 const updateRecipe = async (req, res) => {
   try {
-    if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Dữ liệu cập nhật không hợp lệ.'
-      });
-    }
-
     const recipes = await readJsonArray(recipesFile, 'recipes.json');
     const index = recipes.findIndex((item) => String(item.id) === req.params.id);
 
@@ -407,7 +416,7 @@ const updateRecipe = async (req, res) => {
       });
     }
 
-    const authorizationError = await authorizeRecipeMutation(req, recipes[index]);
+    const authorizationError = authorizeRecipeMutation(req, recipes[index]);
 
     if (authorizationError) {
       return res.status(authorizationError.status).json({
@@ -416,20 +425,67 @@ const updateRecipe = async (req, res) => {
       });
     }
 
-    const editableFields = [
-      'title', 'description', 'category', 'cookingTime', 'difficulty',
-      'image', 'servings', 'equipment', 'ingredients', 'steps', 'reviews',
-      'averageRating'
-    ];
-    const updates = Object.fromEntries(
-      Object.entries(req.body).filter(([key]) => editableFields.includes(key))
-    );
+    const body = req.body ?? {};
+    if (typeof body !== 'object' || Array.isArray(body)) {
+      throw createBadRequest('Dữ liệu cập nhật không hợp lệ.');
+    }
+    const editableFields = new Set([
+      'title', 'description', 'category', 'cookingTime', 'servings',
+      'difficulty', 'ingredients', 'steps', 'equipment'
+    ]);
+    if (!Object.keys(body).some((key) => editableFields.has(key)) && !req.file) {
+      throw createBadRequest('Không có dữ liệu cần cập nhật.');
+    }
 
-    recipes[index] = { ...recipes[index], ...updates };
+    const updated = { ...recipes[index] };
+    if (body.title !== undefined) {
+      const title = typeof body.title === 'string' ? body.title.trim() : '';
+      if (!title) throw createBadRequest('Tên món ăn không được để trống.');
+      updated.title = title;
+    }
+    if (body.description !== undefined) {
+      if (typeof body.description !== 'string') {
+        throw createBadRequest('description phải là chuỗi.');
+      }
+      updated.description = body.description.trim();
+    }
+    if (body.category !== undefined) {
+      const category = typeof body.category === 'string' ? body.category.trim() : '';
+      if (!category) throw createBadRequest('category không được để trống.');
+      updated.category = category;
+    }
+    if (body.cookingTime !== undefined) {
+      updated.cookingTime = parsePositiveIntegerField(body.cookingTime, 'cookingTime');
+    }
+    if (body.servings !== undefined) {
+      updated.servings = parsePositiveIntegerField(body.servings, 'servings');
+    }
+    if (body.difficulty !== undefined) {
+      if (!['Dễ', 'Trung bình', 'Khó'].includes(body.difficulty)) {
+        throw createBadRequest('difficulty phải là Dễ, Trung bình hoặc Khó.');
+      }
+      updated.difficulty = body.difficulty;
+    }
+    if (body.ingredients !== undefined) {
+      updated.ingredients = parseRecipeIngredients(body.ingredients);
+    }
+    if (body.steps !== undefined) updated.steps = parseRecipeSteps(body.steps);
+    if (body.equipment !== undefined) {
+      updated.equipment = parseRecipeEquipment(body.equipment, true);
+    }
+    const oldImage = recipes[index].image;
+    if (req.file) updated.image = `/uploads/${req.file.filename}`;
+    updated.status = 'pending';
+    recipes[index] = updated;
     await writeRecipes(recipes);
+    if (req.file && oldImage !== updated.image) await removeRecipeImage(oldImage);
 
-    return res.status(200).json({ success: true, data: recipes[index] });
+    return res.status(200).json({ success: true, data: updated });
   } catch (error) {
+    await removeUploadedFile(req);
+    if (Number.isInteger(error.status) && error.status < 500) {
+      return res.status(error.status).json({ success: false, message: error.message });
+    }
     return sendServerError(res, 'Không thể cập nhật công thức.', error);
   }
 };
@@ -447,7 +503,7 @@ const deleteRecipe = async (req, res) => {
     }
 
     const recipe = recipes[index];
-    const authorizationError = await authorizeRecipeMutation(req, recipe);
+    const authorizationError = authorizeRecipeMutation(req, recipe);
 
     if (authorizationError) {
       return res.status(authorizationError.status).json({
@@ -458,6 +514,7 @@ const deleteRecipe = async (req, res) => {
 
     recipes.splice(index, 1);
     await writeRecipes(recipes);
+    await removeRecipeImage(recipe.image);
 
     return res.status(200).json({ success: true, data: recipe });
   } catch (error) {
