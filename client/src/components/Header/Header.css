@@ -32,6 +32,52 @@
   gap: 12px;
 }
 
+.header__account-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-text);
+  text-decoration: none;
+  border-radius: var(--radius-pill, 999px);
+  padding: 2px 2px 2px 8px;
+  transition: opacity 180ms ease;
+}
+
+.header__account-chip:hover {
+  opacity: 0.85;
+}
+
+.header__account-text {
+  color: var(--color-text-brand, #1D3B2A);
+  font-family: var(--font-body);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.header__account-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background-color: var(--color-bg-placeholder, #EAECE6);
+  color: var(--color-text-brand, #1D3B2A);
+  font-family: var(--font-body);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.header__account-avatar-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .header__nav-link,
 .header__login-link {
   color: var(--color-text);
@@ -82,6 +128,7 @@
 }
 
 .header__logo:focus-visible,
+.header__account-chip:focus-visible,
 .header__nav-link:focus-visible,
 .header__login-link:focus-visible,
 .header__logout-btn:focus-visible,
@@ -132,6 +179,20 @@
     position: static;
     transform: none;
     gap: 8px;
+  }
+
+  .header__account-chip {
+    padding: 0;
+    gap: 6px;
+  }
+
+  .header__account-text {
+    display: none;
+  }
+
+  .header__account-avatar {
+    width: 36px;
+    height: 36px;
   }
 
   .header__login-link {

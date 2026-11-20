@@ -50,6 +50,26 @@
   color: var(--color-accent);
 }
 
+.register-page__success-title {
+  line-height: 1.25;
+}
+
+.register-page__success-subtitle {
+  margin-bottom: var(--space-6);
+}
+
+.register-page__success-email {
+  overflow-wrap: anywhere;
+}
+
+.register-page__success-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
 .register-page__hero {
   grid-column: 2;
   grid-row: 1;

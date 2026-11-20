@@ -70,3 +70,30 @@ export async function getMyRecipes(userId) {
   const json = await request(recipesPath({ authorId: userId }))
   return json.data
 }
+
+export async function updateUserProfile(userId, payload) {
+  if (!userId) return { synced: false, data: payload }
+  try {
+    const res = await fetch(`${BASE_URL}/users/${encodeURIComponent(userId)}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getUserHeaders(),
+      },
+      body: JSON.stringify(payload),
+    })
+    const json = await res.json().catch(() => ({}))
+    if (res.status === 404 || res.status === 405) {
+      return { synced: false, data: payload }
+    }
+    if (!res.ok) {
+      throw new Error(json.message || `Lỗi ${res.status}`)
+    }
+    return { synced: true, data: json.data || json.user || payload }
+  } catch (err) {
+    if (err instanceof TypeError) {
+      return { synced: false, data: payload }
+    }
+    throw err
+  }
+}

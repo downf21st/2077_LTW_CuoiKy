@@ -132,6 +132,16 @@ function SidebarToggle({ isOpen, onClick, toggleRef }) {
   );
 }
 
+function getAvatarInitial(name, email) {
+  const cleanedName = String(name || "").trim();
+  if (cleanedName) {
+    const parts = cleanedName.split(/\s+/);
+    return parts[parts.length - 1].charAt(0).toUpperCase();
+  }
+  const cleanedEmail = String(email || "").trim();
+  return cleanedEmail ? cleanedEmail.charAt(0).toUpperCase() : "U";
+}
+
 function Sidebar({ isOpen, onToggle, onClose, toggleRef }) {
   const panelRef = useRef(null);
   const arrowRef = useRef(null);
@@ -219,11 +229,18 @@ function Sidebar({ isOpen, onToggle, onClose, toggleRef }) {
   };
 
   let displayName = "Khách";
-  if (role === "admin") {
+  if (user?.name || user?.fullName) {
+    displayName = user.name || user.fullName;
+  } else if (role === "admin") {
     displayName = "Admin";
   } else if (role === "member") {
     displayName = "Member";
   }
+
+  const avatarInitial = getAvatarInitial(
+    user?.name || user?.fullName,
+    user?.email
+  );
 
   return (
     <>
@@ -252,12 +269,27 @@ function Sidebar({ isOpen, onToggle, onClose, toggleRef }) {
           </div>
 
           <div className="sidebar__role">
-            <img
-              className="sidebar__avatar"
-              src={avatarIcon}
-              alt=""
-              aria-hidden="true"
-            />
+            {user?.avatar ? (
+              <img
+                className="sidebar__avatar sidebar__avatar--photo"
+                src={user.avatar}
+                alt={displayName}
+              />
+            ) : user ? (
+              <span
+                className="sidebar__avatar sidebar__avatar--initial"
+                aria-hidden="true"
+              >
+                {avatarInitial}
+              </span>
+            ) : (
+              <img
+                className="sidebar__avatar"
+                src={avatarIcon}
+                alt=""
+                aria-hidden="true"
+              />
+            )}
             <span>{displayName}</span>
           </div>
 
@@ -292,16 +324,16 @@ function Sidebar({ isOpen, onToggle, onClose, toggleRef }) {
                   <span className="nav-item__label">Bảng điều khiển cá nhân</span>
                 </div>
                 <div className="sidebar__group-list">
-                  <NavLink to="/profile" className="sidebar__sub-item" onClick={handleNavigate}>
+                  <NavLink to="/my-account/profile" className="sidebar__sub-item" onClick={handleNavigate}>
                     Thông tin cá nhân
                   </NavLink>
-                  <NavLink to="/my-recipes" className="sidebar__sub-item" onClick={handleNavigate}>
+                  <NavLink to="/my-account/my-recipes" className="sidebar__sub-item" onClick={handleNavigate}>
                     Công thức của tôi
                   </NavLink>
-                  <NavLink to="/favorites" className="sidebar__sub-item" onClick={handleNavigate}>
+                  <NavLink to="/my-account/favorites" className="sidebar__sub-item" onClick={handleNavigate}>
                     Món yêu thích
                   </NavLink>
-                  <NavLink to="/meal-plan" className="sidebar__sub-item" onClick={handleNavigate}>
+                  <NavLink to="/my-account/weekly-menu" className="sidebar__sub-item" onClick={handleNavigate}>
                     Thực đơn tuần và đi chợ
                   </NavLink>
                 </div>

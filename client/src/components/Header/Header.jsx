@@ -1,12 +1,25 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import './Header.css';
 
+function getAvatarInitial(name, email) {
+  const cleanedName = String(name || '').trim();
+  if (cleanedName) {
+    const parts = cleanedName.split(/\s+/);
+    return parts[parts.length - 1].charAt(0).toUpperCase();
+  }
+  const cleanedEmail = String(email || '').trim();
+  return cleanedEmail ? cleanedEmail.charAt(0).toUpperCase() : 'U';
+}
+
 function Header({ onMenuClick }) {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { user, role, isLoggedIn, logout } = useAuth();
 
+  const isAccountPage = pathname.startsWith('/my-account');
   const displayName = user?.name || user?.fullName || user?.email || 'Người dùng';
+  const avatarInitial = getAvatarInitial(user?.name || user?.fullName, user?.email);
   const roleLink =
     role === 'admin'
       ? { to: '/admin', label: 'Quản trị' }
@@ -37,7 +50,26 @@ function Header({ onMenuClick }) {
       </Link>
 
       <div className="header__actions">
-        {isLoggedIn ? (
+        {isLoggedIn && isAccountPage ? (
+          <Link
+            to="/my-account/profile"
+            className="header__account-chip"
+            aria-label="Tài khoản của tôi"
+          >
+            <span className="header__account-text">Tài khoản của tôi</span>
+            <span className="header__account-avatar" aria-hidden="true">
+              {user?.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt=""
+                  className="header__account-avatar-img"
+                />
+              ) : (
+                avatarInitial
+              )}
+            </span>
+          </Link>
+        ) : isLoggedIn ? (
           <>
             <Link to={roleLink.to} className="header__nav-link">
               {roleLink.label}
