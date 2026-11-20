@@ -13,7 +13,12 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const MOCK_USERS = [
-  { id: "user-001", name: "Thành viên", email: "member@cooked.test", role: "member" },
+  {
+    id: "user-001",
+    name: "Thành viên",
+    email: "member@cooked.test",
+    role: "member",
+  },
   { id: "user-002", name: "Admin", email: "admin@cooked.test", role: "admin" },
 ];
 
@@ -21,7 +26,11 @@ export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const [formValues, setFormValues] = useState({ email: "", password: "", rememberMe: false });
+  const [formValues, setFormValues] = useState({
+    email: "",
+    password: "",
+    rememberMe: false,
+  });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -29,14 +38,20 @@ export default function Login() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormValues((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+    setFormValues((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
     if (serverError) setServerError("");
   };
 
   const validate = () => {
     const nextErrors = {};
-    if (!formValues.email.trim() || !EMAIL_REGEX.test(formValues.email.trim())) {
+    if (
+      !formValues.email.trim() ||
+      !EMAIL_REGEX.test(formValues.email.trim())
+    ) {
       nextErrors.email = "Email không hợp lệ";
     }
     if (!formValues.password) {
@@ -64,7 +79,10 @@ export default function Login() {
         const res = await fetch(`${API_BASE}/users/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: normalizedEmail, password: formValues.password }),
+          body: JSON.stringify({
+            email: normalizedEmail,
+            password: formValues.password,
+          }),
         });
 
         if (res.ok) {
@@ -127,27 +145,49 @@ export default function Login() {
 
       <section className="auth-page__panel" aria-labelledby="login-heading">
         <div className="auth-card">
-          <Link to="/" className="auth-card__brand">Cooked</Link>
-          <h1 id="login-heading" className="auth-card__title">Chào mừng trở lại</h1>
-          <p className="auth-card__subtitle">Đăng nhập để lưu công thức và nấu ăn mỗi ngày.</p>
+          <Link to="/" className="auth-card__brand">
+            Cooked
+          </Link>
+          <h1 id="login-heading" className="auth-card__title">
+            Chào mừng trở lại
+          </h1>
+          <p className="auth-card__subtitle">
+            Đăng nhập để lưu công thức và nấu ăn mỗi ngày.
+          </p>
 
           <form className="auth-form" onSubmit={handleSubmit} noValidate>
             <div className="auth-form__field">
-              <label htmlFor="login-email" className="auth-form__label">Email</label>
+              <label htmlFor="login-email" className="auth-form__label">
+                Email
+              </label>
               <input
-                id="login-email" name="email" type="email" placeholder="cooked2026est@example.com"
-                value={formValues.email} onChange={handleChange} disabled={isLoading}
+                id="login-email"
+                name="email"
+                type="email"
+                placeholder="cooked2026est@example.com"
+                value={formValues.email}
+                onChange={handleChange}
+                disabled={isLoading}
                 className={`auth-form__input ${errors.email ? "auth-form__input--error" : ""}`}
               />
-              {errors.email && <p className="auth-form__error">{errors.email}</p>}
+              {errors.email && (
+                <p className="auth-form__error">{errors.email}</p>
+              )}
             </div>
 
             <div className="auth-form__field">
-              <label htmlFor="login-password" className="auth-form__label">Mật khẩu</label>
+              <label htmlFor="login-password" className="auth-form__label">
+                Mật khẩu
+              </label>
               <div className="auth-form__input-wrapper">
                 <input
-                  id="login-password" name="password" type={showPassword ? "text" : "password"} placeholder="••••••••"
-                  value={formValues.password} onChange={handleChange} disabled={isLoading}
+                  id="login-password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={formValues.password}
+                  onChange={handleChange}
+                  disabled={isLoading}
                   className={`auth-form__input auth-form__input--password ${errors.password || serverError ? "auth-form__input--error" : ""}`}
                 />
                 <button
@@ -158,39 +198,82 @@ export default function Login() {
                   disabled={isLoading}
                 >
                   {showPassword ? (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
                       <line x1="1" y1="1" x2="23" y2="23"></line>
                     </svg>
                   ) : (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                       <circle cx="12" cy="12" r="3"></circle>
                     </svg>
                   )}
                 </button>
               </div>
-              {errors.password && <p className="auth-form__error">{errors.password}</p>}
+              {errors.password && (
+                <p className="auth-form__error">{errors.password}</p>
+              )}
               {serverError && <p className="auth-form__error">{serverError}</p>}
               <div className="auth-form__forgot-wrap">
-                <Link to="/login" className="auth-form__forgot">Quên mật khẩu?</Link>
+                <Link to="/login" className="auth-form__forgot">
+                  Quên mật khẩu?
+                </Link>
               </div>
             </div>
 
             <label className="auth-form__remember">
-              <input type="checkbox" name="rememberMe" checked={formValues.rememberMe} onChange={handleChange} className="auth-form__checkbox" />
+              <input
+                type="checkbox"
+                name="rememberMe"
+                checked={formValues.rememberMe}
+                onChange={handleChange}
+                className="auth-form__checkbox"
+              />
               <span>Ghi nhớ đăng nhập</span>
             </label>
 
-            <button type="submit" className="auth-form__submit" disabled={isLoading}>
+            <button
+              type="submit"
+              className="auth-form__submit"
+              disabled={isLoading}
+            >
               {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>
           </form>
 
-          <div className="auth-card__divider"><span>hoặc</span></div>
-          <button type="button" className="auth-card__oauth" disabled={isLoading}>Tiếp tục với Google</button>
+          <div className="auth-card__divider">
+            <span>hoặc</span>
+          </div>
+          <button
+            type="button"
+            className="auth-card__oauth"
+            disabled={isLoading}
+          >
+            Tiếp tục với Google
+          </button>
           <p className="auth-card__switch">
-            Chưa có tài khoản? <Link to="/register" className="auth-card__switch-link">Đăng ký ngay</Link>
+            Chưa có tài khoản?{" "}
+            <Link to="/register" className="auth-card__switch-link">
+              Đăng ký ngay
+            </Link>
           </p>
         </div>
       </section>

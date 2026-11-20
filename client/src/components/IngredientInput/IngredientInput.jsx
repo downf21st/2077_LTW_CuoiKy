@@ -2,7 +2,7 @@ import FormField from "../FormField/FormField";
 import trashIcon from "../../assets/trash.svg";
 import "./IngredientInput.css";
 
-const UNIT_OPTIONS = ["g", "ml", "củ", "muỗng canh", "muỗng cà phê"];
+const UNIT_OPTIONS = ["g", "ml", "muỗng canh", "muỗng cà phê"];
 
 export default function IngredientInput({
   rows,
@@ -67,6 +67,9 @@ export default function IngredientInput({
               <option value="" disabled>
                 Chọn đơn vị
               </option>
+              {row.unit && !UNIT_OPTIONS.includes(row.unit) && (
+                <option value={row.unit}>{row.unit}</option>
+              )}
               {UNIT_OPTIONS.map((unit) => (
                 <option key={unit} value={unit}>
                   {unit}

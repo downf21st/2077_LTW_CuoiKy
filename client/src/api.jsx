@@ -70,24 +70,30 @@ export async function getMyRecipes(userId) {
   const json = await request(recipesPath({ authorId: userId }))
   return json.data
 }
-export async function getFavorites(userId) {
-  if (!userId) return []
-  const json = await request(`/users/${encodeURIComponent(userId)}/favorites`)
-  return json.data
-}
 
-export async function addFavorite(userId, recipeId) {
-  const json = await request(`/users/${encodeURIComponent(userId)}/favorites`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ recipeId }),
-  })
-  return json.data
-}
-
-export async function removeFavorite(userId, recipeId) {
-  await request(
-    `/users/${encodeURIComponent(userId)}/favorites/${encodeURIComponent(recipeId)}`,
-    { method: 'DELETE' },
-  )
+export async function updateUserProfile(userId, payload) {
+  if (!userId) return { synced: false, data: payload }
+  try {
+    const res = await fetch(`${BASE_URL}/users/${encodeURIComponent(userId)}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getUserHeaders(),
+      },
+      body: JSON.stringify(payload),
+    })
+    const json = await res.json().catch(() => ({}))
+    if (res.status === 404 || res.status === 405) {
+      return { synced: false, data: payload }
+    }
+    if (!res.ok) {
+      throw new Error(json.message || `Lỗi ${res.status}`)
+    }
+    return { synced: true, data: json.data || json.user || payload }
+  } catch (err) {
+    if (err instanceof TypeError) {
+      return { synced: false, data: payload }
+    }
+    throw err
+  }
 }

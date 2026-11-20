@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import emptyBreadIcon from './add.svg';
+import emptyBreadIcon from '../../assets/add.svg';
 import { getRecipes } from '../../api';
 import useAuth from '../../hooks/useAuth';
 import RecipeCard from '../../components/RecipeCard/RecipeCard';

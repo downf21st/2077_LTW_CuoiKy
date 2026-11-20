@@ -31,6 +31,37 @@ export function createInitialValues() {
   };
 }
 
+export function createEditValues(recipe) {
+  const values = createInitialValues();
+  for (const field of [
+    "title",
+    "description",
+    "category",
+    "cookingTime",
+    "difficulty",
+    "servings",
+  ]) {
+    values[field] = String(recipe[field] ?? "");
+  }
+  values.equipment = (recipe.equipment ?? []).map((value) => ({
+    id: crypto.randomUUID(),
+    value,
+  }));
+  values.ingredients = (recipe.ingredients ?? []).map((row) => ({
+    id: crypto.randomUUID(),
+    name: row.name ?? "",
+    quantity: String(row.quantity ?? ""),
+    unit: row.unit ?? "",
+  }));
+  values.steps = (recipe.steps ?? []).map((row) => ({
+    id: crypto.randomUUID(),
+    title: row.title ?? "",
+    duration: String(row.duration ?? ""),
+    instruction: row.instruction ?? "",
+  }));
+  return values;
+}
+
 function isIntegerInRange(value, { min, max }) {
   const text = String(value ?? "").trim();
   if (!/^\d+$/.test(text)) return false;
@@ -104,26 +135,38 @@ export function validateRecipe(values = {}) {
     String(value ?? "").trim() !== "" &&
     Number.isFinite(Number(value)) &&
     Number(value) > 0;
+  const units = ["g", "ml", "muỗng canh", "muỗng cà phê"];
+  const ingredients = values.ingredients ?? [];
   if (
-    !(values.ingredients ?? []).some(
+    !ingredients.length ||
+    !ingredients.every(
       (item) =>
-        item.name?.trim() && positive(item.quantity) && item.unit?.trim(),
+        item.name?.trim() &&
+        positive(item.quantity) &&
+        units.includes(item.unit?.trim()),
     )
   ) {
     errors.ingredients =
-      "Vui lòng nhập ít nhất một nguyên liệu đầy đủ, với số lượng lớn hơn 0.";
+      "Mỗi nguyên liệu cần có tên, số lượng lớn hơn 0 và đơn vị hợp lệ.";
   }
   const steps = values.steps ?? [];
   if (!steps.length) {
     errors.steps = { _form: "Vui lòng thêm ít nhất một bước nấu." };
   } else {
     const stepErrors = Object.fromEntries(
-      steps
-        .filter((step) => !positive(step.duration))
-        .map((step) => [
-          step.id,
-          { duration: "Thời gian phải là số phút lớn hơn 0." },
-        ]),
+      steps.flatMap((step) => {
+        const rowErrors = {};
+        if (!step.title?.trim()) rowErrors.title = "Vui lòng nhập tên bước.";
+        if (!step.instruction?.trim())
+          rowErrors.instruction = "Vui lòng nhập hướng dẫn.";
+        if (
+          !positive(step.duration) ||
+          !Number.isInteger(Number(step.duration))
+        ) {
+          rowErrors.duration = "Thời gian phải là số phút nguyên dương.";
+        }
+        return Object.keys(rowErrors).length ? [[step.id, rowErrors]] : [];
+      }),
     );
     if (Object.keys(stepErrors).length) errors.steps = stepErrors;
   }
@@ -140,4 +183,41 @@ export function buildRecipePayload(values) {
     servings: Number(values.servings),
     equipment: values.equipment.map((row) => row.value.trim()).filter(Boolean),
   };
+}
+
+export function buildFormData(values, imageFile) {
+  const formData = new FormData();
+  const { equipment, ...fields } = buildRecipePayload(values);
+  const numericValue = (value) => {
+    const text = String(value ?? "").trim();
+    const number = Number(text);
+    return text !== "" && Number.isFinite(number) ? number : text;
+  };
+
+  Object.entries(fields).forEach(([name, value]) => {
+    formData.append(name, String(value));
+  });
+  formData.append("equipment", JSON.stringify(equipment));
+  formData.append(
+    "ingredients",
+    JSON.stringify(
+      values.ingredients.map((item) => ({
+        name: item.name.trim(),
+        quantity: numericValue(item.quantity),
+        unit: item.unit.trim(),
+      })),
+    ),
+  );
+  formData.append(
+    "steps",
+    JSON.stringify(
+      values.steps.map((step) => ({
+        title: step.title.trim(),
+        duration: numericValue(step.duration),
+        instruction: step.instruction.trim(),
+      })),
+    ),
+  );
+  if (imageFile) formData.append("image", imageFile);
+  return formData;
 }
