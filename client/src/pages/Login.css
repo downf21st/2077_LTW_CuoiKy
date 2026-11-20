@@ -66,20 +66,72 @@
   animation: authBannerSlide 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.auth-page__banner--login {
-  background-image: url('/images/auth-login-banner.png');
-}
-
-.auth-page__banner--register {
-  background-image: url('/images/auth-register-banner.png');
-}
-
-/* Cỡ chữ và vị trí cho câu khẩu hiệu góc dưới bên trái */
-.auth-page__slogan {
+.login-banner__art {
   position: relative;
-  z-index: 1;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  flex: none;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+.login-banner__dish {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+}
+
+.login-banner__dish img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.login-banner__dish--tofu {
+  left: -13%;
+  top: -7%;
+  width: 39%;
+}
+
+.login-banner__dish--pork {
+  left: 57%;
+  top: -11%;
+  width: 53%;
+}
+
+.login-banner__dish--egg {
+  left: 20%;
+  top: 17%;
+  width: 51%;
+}
+
+.login-banner__dish--greens {
+  left: 75%;
+  top: 29%;
+  width: 37%;
+}
+
+.login-banner__dish--bowl {
+  left: -5%;
+  top: 46%;
+  width: 40%;
+}
+
+.login-banner__dish--bun {
+  left: 44%;
+  top: 53%;
+  width: 54%;
+}
+
+.login-banner__slogan {
+  position: absolute;
+  left: 4.5%;
+  right: 6%;
+  top: 89.5%;
+  z-index: 2;
   margin: 0;
-  color: #FAF6F0;
+  color: var(--color-text-on-primary, #FAF6F0);
   font-family: var(--font-display);
   font-size: 3.333cqw;
   font-weight: var(--font-weight-display);
@@ -379,5 +431,14 @@
   }
   .auth-page__panel {
     padding: 40px 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-page,
+  .auth-page__banner,
+  .auth-card,
+  .auth-card--success {
+    animation: none;
   }
 }
