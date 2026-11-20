@@ -6,10 +6,12 @@ import IngredientInput from "../components/IngredientInput/IngredientInput";
 import StepForm from "../components/StepForm/StepForm";
 import DifficultyTags from "../components/DifficultyTags/DifficultyTags";
 import imageIcon from "../assets/image-icon.svg";
+import { getRecipeById } from "../api";
 import {
   CATEGORY_OPTIONS,
   FIELD_LIMITS,
   createInitialValues,
+  createEditValues,
   validateRecipeInfo,
   validateRecipe,
   buildFormData,
@@ -55,13 +57,68 @@ const fields = [
   { name: "difficulty", label: "Độ khó", type: "difficulty" },
 ];
 
-export default function RecipeForm({
+export default function RecipeForm(props) {
+  const { id } = useParams();
+  return id ? (
+    <EditRecipeLoader key={id} id={id} formProps={props} />
+  ) : (
+    <RecipeFormEditor key="create" {...props} />
+  );
+}
+
+function EditRecipeLoader({ id, formProps }) {
+  const [result, setResult] = useState(null);
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    let active = true;
+    getRecipeById(encodeURIComponent(id))
+      .then((recipe) => {
+        if (!recipe || String(recipe.id) !== id)
+          throw new Error("Không tìm thấy công thức.");
+        if (active) setResult({ recipe });
+      })
+      .catch((error) => {
+        if (active)
+          setResult({ error: error.message || "Không thể tải công thức." });
+      });
+    return () => {
+      active = false;
+    };
+  }, [id, attempt]);
+  if (!result) return <p role="status">Đang tải công thức...</p>;
+  if (result.error)
+    return (
+      <section role="alert">
+        <h1>Không thể mở công thức</h1>
+        <p>{result.error}</p>
+        <button
+          type="button"
+          onClick={() => {
+            setResult(null);
+            setAttempt((value) => value + 1);
+          }}
+        >
+          Thử lại
+        </button>{" "}
+        <Link to="/my-account/my-recipes">Về công thức của tôi</Link>
+      </section>
+    );
+  return <RecipeFormEditor {...formProps} initialRecipe={result.recipe} />;
+}
+
+function RecipeFormEditor({
+  initialRecipe,
   onSubmit = () => {},
   isSubmitting = false,
 }) {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [values, setValues] = useState(createInitialValues);
+  const [values, setValues] = useState(() =>
+    initialRecipe ? createEditValues(initialRecipe) : createInitialValues(),
+  );
+  const [existingImage, setExistingImage] = useState(
+    initialRecipe?.image ?? "",
+  );
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -99,13 +156,13 @@ export default function RecipeForm({
   };
 
   const handleRemoveImage = () => {
+    setExistingImage("");
     setImageFile(null);
     setImageError("");
     if (imageInputRef.current) imageInputRef.current.value = "";
     imageButtonRef.current?.focus();
   };
 
-  // TODO: Tải công thức hiện có khi chỉnh sửa ở bước kết nối API.
   const handleChange = (event) => {
     const { name, value } = event.target;
     setValues((previous) => ({ ...previous, [name]: value }));
@@ -165,6 +222,7 @@ export default function RecipeForm({
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    if (id) return;
     if (imageError) {
       imageButtonRef.current?.focus();
       return;
@@ -265,6 +323,9 @@ export default function RecipeForm({
           />
         ) : type === "select" ? (
           <select {...props}>
+            {values[name] && !options.includes(values[name]) && (
+              <option value={values[name]}>{values[name]}</option>
+            )}
             <option value="" disabled>
               {placeholder}
             </option>
@@ -315,6 +376,20 @@ export default function RecipeForm({
                 ref={imagePreviewRef}
                 className="recipe-form__image-preview"
                 alt="Ảnh xem trước của món ăn"
+              />
+            ) : existingImage ? (
+              <img
+                className="recipe-form__image-preview"
+                alt="Ảnh hiện tại của món ăn"
+                src={
+                  new URL(
+                    existingImage,
+                    (
+                      import.meta.env.VITE_API_URL ||
+                      "http://localhost:5000/api"
+                    ).replace(/\/?$/, "/"),
+                  ).href
+                }
               />
             ) : (
               <img className="recipe-form__image-icon" src={imageIcon} alt="" />
@@ -367,7 +442,7 @@ export default function RecipeForm({
                 {imageError}
               </p>
             )}
-            {(imageFile || imageError) && (
+            {(imageFile || imageError || existingImage) && (
               <button
                 className="recipe-form__image-remove"
                 type="button"
@@ -483,9 +558,13 @@ export default function RecipeForm({
           <button
             className="recipe-form__submit"
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || Boolean(id)}
           >
-            {isSubmitting ? "Đang lưu..." : id ? "Lưu thay đổi" : "Đăng món"}
+            {isSubmitting
+              ? "Đang lưu..."
+              : id
+                ? "Lưu thay đổi (chưa kết nối)"
+                : "Đăng món"}
           </button>
         </div>
       </form>

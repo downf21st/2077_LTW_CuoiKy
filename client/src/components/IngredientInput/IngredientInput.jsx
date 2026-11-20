@@ -67,6 +67,9 @@ export default function IngredientInput({
               <option value="" disabled>
                 Chọn đơn vị
               </option>
+              {row.unit && !UNIT_OPTIONS.includes(row.unit) && (
+                <option value={row.unit}>{row.unit}</option>
+              )}
               {UNIT_OPTIONS.map((unit) => (
                 <option key={unit} value={unit}>
                   {unit}
