@@ -1,10 +1,13 @@
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import lockIcon from "../assets/lock-keyhole.svg";
 import StarRating, { StarInput } from "../components/StarRating/StarRating";
-import { MOCK_RECIPES } from "../data/mockRecipes";
+import { getRecipeById } from "../api";
+import useAuth from "../hooks/useAuth";
 import "./RecipeDetail.css";
 
 function RecipeContent({ recipe }) {
+  const { isLoggedIn } = useAuth();
   const ingredients = recipe.ingredients ?? [];
   const steps = recipe.steps ?? [];
   const equipment = recipe.equipment ?? [];
@@ -105,8 +108,10 @@ function RecipeContent({ recipe }) {
         aria-label="Tính năng dành cho thành viên"
       >
         <p className="recipe-detail__guest-message">
-          <img className="recipe-detail__lock-icon" src={lockIcon} alt="" />
-          Đăng nhập để lưu món yêu thích và lên thực đơn tuần.
+          {!isLoggedIn && <img className="recipe-detail__lock-icon" src={lockIcon} alt="" />}
+          {isLoggedIn
+            ? "Tính năng lưu món yêu thích và lên thực đơn tuần đang được phát triển."
+            : "Đăng nhập để lưu món yêu thích và lên thực đơn tuần."}
         </p>
         <div className="recipe-detail__guest-actions">
           <button
@@ -123,12 +128,12 @@ function RecipeContent({ recipe }) {
           >
             Thêm vào thực đơn tuần
           </button>
-          <Link
+          {!isLoggedIn && <Link
             className="recipe-detail__button recipe-detail__button--primary recipe-detail__button--login"
             to="/login"
           >
             Đăng nhập
-          </Link>
+          </Link>}
         </div>
       </section>
       <div className="recipe-detail__content">
@@ -331,16 +336,44 @@ function RecipeContent({ recipe }) {
 
 export default function RecipeDetail() {
   const { id } = useParams();
-  const recipe = MOCK_RECIPES.find((item) => item.id === id);
-  if (!recipe)
+  const [recipe, setRecipe] = useState(null);
+  const [status, setStatus] = useState("loading");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    getRecipeById(id)
+      .then((data) => {
+        if (!isMounted) return;
+        setRecipe(data);
+        setStatus("done");
+      })
+      .catch(() => {
+        if (isMounted) setStatus("error");
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
+
+  if (status === "loading")
+    return (
+      <div className="recipe-detail">
+        <p>Đang tải món ăn...</p>
+      </div>
+    );
+
+  if (status === "error" || !recipe)
     return (
       <div className="recipe-detail" key={id}>
         <h1>Không tìm thấy món ăn</h1>
-        <p>Món ăn này không có trong dữ liệu mẫu.</p>
+        <p>Món ăn này không tồn tại hoặc chưa kết nối được server.</p>
         <Link className="recipe-detail__back" to="/">
           Về trang chủ
         </Link>
       </div>
     );
+
   return <RecipeContent key={recipe.id} recipe={recipe} />;
 }
