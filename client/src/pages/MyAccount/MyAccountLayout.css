@@ -12,8 +12,14 @@
   min-width: 0;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .my-account {
-    padding: var(--space-4) 16px 48px;
+    padding: var(--space-4) 20px 56px;
+  }
+}
+
+@media (max-width: 480px) {
+  .my-account {
+    padding: var(--space-3) 14px 40px;
   }
 }

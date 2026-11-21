@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import emptyBreadIcon from '../../assets/add.svg';
 import { getRecipes } from '../../api';
@@ -33,7 +33,26 @@ function writeFavoriteIds(storageKey, ids) {
   try {
     localStorage.setItem(storageKey, JSON.stringify(ids));
   } catch {
+
   }
+}
+
+function fetchFavoriteData(storageKey) {
+  return getRecipes({ page: 1, limit: 100 }).then((list) => {
+    const recipes = Array.isArray(list) ? list : [];
+    const stored = readFavoriteIds(storageKey);
+
+    if (stored === null) {
+      const initialIds = recipes
+        .slice(0, INITIAL_DEMO_COUNT)
+        .map(getRecipeId)
+        .filter(Boolean);
+      writeFavoriteIds(storageKey, initialIds);
+      return { recipes, ids: initialIds };
+    }
+
+    return { recipes, ids: stored };
+  });
 }
 
 function HeartIcon() {
@@ -63,7 +82,6 @@ export default function Favorites() {
   const [errorMessage, setErrorMessage] = useState('');
   const [undoToast, setUndoToast] = useState(null);
 
-  const requestIdRef = useRef(0);
   const toastTimerRef = useRef(null);
 
   const clearToastTimer = () => {
@@ -77,46 +95,46 @@ export default function Favorites() {
     return () => clearToastTimer();
   }, []);
 
-  const loadFavorites = useCallback(async () => {
-    const currentId = ++requestIdRef.current;
+  useEffect(() => {
+    let isMounted = true;
+
+    fetchFavoriteData(storageKey)
+      .then(({ recipes, ids }) => {
+        if (!isMounted) return;
+        setAllRecipes(recipes);
+        setFavoriteIds(ids);
+        setStatus('done');
+      })
+      .catch((err) => {
+        if (!isMounted) return;
+        setErrorMessage(
+          err?.message || 'Không thể tải danh sách món yêu thích. Vui lòng thử lại.'
+        );
+        setStatus('error');
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [storageKey]);
+
+  const handleRetry = () => {
     setStatus('loading');
     setErrorMessage('');
 
-    try {
-      const list = await getRecipes({ page: 1, limit: 100 });
-      if (currentId !== requestIdRef.current) return;
-
-      const recipes = Array.isArray(list) ? list : [];
-      setAllRecipes(recipes);
-
-      const stored = readFavoriteIds(storageKey);
-      if (stored === null) {
-        const initialIds = recipes
-          .slice(0, INITIAL_DEMO_COUNT)
-          .map(getRecipeId)
-          .filter(Boolean);
-        writeFavoriteIds(storageKey, initialIds);
-        setFavoriteIds(initialIds);
-      } else {
-        setFavoriteIds(stored);
-      }
-
-      setStatus('done');
-    } catch (err) {
-      if (currentId !== requestIdRef.current) return;
-      setErrorMessage(
-        err?.message || 'Không thể tải danh sách món yêu thích. Vui lòng thử lại.'
-      );
-      setStatus('error');
-    }
-  }, [storageKey]);
-
-  useEffect(() => {
-    loadFavorites();
-    return () => {
-      requestIdRef.current += 1;
-    };
-  }, [loadFavorites]);
+    fetchFavoriteData(storageKey)
+      .then(({ recipes, ids }) => {
+        setAllRecipes(recipes);
+        setFavoriteIds(ids);
+        setStatus('done');
+      })
+      .catch((err) => {
+        setErrorMessage(
+          err?.message || 'Không thể tải danh sách món yêu thích. Vui lòng thử lại.'
+        );
+        setStatus('error');
+      });
+  };
 
   const favoriteRecipes = useMemo(() => {
     const recipeMap = new Map(
@@ -218,7 +236,7 @@ export default function Favorites() {
           <button
             type="button"
             className="favorites-page__cta-btn"
-            onClick={loadFavorites}
+            onClick={handleRetry}
           >
             Thử lại
           </button>
