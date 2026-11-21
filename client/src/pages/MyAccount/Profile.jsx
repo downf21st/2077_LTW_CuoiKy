@@ -144,7 +144,7 @@ function ProfileForm() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isDirty]);
 
-  useEffect(() => {
+    useEffect(() => {
     if (!isDirty) return;
 
     const handleDocumentClick = (event) => {
@@ -168,13 +168,14 @@ function ProfileForm() {
         event.stopPropagation();
         setPendingNav(nextTarget);
       } catch {
+        // URL không hợp lệ: bỏ qua để trình duyệt xử lý liên kết như bình thường
       }
     };
 
     document.addEventListener('click', handleDocumentClick, true);
     return () => document.removeEventListener('click', handleDocumentClick, true);
   }, [isDirty, pathname]);
-
+  
   const displayEmail = user?.email || 'Chưa cập nhật';
   const roleLabel = ROLE_LABELS[role] || 'Thành viên';
   const avatarInitial = getAvatarInitial(formData.name, user?.email);
