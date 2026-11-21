@@ -51,10 +51,8 @@ export default function Home() {
   const requestIdRef = useRef(0);
   const debouncedInput = useDebounce(searchInput, 500);
 
-  const fetchRecipes = useCallback(async () => {
+    const fetchRecipes = useCallback(async () => {
     const currentId = ++requestIdRef.current;
-    setStatus('loading');
-    setErrorMessage('');
 
     try {
       const list = await getRecipes({ page: 1, limit: 100 });
@@ -76,6 +74,12 @@ export default function Home() {
     return () => {
       requestIdRef.current += 1;
     };
+  }, [fetchRecipes]);
+
+  const handleRetry = useCallback(() => {
+    setStatus('loading');
+    setErrorMessage('');
+    fetchRecipes();
   }, [fetchRecipes]);
 
   const featuredRecipe = useMemo(() => getRecipeOfTheDay(allRecipes), [allRecipes]);
@@ -253,7 +257,7 @@ export default function Home() {
         recipes={searchedRecipes}
         status={status}
         errorMessage={errorMessage}
-        onRetry={fetchRecipes}
+        onRetry={handleRetry}
         isFiltering={isFiltering}
         onResetFilters={handleResetFilters}
       />
