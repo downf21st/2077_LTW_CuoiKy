@@ -58,10 +58,11 @@ const sendServerError = (res, message, error) => {
 const createBadRequest = (message) => Object.assign(new Error(message), { status: 400 });
 
 const parseFormArray = (value, fieldName, optional = false) => {
-  if (value === undefined || value === null || value === '') {
+  if (value === undefined || value === '') {
     if (optional) return [];
     throw createBadRequest(`Thiếu trường ${fieldName}.`);
   }
+  if (value === null) throw createBadRequest(`${fieldName} không được là null.`);
 
   let parsed;
   try {
@@ -322,7 +323,13 @@ const getRecipeById = async (req, res) => {
     const recipes = await readJsonArray(recipesFile, 'recipes.json');
     const recipe = recipes.find((item) => String(item.id) === req.params.id);
 
-    if (!recipe) {
+    const isVisible = recipe && (
+      (recipe.status || 'approved') === 'approved'
+      || req.user?.role === 'admin'
+      || String(recipe.authorId) === String(req.user?.id)
+    );
+
+    if (!isVisible) {
       return res.status(404).json({
         success: false,
         message: 'Không tìm thấy công thức.'
@@ -352,6 +359,17 @@ const createRecipe = async (req, res) => {
     const title = typeof body.title === 'string' ? body.title.trim() : '';
     if (!title) throw createBadRequest('Tên món ăn là bắt buộc.');
     if (!req.file) throw createBadRequest('Vui lòng tải ảnh công thức lên.');
+    if (body.description !== undefined && typeof body.description !== 'string') {
+      throw createBadRequest('description phải là chuỗi.');
+    }
+    if (body.category !== undefined && (
+      typeof body.category !== 'string' || !body.category.trim()
+    )) {
+      throw createBadRequest('category phải là chuỗi không rỗng.');
+    }
+    if (body.difficulty !== undefined && !['Dễ', 'Trung bình', 'Khó'].includes(body.difficulty)) {
+      throw createBadRequest('difficulty phải là Dễ, Trung bình hoặc Khó.');
+    }
 
     const cleanIngredients = parseRecipeIngredients(body.ingredients);
     const cleanSteps = parseRecipeSteps(body.steps);
@@ -365,11 +383,6 @@ const createRecipe = async (req, res) => {
       : parsePositiveIntegerField(body.servings, 'servings');
     const difficulty = body.difficulty || 'Dễ';
 
-    if (!['Dễ', 'Trung bình', 'Khó'].includes(difficulty)) {
-      throw createBadRequest('difficulty phải là Dễ, Trung bình hoặc Khó.');
-    }
-
-    const recipes = await readJsonArray(recipesFile, 'recipes.json');
     const recipe = {
       id: `recipe-${crypto.randomUUID()}`,
       title,
@@ -391,6 +404,7 @@ const createRecipe = async (req, res) => {
       createdAt: new Date().toISOString()
     };
 
+    const recipes = await readJsonArray(recipesFile, 'recipes.json');
     recipes.push(recipe);
     await writeRecipes(recipes);
 
