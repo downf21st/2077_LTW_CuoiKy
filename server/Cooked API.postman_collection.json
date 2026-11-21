@@ -1,0 +1,158 @@
+{
+  "info": {
+    "_postman_id": "a37e17ef-d17f-4b77-b9d8-1ec53bfdd12a",
+    "name": "Cooked API - Server",
+    "description": "Smoke test tuần tự các endpoint backend. Request tạo món cần chọn file JPG/PNG ở field image. Chạy toàn bộ collection theo thứ tự để các bước sửa/xóa dùng recipeId do bước tạo trả về.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "memberId", "value": "user-001" },
+    { "key": "adminId", "value": "user-002" },
+    { "key": "publicRecipeId", "value": "dish0002" },
+    { "key": "recipeId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Dọn yêu thích của món thử còn sót (200/404)",
+      "request": { "method": "DELETE", "header": [{ "key": "x-user-id", "value": "{{memberId}}" }], "url": "{{baseUrl}}/api/users/{{memberId}}/favorites/{{recipeId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Yêu thích cũ đã được dọn hoặc không tồn tại', function () { pm.expect([200, 404]).to.include(pm.response.code); });"] } }]
+    },
+    {
+      "name": "Dọn món thử còn sót từ lần chạy trước (200/404)",
+      "request": { "method": "DELETE", "header": [{ "key": "x-user-id", "value": "{{memberId}}" }], "url": "{{baseUrl}}/api/recipes/{{recipeId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Không còn món thử cũ hoặc đã dọn xong', function () { pm.expect([200, 404]).to.include(pm.response.code); pm.collectionVariables.unset('recipeId'); });"] } }]
+    },
+    {
+      "name": "GET danh sách công thức",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/recipes?page=1&limit=5" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Trả 200 và data là mảng', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data).to.be.an('array'); });"] } }]
+    },
+    {
+      "name": "GET lọc tác giả và nguyên liệu",
+      "request": { "method": "GET", "header": [{ "key": "x-user-id", "value": "{{memberId}}" }], "url": "{{baseUrl}}/api/recipes?authorId={{memberId}}&ingredients=thịt,hành&page=1&limit=5" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Trả 200 và giữ thông tin phân trang', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().pagination).to.be.an('object'); });", "pm.test('Kết quả có matchCount', function () { pm.response.json().data.forEach(function (recipe) { pm.expect(recipe).to.have.property('matchCount'); }); });"] } }]
+    },
+    {
+      "name": "GET danh mục",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/categories" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Trả danh sách category', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data).to.be.an('array'); });"] } }]
+    },
+    {
+      "name": "POST đăng nhập member",
+      "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"email\": \"member@cooked.test\",\n  \"password\": \"member123\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/users/login" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Đăng nhập trả thông tin user', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().id).to.eql(pm.collectionVariables.get('memberId')); });"] } }]
+    },
+    {
+      "name": "POST đăng ký thiếu dữ liệu (400)",
+      "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Postman test\",\n  \"email\": \"postman-invalid@cooked.test\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/users/register" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Dữ liệu thiếu trả 400 có message', function () { pm.response.to.have.status(400); pm.expect(pm.response.json().message).to.be.a('string'); });"] } }]
+    },
+    {
+      "name": "GET chi tiết công thức công khai",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/recipes/{{publicRecipeId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Trả chi tiết món approved', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.id).to.eql(pm.collectionVariables.get('publicRecipeId')); });"] } }]
+    },
+    {
+      "name": "POST tạo món thử (chọn ảnh JPG/PNG trước khi gửi)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "x-user-id", "value": "{{memberId}}" }],
+        "body": { "mode": "formdata", "formdata": [
+          { "key": "title", "value": "Postman - công thức thử", "type": "text" },
+          { "key": "description", "value": "Món thử để kiểm tra luồng API rồi tự xóa.", "type": "text" },
+          { "key": "category", "value": "Món thử nghiệm", "type": "text" },
+          { "key": "cookingTime", "value": "20", "type": "text" },
+          { "key": "servings", "value": "2", "type": "text" },
+          { "key": "difficulty", "value": "Dễ", "type": "text" },
+          { "key": "equipment", "value": "[\"Nồi\",\"Dao\"]", "type": "text" },
+          { "key": "ingredients", "value": "[{\"name\":\"Thịt gà\",\"quantity\":200,\"unit\":\"g\"}]", "type": "text" },
+          { "key": "steps", "value": "[{\"title\":\"Nấu thử\",\"duration\":10,\"instruction\":\"Nấu chín món thử.\"}]", "type": "text" },
+          { "key": "image", "type": "file", "src": "" }
+        ] },
+        "url": "{{baseUrl}}/api/recipes"
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Tạo món trả 201 và pending', function () { pm.response.to.have.status(201); var recipe = pm.response.json().data; pm.expect(recipe.status).to.eql('pending'); pm.collectionVariables.set('recipeId', recipe.id); });"] } }]
+    },
+    {
+      "name": "GET món pending bằng tài khoản tác giả",
+      "request": { "method": "GET", "header": [{ "key": "x-user-id", "value": "{{memberId}}" }], "url": "{{baseUrl}}/api/recipes/{{recipeId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Tác giả xem được món pending', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.status).to.eql('pending'); });"] } }]
+    },
+    {
+      "name": "GET món pending với tư cách khách (404)",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/recipes/{{recipeId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Khách không xem được món pending', function () { pm.response.to.have.status(404); pm.expect(pm.response.json().success).to.eql(false); });"] } }]
+    },
+    {
+      "name": "GET lọc món pending theo authorId",
+      "request": { "method": "GET", "header": [{ "key": "x-user-id", "value": "{{memberId}}" }], "url": "{{baseUrl}}/api/recipes?authorId={{memberId}}&page=1&limit=100" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Tác giả nhận được món pending của mình', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.some(function (recipe) { return recipe.id === pm.collectionVariables.get('recipeId'); })).to.eql(true); });"] } }]
+    },
+    {
+      "name": "PUT cập nhật món thử của tác giả",
+      "request": { "method": "PUT", "header": [{ "key": "x-user-id", "value": "{{memberId}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Postman - công thức đã sửa\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/recipes/{{recipeId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Tác giả cập nhật được, status về pending', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.title).to.eql('Postman - công thức đã sửa'); pm.expect(pm.response.json().data.status).to.eql('pending'); });"] } }]
+    },
+    {
+      "name": "PUT món của người khác (403)",
+      "request": { "method": "PUT", "header": [{ "key": "x-user-id", "value": "{{memberId}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Không được phép sửa\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/recipes/{{publicRecipeId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Người không phải tác giả nhận 403', function () { pm.response.to.have.status(403); pm.expect(pm.response.json().success).to.eql(false); });"] } }]
+    },
+    {
+      "name": "DELETE món của người khác (403)",
+      "request": { "method": "DELETE", "header": [{ "key": "x-user-id", "value": "{{memberId}}" }], "url": "{{baseUrl}}/api/recipes/{{publicRecipeId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Người không phải tác giả không xóa được', function () { pm.response.to.have.status(403); });"] } }]
+    },
+    {
+      "name": "GET danh sách yêu thích",
+      "request": { "method": "GET", "header": [{ "key": "x-user-id", "value": "{{memberId}}" }], "url": "{{baseUrl}}/api/users/{{memberId}}/favorites" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Đọc danh sách yêu thích trả mảng', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data).to.be.an('array'); });"] } }]
+    },
+    {
+      "name": "GET yêu thích user khác (403)",
+      "request": { "method": "GET", "header": [{ "key": "x-user-id", "value": "{{memberId}}" }], "url": "{{baseUrl}}/api/users/{{adminId}}/favorites" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Không xem được danh sách của user khác', function () { pm.response.to.have.status(403); });"] } }]
+    },
+    {
+      "name": "DELETE dọn yêu thích cũ trước lần chạy (200/404)",
+      "request": { "method": "DELETE", "header": [{ "key": "x-user-id", "value": "{{memberId}}" }], "url": "{{baseUrl}}/api/users/{{memberId}}/favorites/{{publicRecipeId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Không có mục cũ hoặc đã dọn xong', function () { pm.expect([200, 404]).to.include(pm.response.code); });"] } }]
+    },
+    {
+      "name": "POST thêm yêu thích",
+      "request": { "method": "POST", "header": [{ "key": "x-user-id", "value": "{{memberId}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"recipeId\": \"{{publicRecipeId}}\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/users/{{memberId}}/favorites" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Thêm món yêu thích trả 201', function () { pm.response.to.have.status(201); });"] } }]
+    },
+    {
+      "name": "POST thêm trùng yêu thích (409)",
+      "request": { "method": "POST", "header": [{ "key": "x-user-id", "value": "{{memberId}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"recipeId\": \"{{publicRecipeId}}\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/users/{{memberId}}/favorites" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Không lưu trùng, trả 409', function () { pm.response.to.have.status(409); });"] } }]
+    },
+    {
+      "name": "DELETE bỏ yêu thích",
+      "request": { "method": "DELETE", "header": [{ "key": "x-user-id", "value": "{{memberId}}" }], "url": "{{baseUrl}}/api/users/{{memberId}}/favorites/{{publicRecipeId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Bỏ món yêu thích trả 200', function () { pm.response.to.have.status(200); });"] } }]
+    },
+    {
+      "name": "DELETE bỏ món chưa lưu (404)",
+      "request": { "method": "DELETE", "header": [{ "key": "x-user-id", "value": "{{memberId}}" }], "url": "{{baseUrl}}/api/users/{{memberId}}/favorites/{{publicRecipeId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Món không còn trong danh sách, trả 404', function () { pm.response.to.have.status(404); });"] } }]
+    },
+    {
+      "name": "DELETE xóa món thử và ảnh đã tải lên",
+      "request": { "method": "DELETE", "header": [{ "key": "x-user-id", "value": "{{memberId}}" }], "url": "{{baseUrl}}/api/recipes/{{recipeId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Tác giả xóa được món thử', function () { pm.response.to.have.status(200); });"] } }]
+    },
+    {
+      "name": "GET món đã xóa (404)",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/recipes/{{recipeId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Món đã xóa không còn truy cập', function () { pm.response.to.have.status(404); });"] } }]
+    },
+    {
+      "name": "GET danh sách với page sai (400)",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/recipes?page=abc" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Query sai trả 400 có thông báo', function () { pm.response.to.have.status(400); pm.expect(pm.response.json().message).to.be.a('string'); });"] } }]
+    }
+  ]
+}
