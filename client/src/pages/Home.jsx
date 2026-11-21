@@ -248,6 +248,15 @@ export default function Home() {
         isFiltering={isFiltering}
         onResetFilters={handleResetFilters}
       />
+      <RecipeList
+        key={JSON.stringify([searchTags, debouncedInput, searchMode, filters])}
+        recipes={searchedRecipes}
+        status={status}
+        errorMessage={errorMessage}
+        onRetry={fetchRecipes}
+        isFiltering={isFiltering}
+        onResetFilters={handleResetFilters}
+      />
     </div>
   );
 }
