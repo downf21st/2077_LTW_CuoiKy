@@ -242,16 +242,7 @@ export default function Home() {
         onRemoveSearchTag={handleRemoveSearchTag}
         resultCount={status === 'done' ? searchedRecipes.length : 0}
       />
-
-      <RecipeList
-        recipes={searchedRecipes}
-        status={status}
-        errorMessage={errorMessage}
-        onRetry={fetchRecipes}
-        isFiltering={isFiltering}
-        onResetFilters={handleResetFilters}
-      />
-      <RecipeList
+        <RecipeList
         key={JSON.stringify([searchTags, debouncedInput, searchMode, filters])}
         recipes={searchedRecipes}
         status={status}
