@@ -201,6 +201,7 @@ export default function Login() {
             json.message || "Email hoặc mật khẩu không chính xác.";
         }
       } catch {
+        // Không gọi được server: userData vẫn là null, dùng tài khoản mock bên dưới
       }
 
       if (rejectedMessage) {
