@@ -159,7 +159,7 @@ export default function Login() {
     return nextErrors;
   };
 
-  const handleSubmit = async (e) => {
+   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
@@ -174,6 +174,8 @@ export default function Login() {
 
     try {
       let userData = null;
+      let rejectedMessage = "";
+
       try {
         const res = await fetch(`${API_BASE}/users/login`, {
           method: "POST",
@@ -193,9 +195,17 @@ export default function Login() {
             email: rawUser.email || normalizedEmail,
             role: rawUser.role || "member",
           };
+        } else if (res.status === 400 || res.status === 401) {
+          const json = await res.json().catch(() => ({}));
+          rejectedMessage =
+            json.message || "Email hoặc mật khẩu không chính xác.";
         }
       } catch {
+      }
 
+      if (rejectedMessage) {
+        setServerError(rejectedMessage);
+        return;
       }
 
       if (!userData) {
