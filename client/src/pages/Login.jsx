@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import dishEgg from "../assets/banner/0001.png";
 import dishPork from "../assets/banner/0002.png";
@@ -115,7 +115,15 @@ function CleanDishImage({ src, alt }) {
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
+
+  // Trang người dùng muốn vào trước khi bị đẩy về /login (do ProtectedRoute gửi sang)
+  const from = location.state?.from;
+  const isSafeBack = from && !["/login", "/register"].includes(from.pathname);
+  const redirectTo = isSafeBack
+    ? `${from.pathname}${from.search}${from.hash}`
+    : "/";
 
   const [formValues, setFormValues] = useState({
     email: "",
@@ -202,7 +210,7 @@ export default function Login() {
       }
 
       login(userData, { remember: formValues.rememberMe });
-      navigate("/");
+      navigate(redirectTo, { replace: true });
     } catch {
       setServerError("Email hoặc mật khẩu không chính xác.");
     } finally {
