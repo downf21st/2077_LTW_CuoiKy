@@ -33,7 +33,7 @@ function writeFavoriteIds(storageKey, ids) {
   try {
     localStorage.setItem(storageKey, JSON.stringify(ids));
   } catch {
-
+    // Trình duyệt chặn storage hoặc đầy bộ nhớ: bỏ qua, danh sách chỉ không được lưu lại
   }
 }
 
