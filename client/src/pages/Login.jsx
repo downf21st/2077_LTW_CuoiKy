@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import dishEgg from "../assets/banner/0001.png";
@@ -21,6 +21,97 @@ const MOCK_USERS = [
   },
   { id: "user-002", name: "Admin", email: "admin@cooked.test", role: "admin" },
 ];
+
+function CleanDishImage({ src, alt }) {
+  const [cleanedSrc, setCleanedSrc] = useState(src);
+
+  useEffect(() => {
+    let cancelled = false;
+    const img = new Image();
+
+    img.onload = () => {
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+      if (!w || !h) return;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(0, 0, w, h);
+      const data = imageData.data;
+      const total = w * h;
+      const visited = new Uint8Array(total);
+      const queue = new Int32Array(total);
+      const minMainArea = Math.max(500, Math.floor(total * 0.005));
+
+      for (let i = 0; i < total; i++) {
+        if (visited[i] || data[i * 4 + 3] <= 12) continue;
+
+        let head = 0;
+        let tail = 0;
+        queue[tail++] = i;
+        visited[i] = 1;
+
+        while (head < tail) {
+          const curr = queue[head++];
+          const x = curr % w;
+          const y = (curr - x) / w;
+
+          if (x > 0) {
+            const left = curr - 1;
+            if (!visited[left] && data[left * 4 + 3] > 12) {
+              visited[left] = 1;
+              queue[tail++] = left;
+            }
+          }
+          if (x + 1 < w) {
+            const right = curr + 1;
+            if (!visited[right] && data[right * 4 + 3] > 12) {
+              visited[right] = 1;
+              queue[tail++] = right;
+            }
+          }
+          if (y > 0) {
+            const up = curr - w;
+            if (!visited[up] && data[up * 4 + 3] > 12) {
+              visited[up] = 1;
+              queue[tail++] = up;
+            }
+          }
+          if (y + 1 < h) {
+            const down = curr + w;
+            if (!visited[down] && data[down * 4 + 3] > 12) {
+              visited[down] = 1;
+              queue[tail++] = down;
+            }
+          }
+        }
+
+        if (tail < minMainArea) {
+          for (let k = 0; k < tail; k++) {
+            data[queue[k] * 4 + 3] = 0;
+          }
+        }
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+      if (!cancelled) {
+        setCleanedSrc(canvas.toDataURL("image/png"));
+      }
+    };
+
+    img.src = src;
+    return () => {
+      cancelled = true;
+    };
+  }, [src]);
+
+  return <img src={cleanedSrc} alt={alt} />;
+}
 
 export default function Login() {
   const navigate = useNavigate();
@@ -95,7 +186,9 @@ export default function Login() {
             role: rawUser.role || "member",
           };
         }
-      } catch (err) {}
+      } catch {
+
+      }
 
       if (!userData) {
         await new Promise((r) => setTimeout(r, 400));
@@ -110,7 +203,7 @@ export default function Login() {
 
       login(userData, { remember: formValues.rememberMe });
       navigate("/");
-    } catch (error) {
+    } catch {
       setServerError("Email hoặc mật khẩu không chính xác.");
     } finally {
       setIsLoading(false);
@@ -119,25 +212,28 @@ export default function Login() {
 
   return (
     <main className="auth-page auth-page--login">
-      <aside className="auth-page__banner auth-page__banner--login" aria-hidden="true">
+      <aside
+        className="auth-page__banner auth-page__banner--login"
+        aria-hidden="true"
+      >
         <div className="login-banner__art">
           <div className="login-banner__dish login-banner__dish--tofu">
-            <img src={dishTofu} alt="" />
+            <CleanDishImage src={dishTofu} alt="" />
           </div>
           <div className="login-banner__dish login-banner__dish--pork">
-            <img src={dishPork} alt="" />
+            <CleanDishImage src={dishPork} alt="" />
           </div>
           <div className="login-banner__dish login-banner__dish--egg">
-            <img src={dishEgg} alt="" />
+            <CleanDishImage src={dishEgg} alt="" />
           </div>
           <div className="login-banner__dish login-banner__dish--greens">
-            <img src={dishGreens} alt="" />
+            <CleanDishImage src={dishGreens} alt="" />
           </div>
           <div className="login-banner__dish login-banner__dish--bowl">
-            <img src={dishBowl} alt="" />
+            <CleanDishImage src={dishBowl} alt="" />
           </div>
           <div className="login-banner__dish login-banner__dish--bun">
-            <img src={dishBun} alt="" />
+            <CleanDishImage src={dishBun} alt="" />
           </div>
           <p className="login-banner__slogan">Mỗi ngày một món ăn</p>
         </div>
