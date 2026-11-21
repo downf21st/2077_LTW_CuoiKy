@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { getRecipes } from '../api';
 import useDebounce from '../hooks/useDebounce';
@@ -48,39 +48,38 @@ export default function Home() {
     difficulty: '',
   });
 
-  const requestIdRef = useRef(0);
   const debouncedInput = useDebounce(searchInput, 500);
-
-    const fetchRecipes = useCallback(async () => {
-    const currentId = ++requestIdRef.current;
-
-    try {
-      const list = await getRecipes({ page: 1, limit: 100 });
-      if (currentId !== requestIdRef.current) return;
-      setAllRecipes(Array.isArray(list) ? list : []);
-      setStatus('done');
-    } catch (err) {
-      if (currentId !== requestIdRef.current) return;
-      setAllRecipes([]);
-      setErrorMessage(
-        err?.message || 'Không thể tải danh sách món ăn. Vui lòng kiểm tra server và thử lại.'
-      );
-      setStatus('error');
-    }
-  }, []);
+    const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
-    fetchRecipes();
-    return () => {
-      requestIdRef.current += 1;
-    };
-  }, [fetchRecipes]);
+    let isMounted = true;
 
-  const handleRetry = useCallback(() => {
+    getRecipes({ page: 1, limit: 100 })
+      .then((list) => {
+        if (!isMounted) return;
+        setAllRecipes(Array.isArray(list) ? list : []);
+        setStatus('done');
+      })
+      .catch((err) => {
+        if (!isMounted) return;
+        setAllRecipes([]);
+        setErrorMessage(
+          err?.message || 'Không thể tải danh sách món ăn. Vui lòng kiểm tra server và thử lại.'
+        );
+        setStatus('error');
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [reloadKey]);
+
+  const handleRetry = () => {
     setStatus('loading');
     setErrorMessage('');
-    fetchRecipes();
-  }, [fetchRecipes]);
+    setReloadKey((prev) => prev + 1);
+  };
+
 
   const featuredRecipe = useMemo(() => getRecipeOfTheDay(allRecipes), [allRecipes]);
   const featuredId = featuredRecipe?._id || featuredRecipe?.id || 'recipe-001';
