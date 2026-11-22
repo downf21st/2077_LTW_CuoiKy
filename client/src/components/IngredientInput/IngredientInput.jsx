@@ -9,7 +9,7 @@ export default function IngredientInput({
   onChange,
   onAdd,
   onRemove,
-  error,
+  errors = {},
 }) {
   return (
     <section className="ingredient-input" aria-labelledby="ingredients-heading">
@@ -24,11 +24,18 @@ export default function IngredientInput({
           <FormField
             id={`ingredient-name-${row.id}`}
             label="Tên nguyên liệu"
+            error={errors[row.id]?.name}
             className="ingredient-input__name"
           >
             <input
               className="form-field__input"
               id={`ingredient-name-${row.id}`}
+              aria-invalid={Boolean(errors[row.id]?.name)}
+              aria-describedby={
+                errors[row.id]?.name
+                  ? `ingredient-name-${row.id}-error`
+                  : undefined
+              }
               type="text"
               placeholder="Tên nguyên liệu"
               value={row.name}
@@ -38,11 +45,18 @@ export default function IngredientInput({
           <FormField
             id={`ingredient-quantity-${row.id}`}
             label="Số lượng"
+            error={errors[row.id]?.quantity}
             className="ingredient-input__quantity"
           >
             <input
               className="form-field__input"
               id={`ingredient-quantity-${row.id}`}
+              aria-invalid={Boolean(errors[row.id]?.quantity)}
+              aria-describedby={
+                errors[row.id]?.quantity
+                  ? `ingredient-quantity-${row.id}-error`
+                  : undefined
+              }
               type="number"
               min="0"
               step="any"
@@ -56,11 +70,18 @@ export default function IngredientInput({
           <FormField
             id={`ingredient-unit-${row.id}`}
             label="Đơn vị"
+            error={errors[row.id]?.unit}
             className="ingredient-input__unit"
           >
             <select
               className="form-field__input"
               id={`ingredient-unit-${row.id}`}
+              aria-invalid={Boolean(errors[row.id]?.unit)}
+              aria-describedby={
+                errors[row.id]?.unit
+                  ? `ingredient-unit-${row.id}-error`
+                  : undefined
+              }
               value={row.unit}
               onChange={(event) => onChange(row.id, "unit", event.target.value)}
             >
@@ -87,9 +108,9 @@ export default function IngredientInput({
           </button>
         </div>
       ))}
-      {error && (
+      {errors._form && (
         <p className="form-field__error" role="alert">
-          {error}
+          {errors._form}
         </p>
       )}
       <button

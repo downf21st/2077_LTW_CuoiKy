@@ -6,7 +6,7 @@ import IngredientInput from "../components/IngredientInput/IngredientInput";
 import StepForm from "../components/StepForm/StepForm";
 import DifficultyTags from "../components/DifficultyTags/DifficultyTags";
 import imageIcon from "../assets/image-icon.svg";
-import { getRecipeById, updateRecipe } from "../api";
+import { getRecipeById, createRecipe, updateRecipe } from "../api";
 import {
   CATEGORY_OPTIONS,
   FIELD_LIMITS,
@@ -106,11 +106,7 @@ function EditRecipeLoader({ id, formProps }) {
   return <RecipeFormEditor {...formProps} initialRecipe={result.recipe} />;
 }
 
-function RecipeFormEditor({
-  initialRecipe,
-  onSubmit = () => {},
-  isSubmitting = false,
-}) {
+function RecipeFormEditor({ initialRecipe, onSubmit, isSubmitting = false }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [values, setValues] = useState(() =>
@@ -119,7 +115,7 @@ function RecipeFormEditor({
   const [existingImage, setExistingImage] = useState(
     initialRecipe?.image ?? "",
   );
-  const [errors, setErrors] = useState({});
+  const [, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [imageFile, setImageFile] = useState(null);
@@ -226,14 +222,9 @@ function RecipeFormEditor({
     event.preventDefault();
     if (savingRef.current || isSubmitting) return;
     setSaveMessage("");
-    if (imageError) {
-      imageButtonRef.current?.focus();
-      return;
-    }
-    if (!id && !imageFile) {
+    const missingImage = !id && !imageFile;
+    if (missingImage && !imageError) {
       setImageError("Vui lòng chọn ảnh JPG hoặc PNG.");
-      imageButtonRef.current?.focus();
-      return;
     }
     const nextErrors = validateRecipe(values);
     setSubmitted(true);
@@ -244,6 +235,10 @@ function RecipeFormEditor({
       ),
     });
     setErrors(nextErrors);
+    if (imageError || missingImage) {
+      imageButtonRef.current?.focus();
+      return;
+    }
     const firstInvalid = fields.find(({ name }) => nextErrors[name]);
     if (firstInvalid) {
       refs.current[firstInvalid.name]?.focus();
@@ -257,11 +252,13 @@ function RecipeFormEditor({
       return;
     }
     if (nextErrors.ingredients) {
+      const row = values.ingredients.find(
+        (item) => nextErrors.ingredients[item.id],
+      );
+      const field = row && Object.keys(nextErrors.ingredients[row.id])[0];
       document
         .getElementById(
-          values.ingredients[0]
-            ? `ingredient-name-${values.ingredients[0].id}`
-            : "ingredient-add",
+          row ? `ingredient-${field}-${row.id}` : "ingredient-add",
         )
         ?.focus();
       return;
@@ -280,13 +277,17 @@ function RecipeFormEditor({
       return;
     }
     const formData = buildFormData(values, imageFile);
-    if (!id) {
-      onSubmit(formData);
-      return;
-    }
     savingRef.current = true;
     setSaving(true);
     try {
+      if (!id) {
+        if (onSubmit) await onSubmit(formData);
+        else {
+          await createRecipe(formData);
+          navigate("/my-account/my-recipes", { replace: true });
+        }
+        return;
+      }
       const updated = await updateRecipe(id, formData);
       if (updated?.image) setExistingImage(updated.image);
       setImageFile(null);
@@ -306,7 +307,7 @@ function RecipeFormEditor({
   };
 
   const renderField = ({ name, label, type, placeholder, options, hint }) => {
-    const error = touched[name] ? errors[name] : undefined;
+    const error = touched[name] ? validateRecipeInfo(values)[name] : undefined;
     const fieldHint = hint;
     const describedBy =
       [error && `${name}-error`, fieldHint && `${name}-hint`]
@@ -481,7 +482,7 @@ function RecipeFormEditor({
           <div className="recipe-form__fields">{fields.map(renderField)}</div>
         </div>
         <IngredientInput
-          error={submitted ? validateRecipe(values).ingredients : undefined}
+          errors={submitted ? validateRecipe(values).ingredients : undefined}
           rows={values.ingredients}
           onAdd={() => {
             const row = {
@@ -516,7 +517,7 @@ function RecipeFormEditor({
           <EquipmentInput
             rows={values.equipment}
             errors={Object.fromEntries(
-              Object.entries(errors.equipment ?? {}).filter(
+              Object.entries(validateRecipeInfo(values).equipment ?? {}).filter(
                 ([id]) => touched.equipment?.[id],
               ),
             )}
