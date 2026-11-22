@@ -1,13 +1,99 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import lockIcon from "../assets/lock-keyhole.svg";
 import StarRating, { StarInput } from "../components/StarRating/StarRating";
 import { getRecipeById } from "../api";
 import useAuth from "../hooks/useAuth";
+import { getFavorites, addFavorite, removeFavorite } from "../api";
 import "./RecipeDetail.css";
 
+function FavoriteButton({ userId, recipeId }) {
+  const [state, setState] = useState("loading");
+  const [saved, setSaved] = useState(false);
+  const [message, setMessage] = useState("");
+  const [attempt, setAttempt] = useState(0);
+  const busy = useRef(false);
+  const active = useRef(false);
+  useEffect(() => {
+    active.current = true;
+    let current = true;
+    getFavorites(userId)
+      .then((list) => {
+        if (!Array.isArray(list))
+          throw new Error("Dữ liệu yêu thích không hợp lệ.");
+        if (current) {
+          setSaved(list.some((item) => String(item.id) === String(recipeId)));
+          setState("ready");
+        }
+      })
+      .catch(() => {
+        if (current) {
+          setMessage("Không thể tải trạng thái yêu thích.");
+          setState("error");
+        }
+      });
+    return () => {
+      current = false;
+      active.current = false;
+    };
+  }, [userId, recipeId, attempt]);
+  const toggle = async () => {
+    if (busy.current) return;
+    busy.current = true;
+    setState("pending");
+    setMessage("");
+    try {
+      if (saved) await removeFavorite(userId, recipeId);
+      else await addFavorite(userId, recipeId);
+      if (active.current) {
+        setSaved(!saved);
+        setState("ready");
+      }
+    } catch {
+      if (active.current) {
+        setMessage("Không thể cập nhật yêu thích. Vui lòng thử lại.");
+        setState("ready");
+      }
+    } finally {
+      busy.current = false;
+    }
+  };
+  return (
+    <div>
+      <button
+        className="recipe-detail__button recipe-detail__button--primary"
+        type="button"
+        disabled={state !== "ready"}
+        aria-pressed={saved}
+        onClick={toggle}
+      >
+        {state === "loading"
+          ? "Đang tải..."
+          : state === "pending"
+            ? "Đang cập nhật..."
+            : saved
+              ? "Đã lưu yêu thích"
+              : "Lưu yêu thích"}
+      </button>
+      {message && <p role="alert">{message}</p>}
+      {state === "error" && (
+        <button
+          type="button"
+          onClick={() => {
+            setMessage("");
+            setState("loading");
+            setAttempt((n) => n + 1);
+          }}
+        >
+          Thử lại
+        </button>
+      )}
+    </div>
+  );
+}
+
 function RecipeContent({ recipe }) {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
   const ingredients = recipe.ingredients ?? [];
   const steps = recipe.steps ?? [];
   const equipment = recipe.equipment ?? [];
@@ -108,19 +194,29 @@ function RecipeContent({ recipe }) {
         aria-label="Tính năng dành cho thành viên"
       >
         <p className="recipe-detail__guest-message">
-          {!isLoggedIn && <img className="recipe-detail__lock-icon" src={lockIcon} alt="" />}
+          {!isLoggedIn && (
+            <img className="recipe-detail__lock-icon" src={lockIcon} alt="" />
+          )}
           {isLoggedIn
-            ? "Tính năng lưu món yêu thích và lên thực đơn tuần đang được phát triển."
+            ? "Tính năng lên thực đơn tuần đang được phát triển."
             : "Đăng nhập để lưu món yêu thích và lên thực đơn tuần."}
         </p>
         <div className="recipe-detail__guest-actions">
-          <button
-            className="recipe-detail__button recipe-detail__button--locked"
-            type="button"
-            disabled
-          >
-            Lưu yêu thích
-          </button>
+          {isLoggedIn && user?.id ? (
+            <FavoriteButton
+              key={`${user.id}:${recipe.id}`}
+              userId={user.id}
+              recipeId={recipe.id}
+            />
+          ) : (
+            <button
+              className="recipe-detail__button recipe-detail__button--locked"
+              type="button"
+              disabled
+            >
+              Lưu yêu thích
+            </button>
+          )}
           <button
             className="recipe-detail__button recipe-detail__button--locked"
             type="button"
@@ -128,12 +224,14 @@ function RecipeContent({ recipe }) {
           >
             Thêm vào thực đơn tuần
           </button>
-          {!isLoggedIn && <Link
-            className="recipe-detail__button recipe-detail__button--primary recipe-detail__button--login"
-            to="/login"
-          >
-            Đăng nhập
-          </Link>}
+          {!isLoggedIn && (
+            <Link
+              className="recipe-detail__button recipe-detail__button--primary recipe-detail__button--login"
+              to="/login"
+            >
+              Đăng nhập
+            </Link>
+          )}
         </div>
       </section>
       <div className="recipe-detail__content">
@@ -357,7 +455,10 @@ export default function RecipeDetail() {
     };
   }, [id]);
 
-  if (status === "loading")
+  if (
+    status === "loading" ||
+    (status !== "error" && recipe && String(recipe.id) !== String(id))
+  )
     return (
       <div className="recipe-detail">
         <p>Đang tải món ăn...</p>
