@@ -6,6 +6,12 @@ import RecipeCard from "../../components/RecipeCard/RecipeCard";
 import emptyIcon from "../../assets/recipe-empty.svg";
 import "./MyRecipes.css";
 
+function displayRecipe(recipe) {
+  if (!recipe.image?.startsWith('/uploads/')) return recipe;
+  const apiUrl = new URL(import.meta.env.VITE_API_URL || 'http://localhost:5000/api', window.location.href);
+  return { ...recipe, image: new URL(recipe.image, apiUrl.origin).href };
+}
+
 export default function MyRecipes() {
   const { user } = useAuth();
   const userId = user?.id;
@@ -102,7 +108,7 @@ export default function MyRecipes() {
             {recipes.map((recipe) => (
               <div className="my-recipes__item" key={recipe.id}>
                 <RecipeCard
-                  recipe={recipe}
+                  recipe={displayRecipe(recipe)}
                   overlayAction={
                     <span
                       className={`my-recipes__status my-recipes__status--${recipe.status}`}
