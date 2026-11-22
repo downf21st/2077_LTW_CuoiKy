@@ -6,7 +6,7 @@ import IngredientInput from "../components/IngredientInput/IngredientInput";
 import StepForm from "../components/StepForm/StepForm";
 import DifficultyTags from "../components/DifficultyTags/DifficultyTags";
 import imageIcon from "../assets/image-icon.svg";
-import { getRecipeById, updateRecipe } from "../api";
+import { getRecipeById, createRecipe, updateRecipe } from "../api";
 import {
   CATEGORY_OPTIONS,
   FIELD_LIMITS,
@@ -106,11 +106,7 @@ function EditRecipeLoader({ id, formProps }) {
   return <RecipeFormEditor {...formProps} initialRecipe={result.recipe} />;
 }
 
-function RecipeFormEditor({
-  initialRecipe,
-  onSubmit = () => {},
-  isSubmitting = false,
-}) {
+function RecipeFormEditor({ initialRecipe, onSubmit, isSubmitting = false }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [values, setValues] = useState(() =>
@@ -281,13 +277,17 @@ function RecipeFormEditor({
       return;
     }
     const formData = buildFormData(values, imageFile);
-    if (!id) {
-      onSubmit(formData);
-      return;
-    }
     savingRef.current = true;
     setSaving(true);
     try {
+      if (!id) {
+        if (onSubmit) await onSubmit(formData);
+        else {
+          await createRecipe(formData);
+          navigate("/my-account/my-recipes", { replace: true });
+        }
+        return;
+      }
       const updated = await updateRecipe(id, formData);
       if (updated?.image) setExistingImage(updated.image);
       setImageFile(null);
