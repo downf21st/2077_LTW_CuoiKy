@@ -98,6 +98,9 @@ function RecipeContent({ recipe }) {
   const steps = recipe.steps ?? [];
   const equipment = recipe.equipment ?? [];
   const reviews = recipe.reviews ?? [];
+  const image = recipe.image?.startsWith('/uploads/')
+    ? new URL(recipe.image, new URL(import.meta.env.VITE_API_URL || 'http://localhost:5000/api', window.location.href).origin).href
+    : recipe.image;
   const cookingPath = `/recipe/${encodeURIComponent(recipe.id)}/cooking-mode`;
 
   return (
@@ -107,10 +110,10 @@ function RecipeContent({ recipe }) {
       </nav>
       <section className="recipe-detail__hero" aria-labelledby="recipe-title">
         <figure className="recipe-detail__photo">
-          {recipe.image ? (
+          {image ? (
             <img
               className="recipe-detail__photo-image"
-              src={recipe.image}
+              src={image}
               alt={recipe.title}
               width="584"
               height="474"
@@ -391,19 +394,21 @@ function RecipeContent({ recipe }) {
             <h3 className="recipe-detail__review-form-title">
               Bữa cơm của bạn thế nào?
             </h3>
-            <p className="recipe-detail__review-login-hint">
+            {!isLoggedIn && <p className="recipe-detail__review-login-hint">
               <img className="recipe-detail__lock-icon" src={lockIcon} alt="" />{" "}
               Đăng nhập để đánh giá và bình luận.
-            </p>
+            </p>}
+            {!isLoggedIn && (
             <Link
               className="recipe-detail__button recipe-detail__button--primary recipe-detail__review-form-button"
               to="/login"
             >
               Đăng nhập
             </Link>
+            )}
             <fieldset className="recipe-detail__rating-field" disabled>
               <legend className="recipe-detail__rating-legend">
-                Điểm của bạn · Chưa đăng nhập
+                {isLoggedIn ? 'Điểm của bạn' : 'Điểm của bạn · Chưa đăng nhập'}
               </legend>
               <StarInput name="rating" />
             </fieldset>
@@ -423,7 +428,7 @@ function RecipeContent({ recipe }) {
               Gửi đánh giá
             </button>
             <p className="recipe-detail__review-form-note">
-              Chưa thể gửi khi chưa đăng nhập.
+              {isLoggedIn ? 'Tính năng đánh giá đang được phát triển.' : 'Chưa thể gửi khi chưa đăng nhập.'}
             </p>
           </form>
         </div>

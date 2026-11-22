@@ -1,0 +1,98 @@
+[33m1edae53[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mbackend[m[33m)[m fix: restore client files from backend branch
+[33mc151754[m Merge remote-tracking branch 'origin/backend' into backend
+[33mdb3b900[m Merge branch 'backend' of https://github.com/downf21st/2077_LTW_CuoiKy into backend
+[33m9c33f1e[m Merge remote-tracking branch 'origin/main' into backend
+[33m896d2a8[m[33m ([m[1;31morigin/backend[m[33m)[m Merge pull request #17 from downf21st/fe-core
+[33m11efe4d[m[33m ([m[1;31morigin/fe-core[m[33m, [m[1;32mfe-detail[m[33m)[m Merge pull request #16 from downf21st/fe-home
+[33m48ccd3f[m feat(redux): đăng ký cartSlice vào store
+[33mbd46742[m feat(redux): hoàn thiện menuSlice cho lưới 7 ngày x 3 bữa
+[33m92ce2be[m feat(redux): thêm cartSlice cho giỏ đi chợ
+[33m9bad6d8[m[33m ([m[1;31morigin/fe-home[m[33m)[m feat(ui): hoàn thiện responsive Header mobile, fix UI CookingMode và chuẩn bị API
+[33mfe3e746[m fix(data): cập nhật lại link ảnh chuẩn xác cho từng món ăn trong recipes.json
+[33m1517bcb[m feat(server): hoàn thiện logic phân quyền chỉnh sửa và xóa món ăn theo authorId
+[33mef1d3ff[m Merge pull request #15 from downf21st/fe-detail
+[33mbbb2a75[m[33m ([m[1;31morigin/fe-detail[m[33m)[m feat(cooking-mode): nâng cao giao diện người dùng trên thiết bị di động và cải thiện khả năng tiếp cận đối với các bước nấu ăn
+[33m3179bdb[m feat(home): lấy danh sách món từ API thay cho mock data
+[33m32119fe[m feat(api): thêm api.jsx gọi GET /api/recipes
+[33m4c0e518[m Merge pull request #14 from downf21st/fe-home
+[33m1b7dfb3[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m Merge pull request #12 from downf21st/revert-10-fe-home
+[33mc89a132[m[33m ([m[1;31morigin/revert-10-fe-home[m[33m)[m Revert "fix UI Mobile (khung cuộn chọn món, 3 chấm phân trang, header) và setup RecipeCard"
+[33m34ed791[m Merge pull request #11 from downf21st/fe-detail
+[33m3623cfc[m Merge pull request #10 from downf21st/fe-home
+[33m0a771a6[m[33m ([m[1;32mfe-home[m[33m)[m feat(cooking-mode): fix UI Mobile (khung cuộn chọn món, 3 chấm phân trang, header) và setup RecipeCard chờ API
+[33m6f351b0[m feat(data): bổ sung dữ liệu khu vực nấu ăn
+[33mb2476e3[m feat(server): cập nhật toàn bộ Controller CRUD khớp với schema dữ liệu mới
+[33m1eb90c5[m Merge pull request #9 from downf21st/fix/shared-layout
+[33mb973530[m fix(sidebar): sửa bố cục và thêm hiệu ứng điều hướng
+[33m3a5b91f[m refactor(data): cập nhật schema mới cho users.json và recipes.json theo yêu cầu nhóm
+[33m49b5cbe[m Merge pull request #8 from downf21st/fe-detail
+[33m43b9bac[m feat(cooking-mode): thêm các tài nguyên SVG cho nút đóng và bộ đếm thời gian
+[33mab899d5[m feat(detail): hiển thị chi tiết từ dữ liệu mẫu
+[33m83ec5a3[m feat(cooking-mode): thêm chế độ nấu từng bước
+[33m70caf6a[m feat(cooking-mode): thêm giao diện chọn món từ dữ liệu mẫu
+[33mf0fdf1e[m feat(cooking-mode): dựng khung trang khu vực nấu ăn
+[33m22985c5[m Merge pull request #7 from downf21st/fe-home
+[33md9afcab[m feat(redux): bọc Provider quanh App
+[33m294bdcb[m feat(redux): tạo store và menuSlice cho thực đơn tuần
+[33m3388a93[m chore(hooks): xóa useDebounce.js trùng với useDebounce.jsx
+[33mb54c207[m feat(home): hoàn thiện responsive Mobile, fix Header/Sidebar chuẩn Figma và nâng cấp Multi-tag Search
+[33m9de6c0f[m feat(server): hoàn thiện chức năng GET /api/recipes/:id xem chi tiết món ăn theo ID
+[33me6fefaf[m feat(data): thêm mock data 9 món theo cấu trúc recipes.json
+[33m055f613[m Merge pull request #6 from downf21st/fix/shared-layout
+[33m5e3f714[m style(layout): format lại bằng Prettier
+[33m3a62971[m feat(layout): cập nhật sidebar và footer
+[33m1e91251[m feat(footer): thêm các biểu tượng SVG vào phần chân trang (footer), bao gồm: đường phân cách (divider), GitHub, Instagram, gửi (send), xác nhận (submit) và Threads.
+[33m577a859[m feat(assets): thêm các biểu tượng SVG cho avatar, danh mục, nấu ăn, trang chủ, đăng nhập và chuyển đổi trạng thái (toggle)
+[33mfaf5762[m fix(layout): giữ chiều rộng trang và bỏ render trùng
+[33m43816c8[m[33m ([m[1;32mfe-core[m[33m)[m Merge pull request #5 from downf21st/fe-detail
+[33m864bc34[m Merge pull request #4 from downf21st/fe-home
+[33m98fa41e[m feat(home): hoàn thiện UI Hero, SearchBar và RecipeList theo Figma
+[33md7b3ba0[m style: đồng bộ màu thanh cuộn cho toàn bộ trang
+[33mb18ea0d[m feat(detail): dùng sao đánh giá ở hero, danh sách và form
+[33m9ab0d64[m feat(detail): thêm component StarRating và StarInput
+[33md8824f1[m feat(detail): hoàn thiện danh sách nguyên liệu và hộp mẹo
+[33m9692d0d[m feat(detail): hoàn thiện khu vực ảnh món ăn
+[33m1945773[m feat(server): hoàn thiện controller GET /api/recipes có hỗ trợ tìm kiếm và phân trang
+[33mf28fb99[m feat(hooks): viết custom hook useDebounce
+[33m1bb7f1f[m feat(hooks): viết custom hook useDebounce
+[33m0a7ed6c[m chore(layout): cập nhật layout và dọn code ngày thứ 3
+[33m07e1283[m Merge pull request #3 from downf21st/fe-detail
+[33m1af892d[m fix(RecipeDetail.jsx): cập nhật đường dẫn nhập cho tài nguyên biểu tượng ổ khóa
+[33m2cca64a[m fix(RecipeDetail.css): đường dẫn import chính xác cho các biến
+[33m8aa4787[m Merge remote-tracking branch 'origin/fe-core' into fe-detail
+[33mee93c7d[m Merge pull request #2 from downf21st/fe-home
+[33m65c92d1[m Merge branch 'fe-core' into fe-home
+[33mc7b077d[m feat(lock-keyhole): thêm tài nguyên SVG cho biểu tượng lỗ khóa
+[33mcbfb580[m feat(sidebar): cập nhật chính xác bộ icon sidebar theo thiết kế Figma của Đông
+[33m3a5a3c4[m Merge pull request #1 from downf21st/fe-detail
+[33m2369f64[m Merge branch 'fe-detail' of https://github.com/downf21st/2077_LTW_CuoiKy into fe-detail
+[33m03a9cc1[m style(recipe-detail): cải thiện khả năng hiển thị trên thiết bị di động và dọn dẹp CSS
+[33m3b7f008[m Merge branch 'fe-core' into fe-detail
+[33m2463690[m style(recipe-detail): thêm css cho trang chi tiết món ăn
+[33mc6f34f4[m chore(client): hiển thị tạm trang chi tiết món ăn
+[33m926efb1[m chore(client): cập nhật phiên bản các công cụ kiểm tra mã
+[33ma0e7841[m  style(recipe-detail): thêm css cho trang chi tiết món ăn
+[33meeab9fc[m feat(detail): thêm phần đánh giá và form bình luận
+[33m535ef45[m feat(detail): thêm khu vực nguyên liệu và các bước làm
+[33m1e31ca0[m feat(detail): dựng khung trang, breadcrumb, hero và thanh đăng nhập
+[33mde2785e[m feat(layout): dựng Layout bọc Header, Sidebar, nội dung và chỗ đặt footer
+[33mb7612cb[m feat(layout): dựng Sidebar bản Khách và nút đóng/mở
+[33m3ad9da1[m feat(layout): dựng Header với logo Cooked
+[33m0008c75[m fix(client): cập nhật token theo giá trị Figma
+[33m3ccd5f9[m feat(router): cấu hình routes và MainLayout với Outlet
+[33m3bc6540[m feat(router): thêm các trang placeholder
+[33m7a05cde[m feat(server): hoàn thành API lấy danh sách công thức ngày thứ 3
+[33m929a20e[m chore(data): khởi tạo cấu trúc users.json và recipes.json
+[33m967f94a[m chore(client): nạp styles/index.css thay index.css mặc định
+[33m208c7fb[m feat(client): thêm styles/index.css gom font và CSS nền
+[33md186e75[m feat(client): áp font và nền theo design system trong reset.css
+[33m9110682[m feat(client): cập nhật biến CSS theo design system Cooked
+[33mad606c1[m feat(client): khai báo @font-face cho font của dự án
+[33md4bea9e[m feat(client): thêm font Oi, VN Ultra, SF Pro Display dạng WOFF2
+[33m2fde856[m feat(client): thêm reset.css dùng chung
+[33m6b3303a[m feat(client): định nghĩa biến CSS cho màu, font, spacing
+[33m85f885c[m chore(server): khởi tạo dependencies và thêm script start
+[33ma7c5751[m feat: init React Vite client with router and redux
+[33me95204a[m feat: thêm README.md mô tả dự án và hướng dẫn sử dụng
+[33m26f68bc[m chore: thêm các thư mục làm việc tuần 1
+[33ma9fc524[m Init: Khởi tạo cấu trúc dự án recipe-app cho client và server
