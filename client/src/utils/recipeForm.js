@@ -137,17 +137,20 @@ export function validateRecipe(values = {}) {
     Number(value) > 0;
   const units = ["g", "ml", "muỗng canh", "muỗng cà phê"];
   const ingredients = values.ingredients ?? [];
-  if (
-    !ingredients.length ||
-    !ingredients.every(
-      (item) =>
-        item.name?.trim() &&
-        positive(item.quantity) &&
-        units.includes(item.unit?.trim()),
-    )
-  ) {
-    errors.ingredients =
-      "Mỗi nguyên liệu cần có tên, số lượng lớn hơn 0 và đơn vị hợp lệ.";
+  if (!ingredients.length)
+    errors.ingredients = { _form: "Vui lòng thêm ít nhất một nguyên liệu." };
+  else {
+    const rows = Object.fromEntries(
+      ingredients.flatMap((item) => {
+        const row = {};
+        if (!item.name?.trim()) row.name = "Vui lòng nhập tên nguyên liệu.";
+        if (!positive(item.quantity)) row.quantity = "Số lượng phải lớn hơn 0.";
+        if (!units.includes(item.unit?.trim()))
+          row.unit = "Vui lòng chọn đơn vị hợp lệ.";
+        return Object.keys(row).length ? [[item.id, row]] : [];
+      }),
+    );
+    if (Object.keys(rows).length) errors.ingredients = rows;
   }
   const steps = values.steps ?? [];
   if (!steps.length) {
