@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { useAuth } from '../context/useAuth' // sửa cho đúng tên hook của bạn
+import  useAuth  from '../../hooks/useAuth' 
 
 export default function ProtectedRoute({ allowedRoles }) {
   const { isLoggedIn, role } = useAuth()
