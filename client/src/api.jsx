@@ -94,3 +94,12 @@ export async function removeFavorite(userId, recipeId) {
     { method: 'DELETE' },
   )
 }
+
+export async function updateUserProfile(userId, payload) {
+  const json = await request(`/users/${encodeURIComponent(userId)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  return json.data ?? null
+}
