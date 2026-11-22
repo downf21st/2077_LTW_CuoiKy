@@ -21,10 +21,20 @@ export default function StepForm({
             {index + 1}
           </span>
           <div className="step-form__fields">
-            <FormField id={`step-title-${row.id}`} label="Tên bước">
+            <FormField
+              id={`step-title-${row.id}`}
+              label="Tên bước"
+              error={errors[row.id]?.title}
+            >
               <input
                 className="form-field__input"
                 id={`step-title-${row.id}`}
+                aria-invalid={Boolean(errors[row.id]?.title)}
+                aria-describedby={
+                  errors[row.id]?.title
+                    ? `step-title-${row.id}-error`
+                    : undefined
+                }
                 placeholder="Ví dụ: Sơ chế nguyên liệu"
                 value={row.title}
                 onChange={(event) =>
@@ -55,10 +65,20 @@ export default function StepForm({
                 }
               />
             </FormField>
-            <FormField id={`step-instruction-${row.id}`} label="Hướng dẫn">
+            <FormField
+              id={`step-instruction-${row.id}`}
+              label="Hướng dẫn"
+              error={errors[row.id]?.instruction}
+            >
               <textarea
                 className="form-field__input"
                 id={`step-instruction-${row.id}`}
+                aria-invalid={Boolean(errors[row.id]?.instruction)}
+                aria-describedby={
+                  errors[row.id]?.instruction
+                    ? `step-instruction-${row.id}-error`
+                    : undefined
+                }
                 placeholder="Mô tả bước"
                 value={row.instruction}
                 onChange={(event) =>

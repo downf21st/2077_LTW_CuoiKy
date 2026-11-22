@@ -48,8 +48,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background-color: var(--color-bg-placeholder, #EAECE6);
-  color: var(--color-text-brand, #1D3B2A);
+  background-color: var(--color-bg-placeholder);
+  color: var(--color-text-brand);
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 600;

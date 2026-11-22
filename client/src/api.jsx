@@ -49,6 +49,7 @@ export async function getRecipeById(id) {
   const json = await request(`/recipes/${id}`)
   return json.data
 }
+
 export async function createRecipe(formData) {
   const json = await request('/recipes', { method: 'POST', body: formData })
   return json.data
@@ -61,6 +62,7 @@ export async function updateRecipe(id, formData) {
   })
   return json.data
 }
+
 export async function deleteRecipe(id) {
   await request(`/recipes/${encodeURIComponent(id)}`, { method: 'DELETE' })
 }
@@ -70,6 +72,7 @@ export async function getMyRecipes(userId) {
   const json = await request(recipesPath({ authorId: userId }))
   return json.data
 }
+
 export async function getFavorites(userId) {
   if (!userId) return []
   const json = await request(`/users/${encodeURIComponent(userId)}/favorites`)
@@ -90,4 +93,13 @@ export async function removeFavorite(userId, recipeId) {
     `/users/${encodeURIComponent(userId)}/favorites/${encodeURIComponent(recipeId)}`,
     { method: 'DELETE' },
   )
+}
+
+export async function updateUserProfile(userId, payload) {
+  const json = await request(`/users/${encodeURIComponent(userId)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  return json.data ?? null
 }

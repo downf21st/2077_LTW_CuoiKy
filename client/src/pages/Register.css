@@ -1,6 +1,6 @@
 @media (min-width: 901px) {
   .register-page {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) min(50%,80vh)
   }
 }
 

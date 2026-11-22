@@ -108,10 +108,10 @@
 }
 
 .recipe-card__badge--match {
-  background-color: #E3EFE8;
+  background-color: color-mix(in srgb, var(--color-brand) 12%, var(--color-bg-surface));
   color: var(--color-brand);
-  border: 1px solid rgba(29, 59, 42, 0.2);
-  font-weight: 500;
+  border: 1px solid color-mix(in srgb, var(--color-brand) 20%, transparent);
+  font-weight: var(--font-weight-medium);
 }
 
 .recipe-card__title {

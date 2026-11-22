@@ -91,7 +91,14 @@ function PencilIcon({ size = 14 }) {
   );
 }
 
+// Bọc ngoài: key đổi theo tài khoản nên ProfileForm được tạo lại với dữ liệu người mới
 export default function Profile() {
+  const { user } = useAuth();
+  const userKey = user?.id || user?.email || '';
+  return <ProfileForm key={userKey} />;
+}
+
+function ProfileForm() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { user, role, updateUser, logout } = useAuth();
@@ -109,14 +116,6 @@ export default function Profile() {
   const fileInputRef = useRef(null);
   const nameInputRef = useRef(null);
   const usernameInputRef = useRef(null);
-
-  const userKey = user?.id || user?.email || '';
-  useEffect(() => {
-    const next = buildBaseline(user);
-    setSavedData(next);
-    setFormData(next);
-    setEditingField({ name: false, username: false });
-  }, [userKey]);
 
   const isDirty = useMemo(
     () =>
@@ -145,7 +144,7 @@ export default function Profile() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isDirty]);
 
-  useEffect(() => {
+    useEffect(() => {
     if (!isDirty) return;
 
     const handleDocumentClick = (event) => {
@@ -169,13 +168,14 @@ export default function Profile() {
         event.stopPropagation();
         setPendingNav(nextTarget);
       } catch {
+        // URL không hợp lệ: bỏ qua để trình duyệt xử lý liên kết như bình thường
       }
     };
 
     document.addEventListener('click', handleDocumentClick, true);
     return () => document.removeEventListener('click', handleDocumentClick, true);
   }, [isDirty, pathname]);
-
+  
   const displayEmail = user?.email || 'Chưa cập nhật';
   const roleLabel = ROLE_LABELS[role] || 'Thành viên';
   const avatarInitial = getAvatarInitial(formData.name, user?.email);

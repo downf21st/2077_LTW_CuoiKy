@@ -23,8 +23,8 @@ const DIFFICULTY_OPTIONS = [
 const FilterIcon = () => (
   <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <g clipPath="url(#clip0_586_4428)">
-      <path d="M5.83519 4.99992H14.1685L9.99352 10.2499L5.83519 4.99992ZM3.54352 4.67492C5.22686 6.83325 8.33519 10.8333 8.33519 10.8333V15.8333C8.33519 16.2916 8.71019 16.6666 9.16852 16.6666H10.8352C11.2935 16.6666 11.6685 16.2916 11.6685 15.8333V10.8333C11.6685 10.8333 14.7685 6.83325 16.4519 4.67492C16.8769 4.12492 16.4852 3.33325 15.7935 3.33325H4.20186C3.51019 3.33325 3.11852 4.12492 3.54352 4.67492Z" fill="#323232"/>
-      <path opacity="0.3" d="M5.83203 5H14.1654L9.99036 10.25L5.83203 5Z" fill="#323232"/>
+      <path d="M5.83519 4.99992H14.1685L9.99352 10.2499L5.83519 4.99992ZM3.54352 4.67492C5.22686 6.83325 8.33519 10.8333 8.33519 10.8333V15.8333C8.33519 16.2916 8.71019 16.6666 9.16852 16.6666H10.8352C11.2935 16.6666 11.6685 16.2916 11.6685 15.8333V10.8333C11.6685 10.8333 14.7685 6.83325 16.4519 4.67492C16.8769 4.12492 16.4852 3.33325 15.7935 3.33325H4.20186C3.51019 3.33325 3.11852 4.12492 3.54352 4.67492Z" fill="currentColor"/>
+      <path opacity="0.3" d="M5.83203 5H14.1654L9.99036 10.25L5.83203 5Z" fill="currentColor"/>
     </g>
     <defs><clipPath id="clip0_586_4428"><rect width="20" height="20" fill="white"/></clipPath></defs>
   </svg>
@@ -32,8 +32,8 @@ const FilterIcon = () => (
 
 const EmptyToastIcon = () => (
   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <path d="M19 11V16C19 18.2091 17.2091 20 15 20H9C6.79086 20 5 18.2091 5 16V11C5 8.23858 7.23858 6 10 6H14C16.7614 6 19 8.23858 19 11Z" stroke="#8C9B90" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M5 11C5 9.89543 5.89543 9 7 9H17C18.1046 9 19 9.89543 19 11" stroke="#8C9B90" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M19 11V16C19 18.2091 17.2091 20 15 20H9C6.79086 20 5 18.2091 5 16V11C5 8.23858 7.23858 6 10 6H14C16.7614 6 19 8.23858 19 11Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M5 11C5 9.89543 5.89543 9 7 9H17C18.1046 9 19 9.89543 19 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
