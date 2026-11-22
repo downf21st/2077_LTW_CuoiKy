@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import RecipeCard from '../RecipeCard/RecipeCard';
 import './RecipeList.css';
 
@@ -14,10 +14,6 @@ export default function RecipeList({
   onResetFilters,
 }) {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-
-  useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [recipes]);
 
   const visibleRecipes = useMemo(
     () => recipes.slice(0, visibleCount),

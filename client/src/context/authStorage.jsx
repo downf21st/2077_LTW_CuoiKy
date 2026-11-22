@@ -21,6 +21,7 @@ export function writeStoredUser(user, remember = true) {
     const targetStorage = remember ? localStorage : sessionStorage
     targetStorage.setItem(STORAGE_KEY, JSON.stringify(user))
   } catch {
+    // Trình duyệt chặn storage (chế độ riêng tư hoặc đầy bộ nhớ): bỏ qua, vẫn dùng được trong phiên hiện tại
   }
 }
 
@@ -32,6 +33,7 @@ export function updateStoredUser(nextUser) {
     targetStorage.setItem(STORAGE_KEY, JSON.stringify(nextUser))
     writeCachedProfile(nextUser)
   } catch {
+    // Trình duyệt chặn storage: bỏ qua, dữ liệu chỉ không được lưu lại
   }
 }
 
@@ -57,6 +59,7 @@ export function writeCachedProfile(user) {
     }
     localStorage.setItem(`${PROFILE_CACHE_PREFIX}${key}`, JSON.stringify(snapshot))
   } catch {
+    // Trình duyệt chặn storage: bỏ qua, chỉ mất bản lưu nháp hồ sơ
   }
 }
 
@@ -65,5 +68,6 @@ export function clearStoredUser() {
     localStorage.removeItem(STORAGE_KEY)
     sessionStorage.removeItem(STORAGE_KEY)
   } catch {
+    // Trình duyệt chặn storage: không có gì để xóa
   }
 }
