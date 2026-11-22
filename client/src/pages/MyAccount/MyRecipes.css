@@ -1,4 +1,5 @@
 .my-recipes {
+  min-width: 0;
   color: var(--color-text);
   font-family: var(--font-body);
 }
@@ -58,6 +59,8 @@
   background: var(--color-bg-surface);
   color: var(--color-text);
   font-size: 12px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .my-recipes__status--pending {
   background: var(--color-highlight);
@@ -70,12 +73,16 @@
 }
 .my-recipes__actions button {
   flex: 1;
+  min-width: 0;
   min-height: 44px;
   border: 1px solid var(--green-500);
   border-radius: 4px;
   background: transparent;
   color: var(--color-text);
   font: inherit;
+  cursor: pointer;
+}
+.my-recipes__actions button:disabled {
   cursor: not-allowed;
 }
 .my-recipes__actions button:last-child {
@@ -145,6 +152,9 @@
   border-radius: var(--radius-md);
   background: var(--color-bg-surface);
   color: var(--color-text);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overflow-wrap: anywhere;
 }
 .my-recipes__dialog::backdrop {
   background: var(--color-overlay);
@@ -161,6 +171,7 @@
 }
 .my-recipes__dialog-actions button {
   flex: 1;
+  min-width: 0;
   min-height: 44px;
   border: 1px solid var(--green-500);
   background: transparent;
@@ -175,4 +186,16 @@
 .my-recipes__dialog button:focus-visible {
   outline: 3px solid var(--color-accent);
   outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .my-recipes__actions {
+    padding: 0 var(--space-3) var(--space-3);
+  }
+  .my-recipes__dialog {
+    padding: var(--space-4);
+  }
+  .my-recipes__empty {
+    min-height: 300px;
+    padding: var(--space-4);
+  }
 }

@@ -159,6 +159,20 @@
   display: flex;
   justify-content: space-between;
   gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.recipe-form__actions p {
+  flex-basis: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.recipe-form__form,
+.recipe-form__basic-layout,
+.recipe-form__fields {
+  min-width: 0;
+}
+.recipe-form__form .form-field__error {
+  overflow-wrap: anywhere;
 }
 .recipe-form__cancel,
 .recipe-form__submit {
@@ -228,6 +242,12 @@
 
   .layout:has(.sidebar--open) .recipe-form {
     padding-left: calc(252px + var(--space-12));
+  }
+}
+
+@media (min-width: 601px) and (max-width: 1024px) {
+  .layout:has(.sidebar--open) .recipe-form {
+    padding-left: calc(252px + var(--space-6));
   }
 }
 
