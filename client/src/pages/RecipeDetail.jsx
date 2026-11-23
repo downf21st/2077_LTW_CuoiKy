@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import AddToMenuDialog from "../components/AddToMenuDialog/AddToMenuDialog";
 import lockIcon from "../assets/lock-keyhole.svg";
 import StarRating, { StarInput } from "../components/StarRating/StarRating";
 import { getRecipeById } from "../api";
@@ -94,12 +95,22 @@ function FavoriteButton({ userId, recipeId }) {
 
 function RecipeContent({ recipe }) {
   const { isLoggedIn, user } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuTrigger = useRef(null);
+  const navigate = useNavigate();
+  const location = useLocation();
   const ingredients = recipe.ingredients ?? [];
   const steps = recipe.steps ?? [];
   const equipment = recipe.equipment ?? [];
   const reviews = recipe.reviews ?? [];
-  const image = recipe.image?.startsWith('/uploads/')
-    ? new URL(recipe.image, new URL(import.meta.env.VITE_API_URL || 'http://localhost:5000/api', window.location.href).origin).href
+  const image = recipe.image?.startsWith("/uploads/")
+    ? new URL(
+        recipe.image,
+        new URL(
+          import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+          window.location.href,
+        ).origin,
+      ).href
     : recipe.image;
   const cookingPath = `/recipe/${encodeURIComponent(recipe.id)}/cooking-mode`;
 
@@ -201,7 +212,7 @@ function RecipeContent({ recipe }) {
             <img className="recipe-detail__lock-icon" src={lockIcon} alt="" />
           )}
           {isLoggedIn
-            ? "Tính năng lên thực đơn tuần đang được phát triển."
+            ? "Lưu món yêu thích hoặc thêm món vào thực đơn tuần."
             : "Đăng nhập để lưu món yêu thích và lên thực đơn tuần."}
         </p>
         <div className="recipe-detail__guest-actions">
@@ -221,9 +232,14 @@ function RecipeContent({ recipe }) {
             </button>
           )}
           <button
-            className="recipe-detail__button recipe-detail__button--locked"
+            className="recipe-detail__button recipe-detail__button--primary"
             type="button"
-            disabled
+            ref={menuTrigger}
+            onClick={() =>
+              isLoggedIn
+                ? setMenuOpen(true)
+                : navigate("/login", { state: { from: location } })
+            }
           >
             Thêm vào thực đơn tuần
           </button>
@@ -236,6 +252,12 @@ function RecipeContent({ recipe }) {
             </Link>
           )}
         </div>
+        <AddToMenuDialog
+          open={menuOpen}
+          onClose={() => setMenuOpen(false)}
+          recipe={recipe}
+          triggerRef={menuTrigger}
+        />
       </section>
       <div className="recipe-detail__content">
         <section
@@ -394,21 +416,27 @@ function RecipeContent({ recipe }) {
             <h3 className="recipe-detail__review-form-title">
               Bữa cơm của bạn thế nào?
             </h3>
-            {!isLoggedIn && <p className="recipe-detail__review-login-hint">
-              <img className="recipe-detail__lock-icon" src={lockIcon} alt="" />{" "}
-              Đăng nhập để đánh giá và bình luận.
-            </p>}
             {!isLoggedIn && (
-            <Link
-              className="recipe-detail__button recipe-detail__button--primary recipe-detail__review-form-button"
-              to="/login"
-            >
-              Đăng nhập
-            </Link>
+              <p className="recipe-detail__review-login-hint">
+                <img
+                  className="recipe-detail__lock-icon"
+                  src={lockIcon}
+                  alt=""
+                />{" "}
+                Đăng nhập để đánh giá và bình luận.
+              </p>
+            )}
+            {!isLoggedIn && (
+              <Link
+                className="recipe-detail__button recipe-detail__button--primary recipe-detail__review-form-button"
+                to="/login"
+              >
+                Đăng nhập
+              </Link>
             )}
             <fieldset className="recipe-detail__rating-field" disabled>
               <legend className="recipe-detail__rating-legend">
-                {isLoggedIn ? 'Điểm của bạn' : 'Điểm của bạn · Chưa đăng nhập'}
+                {isLoggedIn ? "Điểm của bạn" : "Điểm của bạn · Chưa đăng nhập"}
               </legend>
               <StarInput name="rating" />
             </fieldset>
@@ -428,7 +456,9 @@ function RecipeContent({ recipe }) {
               Gửi đánh giá
             </button>
             <p className="recipe-detail__review-form-note">
-              {isLoggedIn ? 'Tính năng đánh giá đang được phát triển.' : 'Chưa thể gửi khi chưa đăng nhập.'}
+              {isLoggedIn
+                ? "Tính năng đánh giá đang được phát triển."
+                : "Chưa thể gửi khi chưa đăng nhập."}
             </p>
           </form>
         </div>
