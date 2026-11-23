@@ -1,6 +1,7 @@
 const crypto = require('node:crypto');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const { withReviewStats } = require('../utils/reviewStats');
 
 const recipesFile = path.join(__dirname, '..', 'data', 'recipes.json');
 const uploadsDirectory = path.join(__dirname, '..', 'public', 'uploads');
@@ -282,6 +283,11 @@ const getRecipes = async (req, res) => {
         });
     }
 
+    filteredRecipes = filteredRecipes.map((recipe) => ({
+      ...withReviewStats(recipe),
+      ...(recipe.matchCount === undefined ? {} : { matchCount: recipe.matchCount })
+    }));
+
     const totalItems = filteredRecipes.length;
     const totalPages = Math.ceil(totalItems / limit);
     const startIndex = (page - 1) * limit;
@@ -336,7 +342,10 @@ const getRecipeById = async (req, res) => {
       });
     }
 
-    return res.status(200).json({ success: true, data: recipe });
+    return res.status(200).json({
+      success: true,
+      data: withReviewStats(recipe, true)
+    });
   } catch (error) {
     return sendServerError(res, 'Không thể đọc chi tiết công thức.', error);
   }
@@ -424,6 +433,7 @@ const updateRecipe = async (req, res) => {
     const index = recipes.findIndex((item) => String(item.id) === req.params.id);
 
     if (index === -1) {
+      await removeUploadedFile(req);
       return res.status(404).json({
         success: false,
         message: 'Không tìm thấy công thức.'
@@ -433,6 +443,7 @@ const updateRecipe = async (req, res) => {
     const authorizationError = authorizeRecipeMutation(req, recipes[index]);
 
     if (authorizationError) {
+      await removeUploadedFile(req);
       return res.status(authorizationError.status).json({
         success: false,
         message: authorizationError.message
