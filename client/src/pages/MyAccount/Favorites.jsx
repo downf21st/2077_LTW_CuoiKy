@@ -1,58 +1,16 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import emptyBreadIcon from '../../assets/add.svg';
-import { getRecipes } from '../../api';
+import { getFavorites, addFavorite, removeFavorite } from '../../api';
 import useAuth from '../../hooks/useAuth';
 import RecipeCard from '../../components/RecipeCard/RecipeCard';
 import './Favorites.css';
 
 const SKELETON_COUNT = 6;
-const INITIAL_DEMO_COUNT = 6;
 const TOAST_DURATION_MS = 4500;
 
 function getRecipeId(recipe) {
   return String(recipe?._id || recipe?.id || '');
-}
-
-function getStorageKey(userId) {
-  return `cooked_favorites_${userId || 'guest'}`;
-}
-
-function readFavoriteIds(storageKey) {
-  try {
-    const raw = localStorage.getItem(storageKey);
-    if (raw === null) return null;
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.map(String) : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeFavoriteIds(storageKey, ids) {
-  try {
-    localStorage.setItem(storageKey, JSON.stringify(ids));
-  } catch {
-    // Trình duyệt chặn storage hoặc đầy bộ nhớ: bỏ qua, danh sách chỉ không được lưu lại
-  }
-}
-
-function fetchFavoriteData(storageKey) {
-  return getRecipes({ page: 1, limit: 100 }).then((list) => {
-    const recipes = Array.isArray(list) ? list : [];
-    const stored = readFavoriteIds(storageKey);
-
-    if (stored === null) {
-      const initialIds = recipes
-        .slice(0, INITIAL_DEMO_COUNT)
-        .map(getRecipeId)
-        .filter(Boolean);
-      writeFavoriteIds(storageKey, initialIds);
-      return { recipes, ids: initialIds };
-    }
-
-    return { recipes, ids: stored };
-  });
 }
 
 function HeartIcon() {
@@ -71,18 +29,20 @@ function HeartIcon() {
 
 export default function Favorites() {
   const { user } = useAuth();
-  const storageKey = useMemo(
-    () => getStorageKey(user?.id || user?.email),
-    [user?.id, user?.email]
-  );
+  const userId = user?.id || user?._id || '';
 
-  const [allRecipes, setAllRecipes] = useState([]);
-  const [favoriteIds, setFavoriteIds] = useState([]);
+  const [favoriteRecipes, setFavoriteRecipes] = useState([]);
   const [status, setStatus] = useState('loading');
   const [errorMessage, setErrorMessage] = useState('');
-  const [undoToast, setUndoToast] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [pendingIds, setPendingIds] = useState([]);
+  const [isUndoing, setIsUndoing] = useState(false);
+  const [toast, setToast] = useState(null);
 
+  const isMountedRef = useRef(true);
   const toastTimerRef = useRef(null);
+  const busyIdsRef = useRef(new Set());
+  const undoBusyRef = useRef(false);
 
   const clearToastTimer = () => {
     if (toastTimerRef.current) {
@@ -91,22 +51,39 @@ export default function Favorites() {
     }
   };
 
+  const showToast = (nextToast) => {
+    clearToastTimer();
+    setToast(nextToast);
+    toastTimerRef.current = setTimeout(() => {
+      if (isMountedRef.current) {
+        setToast(null);
+      }
+      toastTimerRef.current = null;
+    }, TOAST_DURATION_MS);
+  };
+
   useEffect(() => {
-    return () => clearToastTimer();
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      clearToastTimer();
+    };
   }, []);
 
   useEffect(() => {
-    let isMounted = true;
+    let isCurrent = true;
 
-    fetchFavoriteData(storageKey)
-      .then(({ recipes, ids }) => {
-        if (!isMounted) return;
-        setAllRecipes(recipes);
-        setFavoriteIds(ids);
+    getFavorites(userId)
+      .then((list) => {
+        if (!isCurrent) return;
+        if (!Array.isArray(list)) {
+          throw new Error('Dữ liệu món yêu thích không hợp lệ.');
+        }
+        setFavoriteRecipes(list);
         setStatus('done');
       })
       .catch((err) => {
-        if (!isMounted) return;
+        if (!isCurrent) return;
         setErrorMessage(
           err?.message || 'Không thể tải danh sách món yêu thích. Vui lòng thử lại.'
         );
@@ -114,69 +91,80 @@ export default function Favorites() {
       });
 
     return () => {
-      isMounted = false;
+      isCurrent = false;
     };
-  }, [storageKey]);
+  }, [userId, reloadKey]);
 
   const handleRetry = () => {
     setStatus('loading');
     setErrorMessage('');
+    setReloadKey((prev) => prev + 1);
+  };
 
-    fetchFavoriteData(storageKey)
-      .then(({ recipes, ids }) => {
-        setAllRecipes(recipes);
-        setFavoriteIds(ids);
-        setStatus('done');
-      })
-      .catch((err) => {
-        setErrorMessage(
-          err?.message || 'Không thể tải danh sách món yêu thích. Vui lòng thử lại.'
-        );
-        setStatus('error');
+  const handleRemoveFavorite = async (recipe, removedIndex) => {
+    const targetId = getRecipeId(recipe);
+    if (!userId || !targetId || busyIdsRef.current.has(targetId)) return;
+
+    busyIdsRef.current.add(targetId);
+    setPendingIds((prev) => (prev.includes(targetId) ? prev : [...prev, targetId]));
+
+    try {
+      await removeFavorite(userId, targetId);
+      if (!isMountedRef.current) return;
+
+      setFavoriteRecipes((prev) =>
+        prev.filter((item) => getRecipeId(item) !== targetId)
+      );
+      showToast({ type: 'undo', recipe, index: removedIndex });
+    } catch (err) {
+      if (!isMountedRef.current) return;
+      showToast({
+        type: 'error',
+        message: err?.message || 'Không thể bỏ yêu thích. Vui lòng thử lại.',
       });
+    } finally {
+      busyIdsRef.current.delete(targetId);
+      if (isMountedRef.current) {
+        setPendingIds((prev) => prev.filter((id) => id !== targetId));
+      }
+    }
   };
 
-  const favoriteRecipes = useMemo(() => {
-    const recipeMap = new Map(
-      allRecipes.map((recipe) => [getRecipeId(recipe), recipe])
-    );
-    return favoriteIds
-      .map((id) => recipeMap.get(id))
-      .filter(Boolean);
-  }, [allRecipes, favoriteIds]);
+  const handleUndoRemove = async () => {
+    if (!userId || toast?.type !== 'undo' || undoBusyRef.current) return;
 
-  const handleRemoveFavorite = (recipeId) => {
-    const targetId = String(recipeId);
-    const removedIndex = favoriteIds.indexOf(targetId);
-    if (removedIndex === -1) return;
-
-    const nextIds = favoriteIds.filter((id) => id !== targetId);
-    writeFavoriteIds(storageKey, nextIds);
-    setFavoriteIds(nextIds);
+    const { recipe, index } = toast;
+    const targetId = getRecipeId(recipe);
+    if (!targetId) return;
 
     clearToastTimer();
-    setUndoToast({ id: targetId, index: removedIndex });
-    toastTimerRef.current = setTimeout(() => {
-      setUndoToast(null);
-      toastTimerRef.current = null;
-    }, TOAST_DURATION_MS);
-  };
+    undoBusyRef.current = true;
+    setIsUndoing(true);
 
-  const handleUndoRemove = () => {
-    if (!undoToast) return;
-    clearToastTimer();
+    try {
+      await addFavorite(userId, targetId);
+      if (!isMountedRef.current) return;
 
-    const { id, index } = undoToast;
-    setFavoriteIds((prev) => {
-      if (prev.includes(id)) return prev;
-      const next = [...prev];
-      const insertAt = Math.min(Math.max(index, 0), next.length);
-      next.splice(insertAt, 0, id);
-      writeFavoriteIds(storageKey, next);
-      return next;
-    });
-
-    setUndoToast(null);
+      setFavoriteRecipes((prev) => {
+        if (prev.some((item) => getRecipeId(item) === targetId)) return prev;
+        const next = [...prev];
+        const insertAt = Math.min(Math.max(index, 0), next.length);
+        next.splice(insertAt, 0, recipe);
+        return next;
+      });
+      setToast(null);
+    } catch (err) {
+      if (!isMountedRef.current) return;
+      showToast({
+        type: 'error',
+        message: err?.message || 'Không thể hoàn tác. Vui lòng thử lại.',
+      });
+    } finally {
+      undoBusyRef.current = false;
+      if (isMountedRef.current) {
+        setIsUndoing(false);
+      }
+    }
   };
 
   return (
@@ -265,6 +253,7 @@ export default function Favorites() {
           {favoriteRecipes.map((recipe, index) => {
             const recipeId = getRecipeId(recipe) || `fav-${index}`;
             const recipeTitle = recipe?.title || recipe?.name || 'món ăn';
+            const isRemoving = pendingIds.includes(recipeId);
 
             return (
               <li key={recipeId} className="favorites-page__item">
@@ -275,10 +264,11 @@ export default function Favorites() {
                     <button
                       type="button"
                       className="favorites-page__heart-btn"
+                      disabled={isRemoving}
                       onClick={(event) => {
                         event.preventDefault();
                         event.stopPropagation();
-                        handleRemoveFavorite(recipeId);
+                        handleRemoveFavorite(recipe, index);
                       }}
                       aria-label={`Bỏ yêu thích món ${recipeTitle}`}
                       title="Bỏ khỏi yêu thích"
@@ -293,22 +283,25 @@ export default function Favorites() {
         </ul>
       )}
 
-      {undoToast && (
+      {toast && (
         <div
           className="favorites-page__toast"
-          role="status"
+          role={toast.type === 'error' ? 'alert' : 'status'}
           aria-live="polite"
         >
           <span className="favorites-page__toast-text">
-            Đã bỏ khỏi yêu thích
+            {toast.type === 'error' ? toast.message : 'Đã bỏ khỏi yêu thích'}
           </span>
-          <button
-            type="button"
-            className="favorites-page__toast-undo"
-            onClick={handleUndoRemove}
-          >
-            Hoàn tác
-          </button>
+          {toast.type === 'undo' && (
+            <button
+              type="button"
+              className="favorites-page__toast-undo"
+              disabled={isUndoing}
+              onClick={handleUndoRemove}
+            >
+              {isUndoing ? 'Đang hoàn tác...' : 'Hoàn tác'}
+            </button>
+          )}
         </div>
       )}
     </div>
