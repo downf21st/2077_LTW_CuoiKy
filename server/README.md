@@ -37,6 +37,7 @@ Nguyên liệu có cấu trúc `{ "name": "...", "quantity": 100, "unit": "g" }`
 | --- | --- | --- |
 | POST | `/api/users/login` | JSON `{ "email": "...", "password": "..." }`. |
 | POST | `/api/users/register` | JSON `{ "name": "...", "email": "...", "password": "..." }`. Email trùng trả 409. |
+| PUT | `/api/users/:id` | Cập nhật hồ sơ của chính user qua `x-user-id`; body nhận `name`, `fullName`, `username`, `bio`, `avatar` (ảnh data URL) hoặc `avatarUrl`. Email và role không thể sửa qua endpoint này. |
 | GET | `/api/users/:id/favorites` | Danh sách recipe đầy đủ; chỉ user đó hoặc admin. |
 | POST | `/api/users/:id/favorites` | JSON `{ "recipeId": "..." }`; đã lưu trả 409. |
 | DELETE | `/api/users/:id/favorites/:recipeId` | Bỏ món khỏi danh sách. |
