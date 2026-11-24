@@ -113,28 +113,49 @@
   --header-height: 64px;
 }
 
-[data-theme="dark"] {
+:root[data-theme="dark"] {
   color-scheme: dark;
 
   --color-bg-page: var(--green-950);
-  --color-bg-surface: var(--green-900);
-  --color-bg-footer: var(--green-950);
-  --color-bg-elevated: var(--green-800);
-  --color-bg-placeholder: var(--gray-900);
+  --color-bg-surface: #15251c;
+  --color-bg-footer: #09120c;
+  --color-bg-elevated: #1e3428;
+  --color-bg-placeholder: #273c30;
   --color-bg-header-glass: color-mix(in srgb, var(--green-950) 88%, transparent);
-  --color-surface-hover: color-mix(in srgb, var(--cream-100) 8%, transparent);
+  --color-surface-hover: color-mix(in srgb, var(--cream-100) 9%, transparent);
+  --color-overlay: color-mix(in srgb, var(--black) 65%, transparent);
 
-  --color-brand: var(--green-500);
-  --color-brand-hover: var(--green-200);
-  --color-on-brand: var(--green-950);
+  --color-brand: #3b6b53;
+  --color-brand-hover: #4b8266;
+  --color-on-brand: var(--cream-25);
+
+  --color-accent: #e08253;
+  --color-accent-soft: #eb9d76;
+  --color-highlight: #594b1e;
+  --color-on-accent: var(--yellow-400);
 
   --color-text: var(--cream-100);
-  --color-text-muted: var(--green-200);
-  --color-text-disabled: var(--gray-500);
+  --color-text-muted: #b3c5b8;
+  --color-text-disabled: #778a7d;
 
-  --color-border: var(--green-800);
-  --color-border-strong: var(--green-500);
-  --color-disabled-bg: var(--gray-900);
+  --color-border: #263f31;
+  --color-border-strong: #466b57;
+  --color-border-default: #2f4d3d;
 
-  --shadow-card-featured: 0 16px 40px color-mix(in srgb, var(--black) 50%, transparent);
+  --color-error: #f27468;
+  --color-success: #6dc294;
+  --color-disabled-bg: #223027;
+
+  --color-bg-inverse: #13241b;
+  --color-text-brand: var(--cream-100);
+  --color-text-on-primary: var(--cream-100);
+  --color-text-on-inverse: var(--cream-25);
+
+  --shadow-card-featured: 0 16px 40px color-mix(in srgb, var(--black) 55%, transparent), 0 2px 8px color-mix(in srgb, var(--black) 35%, transparent);
+  --shadow-card-hover: 0 14px 28px color-mix(in srgb, var(--black) 45%, transparent);
+  --shadow-cta-hover: 0 6px 16px color-mix(in srgb, var(--black) 40%, transparent);
+  --shadow-featured-hover: 0 18px 42px color-mix(in srgb, var(--black) 50%, transparent);
+  --shadow-search-focus: 0 4px 16px color-mix(in srgb, var(--black) 40%, transparent);
+  --shadow-sidebar-toggle: 2px 0 6px color-mix(in srgb, var(--black) 40%, transparent), 7px 0 10px color-mix(in srgb, var(--black) 35%, transparent);
+  --shadow-dropdown: 0 14px 36px color-mix(in srgb, var(--black) 60%, transparent);
 }

@@ -1,11 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import "./FilterBar.css";
 
-const CATEGORY_OPTIONS = [
-  { value: "Món chính", label: "Món chính" },
-  { value: "Món nước", label: "Món nước" },
-];
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const TIME_OPTIONS = [
   { value: "15", label: "Dưới 15 phút" },
@@ -19,6 +16,39 @@ const DIFFICULTY_OPTIONS = [
   { value: "Trung bình", label: "Trung bình" },
   { value: "Khó", label: "Khó" },
 ];
+
+function normalizeCategoryOptions(rawList) {
+  if (!Array.isArray(rawList)) return [];
+  const seen = new Set();
+  const options = [];
+
+  rawList.forEach((item) => {
+    const name =
+      typeof item === "string"
+        ? item.trim()
+        : String(item?.name || item?.label || "").trim();
+
+    if (!name || seen.has(name)) return;
+    seen.add(name);
+    options.push({ value: name, label: name });
+  });
+
+  return options;
+}
+
+async function fetchCategoryOptions(signal) {
+  const res = await fetch(`${API_BASE}/categories`, { signal });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(json?.message || `Lỗi ${res.status}`);
+  }
+  const list = Array.isArray(json)
+    ? json
+    : Array.isArray(json?.data)
+      ? json.data
+      : [];
+  return normalizeCategoryOptions(list);
+}
 
 const FilterIcon = () => (
   <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -46,11 +76,52 @@ export default function FilterBar({
 }) {
   const [internalFilters, setInternalFilters] = useState({ category: "", cookingTime: "", difficulty: "" });
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [categoryOptions, setCategoryOptions] = useState([]);
+  const [categoryStatus, setCategoryStatus] = useState("loading");
+  const [categoryError, setCategoryError] = useState("");
+  const [categoryReloadKey, setCategoryReloadKey] = useState(0);
+
   const filters = value || internalFilters;
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetchCategoryOptions(controller.signal)
+      .then((options) => {
+        if (controller.signal.aborted) return;
+        setCategoryOptions(options);
+        setCategoryStatus("done");
+      })
+      .catch((err) => {
+        if (controller.signal.aborted) return;
+        setCategoryError(err?.message || "Không thể tải danh sách loại món.");
+        setCategoryStatus("error");
+      });
+
+    return () => controller.abort();
+  }, [categoryReloadKey]);
+
+  useEffect(() => {
+    if (!isModalOpen) return;
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isModalOpen]);
+
+  const handleRetryCategories = () => {
+    setCategoryStatus("loading");
+    setCategoryError("");
+    setCategoryReloadKey((prev) => prev + 1);
+  };
 
   const hasActiveFilters = Boolean(filters.category || filters.cookingTime || filters.difficulty);
   const isActivelyFiltering = hasActiveFilters || searchTags.length > 0;
-  
+
   const activeDropdownCount = (filters.category ? 1 : 0) + (filters.cookingTime ? 1 : 0) + (filters.difficulty ? 1 : 0);
   const totalSelectedTags = activeDropdownCount + searchTags.length;
 
@@ -72,18 +143,42 @@ export default function FilterBar({
       <div className="home-filter-bar-desktop">
         <div className="home-filter-bar" role="region" aria-label="Bộ lọc món ăn">
           <div className="home-filter-bar__item">
-            <select name="category" value={filters.category || ""} onChange={(e) => updateFilter(e.target.name, e.target.value)} className="home-filter-bar__select">
-              <option value="" hidden>Loại món</option>
-              {CATEGORY_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
+            <select
+              name="category"
+              aria-label="Lọc theo loại món"
+              value={filters.category || ""}
+              disabled={categoryStatus !== "done"}
+              onChange={(e) => updateFilter(e.target.name, e.target.value)}
+              className="home-filter-bar__select"
+            >
+              {categoryStatus === "loading" && (
+                <option value="">Đang tải loại món...</option>
+              )}
+              {categoryStatus === "error" && (
+                <option value="">Lỗi tải loại món</option>
+              )}
+              {categoryStatus === "done" && (
+                <>
+                  <option value="" hidden>Loại món</option>
+                  <option value="all">Tất cả loại món</option>
+                  {categoryOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </>
+              )}
             </select>
           </div>
 
           <div className="home-filter-bar__item">
-            <select name="cookingTime" value={filters.cookingTime || ""} onChange={(e) => updateFilter(e.target.name, e.target.value)} className="home-filter-bar__select">
+            <select
+              name="cookingTime"
+              aria-label="Lọc theo thời gian nấu"
+              value={filters.cookingTime || ""}
+              onChange={(e) => updateFilter(e.target.name, e.target.value)}
+              className="home-filter-bar__select"
+            >
               <option value="" hidden>Thời gian</option>
               {TIME_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -94,7 +189,13 @@ export default function FilterBar({
           </div>
 
           <div className="home-filter-bar__item">
-            <select name="difficulty" value={filters.difficulty || ""} onChange={(e) => updateFilter(e.target.name, e.target.value)} className="home-filter-bar__select">
+            <select
+              name="difficulty"
+              aria-label="Lọc theo độ khó"
+              value={filters.difficulty || ""}
+              onChange={(e) => updateFilter(e.target.name, e.target.value)}
+              className="home-filter-bar__select"
+            >
               <option value="" hidden>Độ khó</option>
               {DIFFICULTY_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -104,8 +205,25 @@ export default function FilterBar({
             </select>
           </div>
         </div>
-        {hasActiveFilters && <button type="button" className="home-filter-bar__clear" onClick={handleClearAll}>Xóa bộ lọc</button>}
+        {hasActiveFilters && (
+          <button type="button" className="home-filter-bar__clear" onClick={handleClearAll}>
+            Xóa bộ lọc
+          </button>
+        )}
       </div>
+
+      {categoryStatus === "error" && (
+        <div className="home-filter-bar__error" role="alert">
+          <span>{categoryError}</span>
+          <button
+            type="button"
+            className="home-filter-bar__retry"
+            onClick={handleRetryCategories}
+          >
+            Thử lại
+          </button>
+        </div>
+      )}
 
       <div className="home-filter-bar-mobile">
         <button type="button" className="home-filter-mobile-btn" onClick={() => setIsModalOpen(true)}>
@@ -145,18 +263,50 @@ export default function FilterBar({
       {isModalOpen && createPortal(
         <>
           <div className="filter-modal-backdrop" onClick={() => setIsModalOpen(false)} aria-hidden="true"/>
-          <div className="filter-modal-sheet" role="dialog" aria-label="Bộ lọc món ăn">
+          <div className="filter-modal-sheet" role="dialog" aria-modal="true" aria-label="Bộ lọc món ăn">
             <div className="filter-modal-handle-area" onClick={() => setIsModalOpen(false)}><div className="filter-modal-handle" /></div>
             <div className="filter-modal-header"><h3>Bộ lọc</h3></div>
             <div className="filter-modal-body">
               <div className="filter-modal-group">
                 <h4>Loại món</h4>
-                <div className="filter-modal-options">
-                  <button type="button" className={`filter-modal-opt ${!filters.category ? "active" : ""}`} onClick={() => updateFilter("category", "all")}>Tất cả</button>
-                  {CATEGORY_OPTIONS.map((opt) => (
-                    <button type="button" key={opt.value} className={`filter-modal-opt ${filters.category === opt.value ? "active" : ""}`} onClick={() => updateFilter("category", opt.value)}>{opt.label}</button>
-                  ))}
-                </div>
+                {categoryStatus === "loading" && (
+                  <p className="filter-modal-status" role="status">
+                    Đang tải danh sách loại món...
+                  </p>
+                )}
+                {categoryStatus === "error" && (
+                  <div className="filter-modal-error" role="alert">
+                    <span>{categoryError}</span>
+                    <button
+                      type="button"
+                      className="home-filter-bar__retry"
+                      onClick={handleRetryCategories}
+                    >
+                      Thử lại
+                    </button>
+                  </div>
+                )}
+                {categoryStatus === "done" && (
+                  <div className="filter-modal-options">
+                    <button
+                      type="button"
+                      className={`filter-modal-opt ${!filters.category ? "active" : ""}`}
+                      onClick={() => updateFilter("category", "all")}
+                    >
+                      Tất cả
+                    </button>
+                    {categoryOptions.map((opt) => (
+                      <button
+                        type="button"
+                        key={opt.value}
+                        className={`filter-modal-opt ${filters.category === opt.value ? "active" : ""}`}
+                        onClick={() => updateFilter("category", opt.value)}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="filter-modal-group">
                 <h4>Thời gian</h4>
