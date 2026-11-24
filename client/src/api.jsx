@@ -162,7 +162,10 @@ export async function getStats() {
   const json = await request('/stats')
   return unwrap(json)
 }
-
+export async function getCategories() {
+  const json = await request('/categories')
+  return unwrap(json)
+}
 export async function createCategory(name) {
   const json = await request('/categories', jsonRequest('POST', { name }))
   return unwrap(json)
@@ -178,4 +181,4 @@ export async function updateCategory(id, name) {
 
 export async function deleteCategory(id) {
   await request(`/categories/${encodeURIComponent(id)}`, { method: 'DELETE' })
-}
+}s
