@@ -18,5 +18,15 @@
     "bio": "",
     "avatarUrl": null,
     "passwordHash": "scrypt$16384$8$1$d054d5d3d93fca496b7d7bd63d18daeb$b1dfec0f0ee81cb0fdf2bd05b3f91bc6989b58ba8c5a82be39eec79b6324e9b052b46d9c6d1edff0e1100eac9ebf1b749c762d0c563663074a32c02e2f03c956"
+  },
+  {
+    "id": "user-003",
+    "fullName": "Hà Thoại Nguyễn",
+    "username": "thoainh.ptit",
+    "email": "thoainh.ptit@gmail.com",
+    "role": "member",
+    "bio": "thoai dang đi chơi",
+    "avatarUrl": null,
+    "passwordHash": "scrypt$16384$8$1$fb37e784e8d040937a3cacba37f32efe$e747b584266079f47f2605393b8aa1920059e29c9cd933ef03bcd6c49c84111ee0c5a22b8132fe061d203edbd4cd0f68834145c88347e1f9e4664a4708e384b7"
   }
 ]

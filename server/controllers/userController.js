@@ -86,8 +86,12 @@ const verifyPassword = async (password, passwordHash) => {
 const publicUser = (user) => ({
   id: user.id,
   name: user.fullName,
+  fullName: user.fullName,
+  username: user.username,
   email: user.email,
-  role: user.role
+  role: user.role,
+  bio: user.bio ?? '',
+  avatar: user.avatarUrl ?? null
 });
 
 const login = async (req, res, next) => {
@@ -113,6 +117,109 @@ const login = async (req, res, next) => {
     }
 
     return res.status(200).json(publicUser(user));
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const updateProfile = async (req, res, next) => {
+  try {
+    const update = writeQueue.current.then(async () => {
+      if (String(req.params.id) !== String(req.user.id)) {
+        const error = new Error('Bạn không có quyền cập nhật hồ sơ này.');
+        error.status = 403;
+        throw error;
+      }
+
+      const users = await readUsers();
+      const index = users.findIndex((user) => String(user.id) === String(req.user.id));
+      if (index === -1) {
+        const error = new Error('Không tìm thấy người dùng.');
+        error.status = 404;
+        throw error;
+      }
+
+      const body = req.body;
+      if (!body || typeof body !== 'object' || Array.isArray(body)) {
+        const error = new Error('Dữ liệu cập nhật không hợp lệ.');
+        error.status = 400;
+        throw error;
+      }
+
+      const editableFields = ['name', 'fullName', 'username', 'bio', 'avatar', 'avatarUrl'];
+      if (!editableFields.some((field) => Object.hasOwn(body, field))) {
+        const error = new Error('Không có thông tin hồ sơ cần cập nhật.');
+        error.status = 400;
+        throw error;
+      }
+
+      const updated = { ...users[index] };
+      const name = body.fullName ?? body.name;
+      if (name !== undefined) {
+        if (typeof name !== 'string' || !name.trim() || name.trim().length > 60) {
+          const error = new Error('Tên hiển thị phải có từ 1 đến 60 ký tự.');
+          error.status = 400;
+          throw error;
+        }
+        updated.fullName = name.trim();
+      }
+
+      if (body.username !== undefined) {
+        const username = typeof body.username === 'string'
+          ? body.username.trim().replace(/^@+/, '')
+          : '';
+        if (!/^[a-zA-Z0-9._-]{2,31}$/.test(username)) {
+          const error = new Error('Tên người dùng phải có từ 2 đến 31 ký tự hợp lệ.');
+          error.status = 400;
+          throw error;
+        }
+        if (users.some((user, userIndex) => userIndex !== index
+          && typeof user.username === 'string'
+          && user.username.replace(/^@+/, '').toLowerCase() === username.toLowerCase())) {
+          const error = new Error('Tên người dùng này đã được sử dụng.');
+          error.status = 409;
+          throw error;
+        }
+        updated.username = username;
+      }
+
+      if (body.bio !== undefined) {
+        if (typeof body.bio !== 'string' || body.bio.length > 500) {
+          const error = new Error('Giới thiệu phải là chuỗi và không vượt quá 500 ký tự.');
+          error.status = 400;
+          throw error;
+        }
+        updated.bio = body.bio.trim();
+      }
+
+      const avatar = body.avatar !== undefined ? body.avatar : body.avatarUrl;
+      if (avatar !== undefined) {
+        const isEmpty = avatar === null || avatar === '';
+        const isDataUrl = typeof avatar === 'string'
+          && avatar.length <= 500_000
+          && /^data:image\/(?:jpeg|png|webp|gif);base64,[A-Za-z0-9+/]+={0,2}$/.test(avatar);
+        const isHttpUrl = typeof avatar === 'string'
+          && avatar.length <= 500_000
+          && /^https?:\/\//i.test(avatar);
+        const isLocalUpload = typeof avatar === 'string'
+          && avatar.length <= 500_000
+          && /^\/uploads\/[a-zA-Z0-9._-]+$/.test(avatar);
+        if (!isEmpty && !isDataUrl && !isHttpUrl && !isLocalUpload) {
+          const error = new Error('Ảnh đại diện không hợp lệ hoặc vượt quá giới hạn dung lượng.');
+          error.status = 400;
+          throw error;
+        }
+        updated.avatarUrl = isEmpty ? null : avatar;
+      }
+
+      users[index] = updated;
+      await writeUsers(users);
+      return updated;
+    });
+
+    writeQueue.current = update.then(() => undefined, () => undefined);
+    const user = await update;
+    return res.status(200).json({ success: true, data: publicUser(user) });
   } catch (error) {
     return next(error);
   }
@@ -175,4 +282,4 @@ const register = async (req, res, next) => {
   }
 };
 
-module.exports = { login, register, hashPassword, verifyPassword };
+module.exports = { login, register, updateProfile, hashPassword, verifyPassword };
