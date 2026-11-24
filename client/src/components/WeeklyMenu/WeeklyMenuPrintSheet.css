@@ -1,0 +1,364 @@
+.wm-print {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: var(--white) !important;
+    color: var(--green-950) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body > *:not(.wm-print) {
+    display: none !important;
+  }
+
+  .wm-print {
+    display: block !important;
+    width: 100%;
+    background: var(--white);
+    color: var(--green-950);
+    font-family: var(--font-body);
+    font-size: 9.5pt;
+    line-height: 1.4;
+    box-sizing: border-box;
+  }
+
+  .wm-print__shell {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .wm-print__shell-head {
+    display: table-header-group;
+  }
+
+  .wm-print__shell-foot {
+    display: table-footer-group;
+  }
+
+  .wm-print__shell-spacer {
+    height: 15mm;
+    padding: 0;
+    border: 0;
+  }
+
+  .wm-print__shell-cell {
+    padding: 0 15mm;
+    border: 0;
+    vertical-align: top;
+  }
+
+  .wm-print__shell-foot-cell {
+    padding: 6mm 15mm 12mm;
+    border: 0;
+    vertical-align: bottom;
+  }
+
+  .wm-print__header {
+    margin-bottom: 16px;
+  }
+
+  .wm-print__brand-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+
+  .wm-print__logo {
+    color: var(--green-900);
+    font-family: var(--font-display);
+    font-size: 20pt;
+    font-weight: var(--font-weight-display);
+    line-height: 1.1;
+  }
+
+  .wm-print__meta-count {
+    color: var(--green-900);
+    font-size: 9pt;
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .wm-print__meta-count--empty {
+    color: var(--brown-800);
+  }
+
+  .wm-print__doc-title {
+    margin: 0 0 6px;
+    color: var(--green-950);
+    font-family: var(--font-heading);
+    font-size: 17pt;
+    font-weight: var(--font-weight-display);
+    line-height: 1.2;
+  }
+
+  .wm-print__doc-subtitle {
+    margin: 0 0 10px;
+    color: var(--brown-800);
+    font-size: 8.5pt;
+  }
+
+  .wm-print__divider {
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(
+      to right,
+      var(--orange-500) 0%,
+      var(--orange-500) 18%,
+      var(--green-900) 18%,
+      var(--green-900) 100%
+    );
+  }
+
+  .wm-print__divider--solid {
+    background: var(--green-900);
+  }
+
+  .wm-print__section {
+    margin-bottom: 18px;
+  }
+
+  .wm-print__section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .wm-print__section-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .wm-print__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 20px;
+    padding: 0 6px;
+    border: 1px solid var(--green-900);
+    border-radius: 5px;
+    background: var(--cream-75);
+    color: var(--green-900);
+    font-size: 8.5pt;
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .wm-print__section-title {
+    margin: 0;
+    color: var(--green-950);
+    font-family: var(--font-heading);
+    font-size: 12.5pt;
+    font-weight: var(--font-weight-display);
+    line-height: 1.2;
+  }
+
+  .wm-print__section-meta {
+    color: var(--brown-800);
+    font-size: 8.5pt;
+    font-weight: var(--font-weight-medium);
+  }
+
+  .wm-print__table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .wm-print__table thead {
+    display: table-header-group;
+  }
+
+  .wm-print__table thead th {
+    padding: 7px 8px;
+    border-top: 1px solid var(--green-900);
+    border-bottom: 1.5px solid var(--green-900);
+    background: var(--cream-75);
+    color: var(--green-900);
+    font-size: 8pt;
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.03em;
+    text-align: left;
+  }
+
+  .wm-print__row {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .wm-print__table tbody td {
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--green-200);
+    vertical-align: top;
+  }
+
+  .wm-print__col-day {
+    width: 14%;
+  }
+
+  .wm-print__col-meal {
+    width: 28.66%;
+  }
+
+  .wm-print__day-name {
+    color: var(--green-950);
+    font-size: 9.5pt;
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: 2px;
+  }
+
+  .wm-print__day-count {
+    color: var(--brown-800);
+    font-size: 8pt;
+  }
+
+  .wm-print__meal-box {
+    padding: 6px 8px;
+    border: 1px solid var(--green-200);
+    border-radius: 6px;
+    background: var(--cream-75);
+  }
+
+  .wm-print__meal-box--empty {
+    border-style: dashed;
+    background: var(--white);
+    color: var(--brown-800);
+    font-style: italic;
+    font-size: 8.5pt;
+  }
+
+  .wm-print__dish-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .wm-print__dish-item {
+    color: var(--green-950);
+    font-size: 8.5pt;
+    line-height: 1.35;
+    word-break: break-word;
+  }
+
+  .wm-print__col-check {
+    width: 30px;
+    text-align: center !important;
+  }
+
+  .wm-print__col-qty {
+    width: 112px;
+    text-align: right !important;
+  }
+
+  .wm-print__check-cell {
+    text-align: center;
+    padding-top: 10px !important;
+  }
+
+  .wm-print__checkbox {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    border: 1.5px solid var(--green-900);
+    border-radius: 3px;
+    background: var(--white);
+  }
+
+  .wm-print__ing-name {
+    color: var(--green-950);
+    font-size: 9.5pt;
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: 2px;
+  }
+
+  .wm-print__ing-recipes {
+    color: var(--brown-800);
+    font-size: 8pt;
+    line-height: 1.35;
+  }
+
+  .wm-print__qty-cell {
+    text-align: right;
+    color: var(--green-950);
+    font-size: 9.5pt;
+    font-weight: var(--font-weight-semibold);
+    white-space: nowrap;
+  }
+
+  .wm-print__summary-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 14px;
+    padding: 10px 14px;
+    border: 1px solid var(--green-900);
+    border-radius: 8px;
+    background: var(--cream-75);
+    font-size: 8.5pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .wm-print__summary-box strong {
+    color: var(--green-950);
+  }
+
+  .wm-print__summary-box span {
+    color: var(--brown-800);
+  }
+
+  .wm-print__empty-box {
+    padding: 26px 20px;
+    border: 1.5px dashed var(--green-500);
+    border-radius: 10px;
+    text-align: center;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .wm-print__empty-title {
+    margin: 0 0 6px;
+    color: var(--green-950);
+    font-family: var(--font-heading);
+    font-size: 11.5pt;
+  }
+
+  .wm-print__empty-desc {
+    margin: 0 auto;
+    max-width: 420px;
+    color: var(--brown-800);
+    font-size: 8.5pt;
+    line-height: 1.5;
+  }
+
+  .wm-print__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 8px;
+    border-top: 1px solid var(--green-200);
+    font-size: 8pt;
+    color: var(--brown-800);
+  }
+}

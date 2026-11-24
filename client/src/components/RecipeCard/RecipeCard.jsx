@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import StarRating from '../StarRating/StarRating';
 import './RecipeCard.css';
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const DIFFICULTY_MAP = {
   hard: { label: 'Khó', modifier: 'hard' },
@@ -13,6 +16,19 @@ const DIFFICULTY_MAP = {
   dễ: { label: 'Dễ', modifier: 'easy' },
   de: { label: 'Dễ', modifier: 'easy' },
 };
+
+function resolveCardImage(src) {
+  if (!src) return '';
+  if (src.startsWith('/uploads/')) {
+    try {
+      const origin = new URL(API_BASE, window.location.href).origin;
+      return new URL(src, origin).href;
+    } catch {
+      return src;
+    }
+  }
+  return src;
+}
 
 export default function RecipeCard({
   recipe,
@@ -41,12 +57,15 @@ export default function RecipeCard({
     author,
     authorName,
     authorId,
+    averageRating,
+    reviewCount,
+    reviews,
   } = recipe || {};
 
   const recipeId = _id || id || 'recipe-001';
   const displayTitle = title || name || 'Món ăn';
   const displayDesc = description || summary || 'Mô tả món ăn';
-  const displayImage = image || imageUrl || thumbnail || '';
+  const displayImage = resolveCardImage(image || imageUrl || thumbnail || '');
 
   const normalizedDiffKey = String(difficulty).toLowerCase().trim();
   const diffConfig = DIFFICULTY_MAP[normalizedDiffKey] || DIFFICULTY_MAP.easy;
@@ -71,6 +90,16 @@ export default function RecipeCard({
       : author?.name || author?.fullName) ||
     authorId ||
     '';
+
+  const displayReviewCount =
+    Number.isInteger(reviewCount) && reviewCount >= 0
+      ? reviewCount
+      : Array.isArray(reviews)
+        ? reviews.length
+        : 0;
+
+  const numericRating = Number(averageRating);
+  const displayRating = Number.isFinite(numericRating) ? numericRating : 0;
 
   return (
     <article className="recipe-card">
@@ -130,6 +159,15 @@ export default function RecipeCard({
           <h3 className="recipe-card__title" title={displayTitle}>
             {displayTitle}
           </h3>
+
+          <div className="recipe-card__rating">
+            <StarRating
+              value={displayRating}
+              count={displayReviewCount}
+              size="sm"
+            />
+          </div>
+
           <p className="recipe-card__description">{displayDesc}</p>
 
           {showAuthor && displayAuthor && (
