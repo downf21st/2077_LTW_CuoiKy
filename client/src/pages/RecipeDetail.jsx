@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import AddToMenuDialog from "../components/AddToMenuDialog/AddToMenuDialog";
+import ReviewForm from "../components/ReviewForm/ReviewForm";
 import lockIcon from "../assets/lock-keyhole.svg";
 import StarRating, { StarInput } from "../components/StarRating/StarRating";
 import { getRecipeById } from "../api";
@@ -409,58 +410,72 @@ function RecipeContent({ recipe }) {
               </p>
             )}
           </div>
-          <form
-            className="recipe-detail__review-form"
-            onSubmit={(event) => event.preventDefault()}
-          >
-            <h3 className="recipe-detail__review-form-title">
-              Bữa cơm của bạn thế nào?
-            </h3>
-            {!isLoggedIn && (
-              <p className="recipe-detail__review-login-hint">
-                <img
-                  className="recipe-detail__lock-icon"
-                  src={lockIcon}
-                  alt=""
-                />{" "}
-                Đăng nhập để đánh giá và bình luận.
+          {isLoggedIn ? (
+            <div className="recipe-detail__review-form">
+              <h3 className="recipe-detail__review-form-title">
+                Bữa cơm của bạn thế nào?
+              </h3>
+              <p className="recipe-detail__review-form-note">
+                Chức năng gửi đánh giá chưa khả dụng. Nội dung chưa được lưu.
               </p>
-            )}
-            {!isLoggedIn && (
-              <Link
-                className="recipe-detail__button recipe-detail__button--primary recipe-detail__review-form-button"
-                to="/login"
-              >
-                Đăng nhập
-              </Link>
-            )}
-            <fieldset className="recipe-detail__rating-field" disabled>
-              <legend className="recipe-detail__rating-legend">
-                {isLoggedIn ? "Điểm của bạn" : "Điểm của bạn · Chưa đăng nhập"}
-              </legend>
-              <StarInput name="rating" />
-            </fieldset>
-            <label className="recipe-detail__comment-label">
-              Bình luận của bạn
-              <textarea
-                className="recipe-detail__comment"
-                placeholder="Viết cảm nhận của bạn…"
-                disabled
-              />
-            </label>
-            <button
-              className="recipe-detail__button recipe-detail__button--disabled recipe-detail__review-form-button"
-              type="submit"
-              disabled
+              <ReviewForm onSubmit={() => {}} />
+            </div>
+          ) : (
+            <form
+              className="recipe-detail__review-form"
+              onSubmit={(event) => event.preventDefault()}
             >
-              Gửi đánh giá
-            </button>
-            <p className="recipe-detail__review-form-note">
-              {isLoggedIn
-                ? "Tính năng đánh giá đang được phát triển."
-                : "Chưa thể gửi khi chưa đăng nhập."}
-            </p>
-          </form>
+              <h3 className="recipe-detail__review-form-title">
+                Bữa cơm của bạn thế nào?
+              </h3>
+              {!isLoggedIn && (
+                <p className="recipe-detail__review-login-hint">
+                  <img
+                    className="recipe-detail__lock-icon"
+                    src={lockIcon}
+                    alt=""
+                  />{" "}
+                  Đăng nhập để đánh giá và bình luận.
+                </p>
+              )}
+              {!isLoggedIn && (
+                <Link
+                  className="recipe-detail__button recipe-detail__button--primary recipe-detail__review-form-button"
+                  to="/login"
+                >
+                  Đăng nhập
+                </Link>
+              )}
+              <fieldset className="recipe-detail__rating-field" disabled>
+                <legend className="recipe-detail__rating-legend">
+                  {isLoggedIn
+                    ? "Điểm của bạn"
+                    : "Điểm của bạn · Chưa đăng nhập"}
+                </legend>
+                <StarInput name="rating" />
+              </fieldset>
+              <label className="recipe-detail__comment-label">
+                Bình luận của bạn
+                <textarea
+                  className="recipe-detail__comment"
+                  placeholder="Viết cảm nhận của bạn…"
+                  disabled
+                />
+              </label>
+              <button
+                className="recipe-detail__button recipe-detail__button--disabled recipe-detail__review-form-button"
+                type="submit"
+                disabled
+              >
+                Gửi đánh giá
+              </button>
+              <p className="recipe-detail__review-form-note">
+                {isLoggedIn
+                  ? "Tính năng đánh giá đang được phát triển."
+                  : "Chưa thể gửi khi chưa đăng nhập."}
+              </p>
+            </form>
+          )}
         </div>
       </section>
     </div>
