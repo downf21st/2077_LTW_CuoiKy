@@ -8,14 +8,18 @@ function StarIcon({ className = "" }) {
   );
 }
 
-export default function StarRating({ value = 0, max = 5, size = "md" }) {
-  const count = Math.max(0, Math.floor(max));
-  const rating = Number.isFinite(value) ? Math.min(count, Math.max(0, value)) : 0;
+export default function StarRating({ value = 0, count, max = 5, size = "md" }) {
+  const starCount = Math.max(0, Math.floor(max));
+  const rating = Number.isFinite(value) ? Math.min(starCount, Math.max(0, value)) : 0;
   const starSize = size === "sm" ? "sm" : "md";
+  const hasCount = Number.isInteger(count) && count >= 0;
+  const label = hasCount && count === 0
+    ? "Chưa có đánh giá"
+    : `${String(rating).replace(".", ",")} trên ${starCount} sao${hasCount ? `, ${count} đánh giá` : ""}`;
 
   return (
-    <span className={`star-rating star-rating--${starSize}`} role="img" aria-label={`${String(rating).replace(".", ",")} trên ${count} sao`}>
-      {Array.from({ length: count }, (_, index) => {
+    <span className={`star-rating star-rating--${starSize}`} role="img" aria-label={label}>
+      {Array.from({ length: starCount }, (_, index) => {
         const fill = Math.min(1, Math.max(0, rating - index)) * 100;
         return (
           <span className="star-rating__star" key={index}>
@@ -26,6 +30,7 @@ export default function StarRating({ value = 0, max = 5, size = "md" }) {
           </span>
         );
       })}
+      {hasCount && <span className="star-rating__count" aria-hidden="true">{count === 0 ? "Chưa có đánh giá" : `${String(rating).replace(".", ",")}/${starCount} · ${count} đánh giá`}</span>}
     </span>
   );
 }

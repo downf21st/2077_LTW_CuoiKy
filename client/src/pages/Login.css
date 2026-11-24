@@ -54,12 +54,13 @@
 }
 
 .auth-page__banner {
-  position: relative;
+  position: sticky;
+  top: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   min-width: 0;
-  min-height: 100dvh;
+  height: 100dvh;
   background-color: var(--color-bg-inverse);
   background-image: none;
   box-sizing: border-box;
@@ -70,11 +71,11 @@
 .login-banner__art {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  height: 100%;
   flex: none;
   background-color: var(--color-bg-inverse);
   overflow: hidden;
-  container-type: inline-size;
+  container-type: size;
 }
 
 .login-banner__dish {
@@ -94,49 +95,49 @@
 .login-banner__dish--tofu {
   left: -13%;
   top: -7%;
-  width: 39%;
+  width: min(39cqw, 31.2cqh);
 }
 
 .login-banner__dish--pork {
-  left: 57%;
+  right: -10%;
   top: -11%;
-  width: 53%;
+  width: min(53cqw, 42.4cqh);
 }
 
 .login-banner__dish--egg {
   left: 20%;
   top: 17%;
-  width: 51%;
+  width: min(51cqw, 40.8cqh);
 }
 
 .login-banner__dish--greens {
-  left: 75%;
+  right: -12%;
   top: 29%;
-  width: 37%;
+  width: min(37cqw, 29.6cqh);
 }
 
 .login-banner__dish--bowl {
   left: -5%;
   top: 46%;
-  width: 40%;
+  width: min(40cqw, 32cqh);
 }
 
 .login-banner__dish--bun {
   left: 44%;
   top: 53%;
-  width: 54%;
+  width: min(54cqw, 43.2cqh);
 }
 
 .login-banner__slogan {
   position: absolute;
   left: 4.5%;
   right: 6%;
-  top: 89.5%;
+  bottom: 4.5%;
   z-index: 2;
   margin: 0;
   color: var(--color-text-on-primary);
   font-family: var(--font-display);
-  font-size: 3.333cqw;
+  font-size: min(3.333cqw, 2.666cqh);
   font-weight: var(--font-weight-display);
   line-height: var(--line-height-heading);
 }
@@ -147,7 +148,7 @@
   justify-content: center;
   width: 100%;
   min-height: 100dvh;
-  padding: var(--space-8) var(--space-6);
+  padding: var(--space-6);
   background-color: var(--color-bg-page);
   box-sizing: border-box;
 }
