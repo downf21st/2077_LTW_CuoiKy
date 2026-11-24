@@ -181,4 +181,4 @@ export async function updateCategory(id, name) {
 
 export async function deleteCategory(id) {
   await request(`/categories/${encodeURIComponent(id)}`, { method: 'DELETE' })
-}s
+}
