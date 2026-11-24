@@ -103,3 +103,79 @@ export async function updateUserProfile(userId, payload) {
   })
   return json.data ?? null
 }
+
+const unwrap = (json) => json.data ?? json
+
+const jsonRequest = (method, body) => ({
+  method,
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(body),
+})
+
+export async function getMenu(userId) {
+  const json = await request(`/menus/${encodeURIComponent(userId)}`)
+  return unwrap(json)
+}
+
+export async function saveMenu(userId, days) {
+  const json = await request(
+    `/menus/${encodeURIComponent(userId)}`,
+    jsonRequest('PUT', { days }),
+  )
+  return unwrap(json)
+}
+
+export async function clearMenuApi(userId) {
+  await request(`/menus/${encodeURIComponent(userId)}`, { method: 'DELETE' })
+}
+
+export async function createReview(recipeId, { rating, comment }) {
+  const json = await request(
+    `/recipes/${encodeURIComponent(recipeId)}/reviews`,
+    jsonRequest('POST', { rating, comment }),
+  )
+  return unwrap(json)
+}
+
+export async function setRecipeStatus(recipeId, status) {
+  const json = await request(
+    `/recipes/${encodeURIComponent(recipeId)}/status`,
+    jsonRequest('PUT', { status }),
+  )
+  return unwrap(json)
+}
+
+export async function getAdminReviews(params) {
+  const json = await request(`/reviews${buildQuery(params)}`)
+  return unwrap(json)
+}
+
+export async function setReviewHidden(recipeId, reviewId, hidden) {
+  const json = await request(
+    `/recipes/${encodeURIComponent(recipeId)}/reviews/${encodeURIComponent(reviewId)}`,
+    jsonRequest('PUT', { hidden }),
+  )
+  return unwrap(json)
+}
+
+export async function getStats() {
+  const json = await request('/stats')
+  return unwrap(json)
+}
+
+export async function createCategory(name) {
+  const json = await request('/categories', jsonRequest('POST', { name }))
+  return unwrap(json)
+}
+
+export async function updateCategory(id, name) {
+  const json = await request(
+    `/categories/${encodeURIComponent(id)}`,
+    jsonRequest('PUT', { name }),
+  )
+  return unwrap(json)
+}
+
+export async function deleteCategory(id) {
+  await request(`/categories/${encodeURIComponent(id)}`, { method: 'DELETE' })
+}

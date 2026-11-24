@@ -1,14 +1,24 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { getRecipes } from '../../api';
 import cookingIcon from '../../assets/sidebar/cooking.svg';
 import trashIcon from '../../assets/trash.svg';
 import RecipePicker from '../../components/WeeklyMenu/RecipePicker';
 import ShoppingList from '../../components/WeeklyMenu/ShoppingList';
+import WeeklyMenuPrintSheet from '../../components/WeeklyMenu/WeeklyMenuPrintSheet';
+import {
+  addRecipeToSlot,
+  clearMenu,
+  moveRecipe,
+  removeRecipeFromSlot,
+  selectMenuDays,
+  selectMenuItemCount,
+  selectSlotItems,
+} from '../../redux/menuSlice';
 import {
   DAYS,
   MEALS,
-  createEmptyDays,
-  createSlotItem,
   formatCookingTime,
   getTodayDayKey,
   getWeekMeta,
@@ -24,34 +34,32 @@ const HIGHLIGHT_DURATION_MS = 2800;
 function MoveIcon() {
   return (
     <svg
-      width="14"
-      height="14"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="2.1"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d="M5 9l-3 3 3 3" />
-      <path d="M19 9l3 3-3 3" />
+      <path d="M6 8l-4 4 4 4" />
+      <path d="M18 8l4 4-4 4" />
       <path d="M2 12h20" />
     </svg>
   );
 }
 
-function DishCard({ item, dayKey, mealKey, onOpenMove, onRemove }) {
+function DishCard({ item, cookingTime, dayKey, mealKey, onOpenMove, onRemove }) {
   const image = resolveRecipeImage(item.image);
-  const timeText = formatCookingTime(item.cookingTime);
+  const timeText = formatCookingTime(cookingTime ?? item.cookingTime);
 
   return (
     <article className="weekly-menu__dish-card">
-      <div className="weekly-menu__dish-thumb">
-        {image && <img src={image} alt={item.title} />}
-      </div>
+      <div className="weekly-menu__dish-top">
+        <div className="weekly-menu__dish-thumb">
+          {image && <img src={image} alt={item.title} />}
+        </div>
 
-      <div className="weekly-menu__dish-info">
         <Link
           to={`/recipe/${encodeURIComponent(item.recipeId)}`}
           className="weekly-menu__dish-title"
@@ -59,24 +67,7 @@ function DishCard({ item, dayKey, mealKey, onOpenMove, onRemove }) {
         >
           {item.title}
         </Link>
-        {timeText && (
-          <span className="weekly-menu__time-pill">
-            <span className="weekly-menu__dot" aria-hidden="true" />
-            {timeText}
-          </span>
-        )}
-      </div>
 
-      <div className="weekly-menu__dish-actions">
-        <button
-          type="button"
-          className="weekly-menu__icon-btn"
-          aria-label={`Chuyển món ${item.title} sang ô khác`}
-          title="Chuyển sang bữa/ngày khác"
-          onClick={(event) => onOpenMove(dayKey, mealKey, item, event.currentTarget)}
-        >
-          <MoveIcon />
-        </button>
         <button
           type="button"
           className="weekly-menu__icon-btn weekly-menu__icon-btn--danger"
@@ -87,15 +78,147 @@ function DishCard({ item, dayKey, mealKey, onOpenMove, onRemove }) {
           <img src={trashIcon} alt="" aria-hidden="true" />
         </button>
       </div>
+
+      <div className="weekly-menu__dish-bottom">
+        {timeText && (
+          <span className="weekly-menu__time-pill">
+            <span className="weekly-menu__dot" aria-hidden="true" />
+            {timeText}
+          </span>
+        )}
+
+        <button
+          type="button"
+          className="weekly-menu__icon-btn weekly-menu__icon-btn--move"
+          aria-label={`Chuyển món ${item.title} sang ô khác`}
+          title="Chuyển sang bữa/ngày khác"
+          onClick={(event) => onOpenMove(dayKey, mealKey, item, event.currentTarget)}
+        >
+          <MoveIcon />
+        </button>
+      </div>
     </article>
   );
 }
 
+function MenuSlot({ day, meal, recipeTimeMap, onOpenPicker, onOpenMove, onRemove }) {
+  const slotItems = useSelector(selectSlotItems(day.key, meal.key));
+
+  return (
+    <div
+      className={`weekly-menu__slot${
+        slotItems.length > 0 ? ' weekly-menu__slot--filled' : ''
+      }`}
+    >
+      {slotItems.length > 0 ? (
+        <>
+          <div className="weekly-menu__slot-list">
+            {slotItems.map((item) => (
+              <DishCard
+                key={item.uid}
+                item={item}
+                cookingTime={recipeTimeMap[String(item.recipeId)]}
+                dayKey={day.key}
+                mealKey={meal.key}
+                onOpenMove={onOpenMove}
+                onRemove={onRemove}
+              />
+            ))}
+          </div>
+          <button
+            type="button"
+            className="weekly-menu__slot-add-more"
+            aria-label={`Thêm món cho ${meal.label} ${day.fullLabel}`}
+            onClick={(event) =>
+              onOpenPicker(day.key, meal.key, event.currentTarget)
+            }
+          >
+            + Thêm
+          </button>
+        </>
+      ) : (
+        <button
+          className="weekly-menu__slot-empty-btn"
+          type="button"
+          aria-label={`Thêm món cho ${meal.label} ${day.fullLabel}`}
+          onClick={(event) =>
+            onOpenPicker(day.key, meal.key, event.currentTarget)
+          }
+        >
+          + Thêm món
+        </button>
+      )}
+    </div>
+  );
+}
+
+function MobileMealSlot({
+  dayKey,
+  dayFullLabel,
+  meal,
+  recipeTimeMap,
+  onOpenPicker,
+  onOpenMove,
+  onRemove,
+}) {
+  const slotItems = useSelector(selectSlotItems(dayKey, meal.key));
+
+  return (
+    <div className="weekly-menu__mobile-meal-group">
+      <div className="weekly-menu__mobile-meal-heading">
+        <img src={cookingIcon} alt="" aria-hidden="true" />
+        <span>{meal.label}</span>
+      </div>
+
+      {slotItems.length > 0 ? (
+        <div className="weekly-menu__mobile-slot-stack">
+          {slotItems.map((item) => (
+            <DishCard
+              key={item.uid}
+              item={item}
+              cookingTime={recipeTimeMap[String(item.recipeId)]}
+              dayKey={dayKey}
+              mealKey={meal.key}
+              onOpenMove={onOpenMove}
+              onRemove={onRemove}
+            />
+          ))}
+          <button
+            type="button"
+            className="weekly-menu__slot-empty-btn weekly-menu__slot-empty-btn--compact"
+            aria-label={`Thêm món cho ${meal.label} ${dayFullLabel}`}
+            onClick={(event) =>
+              onOpenPicker(dayKey, meal.key, event.currentTarget)
+            }
+          >
+            + Thêm món
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          className="weekly-menu__slot-empty-btn weekly-menu__slot-empty-btn--mobile"
+          aria-label={`Thêm món cho ${meal.label} ${dayFullLabel}`}
+          onClick={(event) =>
+            onOpenPicker(dayKey, meal.key, event.currentTarget)
+          }
+        >
+          + Thêm món
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function WeeklyMenu() {
+  const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [days, setDays] = useState(() => createEmptyDays());
+  const days = useSelector(selectMenuDays);
+  const totalDishes = useSelector(selectMenuItemCount);
+
+  const [recipeTimeMap, setRecipeTimeMap] = useState({});
   const [weekOffset, setWeekOffset] = useState(0);
   const [mobileTab, setMobileTab] = useState('calendar');
   const [selectedMobileDay, setSelectedMobileDay] = useState(() => getTodayDayKey());
@@ -119,6 +242,29 @@ export default function WeeklyMenu() {
   const toastTimerRef = useRef(null);
   const highlightTimerRef = useRef(null);
   const lastTriggerRef = useRef(null);
+
+  useEffect(() => {
+    let isCurrent = true;
+
+    getRecipes({ page: 1, limit: 100 })
+      .then((list) => {
+        if (!isCurrent || !Array.isArray(list)) return;
+        const nextMap = {};
+        list.forEach((recipe) => {
+          const id = recipe?.id ?? recipe?._id;
+          const time = recipe?.cookingTime ?? recipe?.duration ?? recipe?.time;
+          if (id !== undefined && id !== null && time !== undefined && time !== null) {
+            nextMap[String(id)] = time;
+          }
+        });
+        setRecipeTimeMap((prev) => ({ ...prev, ...nextMap }));
+      })
+      .catch(() => {});
+
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (location.state?.pickedRecipe) {
@@ -151,18 +297,6 @@ export default function WeeklyMenu() {
   }, [moveTarget, confirmClearOpen, incomingRecipe]);
 
   const { dates, rangeLabel } = useMemo(() => getWeekMeta(weekOffset), [weekOffset]);
-
-  const totalDishes = useMemo(
-    () =>
-      DAYS.reduce(
-        (sum, day) =>
-          sum +
-          MEALS.reduce((mealSum, meal) => mealSum + days[day.key][meal.key].length, 0),
-        0
-      ),
-    [days]
-  );
-
   const shoppingItems = useMemo(() => mergeIngredients(days), [days]);
 
   const showToast = useCallback((message, type = 'success') => {
@@ -174,7 +308,7 @@ export default function WeeklyMenu() {
     }, TOAST_DURATION_MS);
   }, []);
 
-  const triggerHighlightForRecipe = (recipe) => {
+  const triggerHighlightForRecipe = useCallback((recipe) => {
     const ingredients = Array.isArray(recipe?.ingredients) ? recipe.ingredients : [];
     const keys = ingredients
       .map((rawIng) => {
@@ -190,7 +324,7 @@ export default function WeeklyMenu() {
       setHighlightedKeys([]);
       highlightTimerRef.current = null;
     }, HIGHLIGHT_DURATION_MS);
-  };
+  }, []);
 
   const getDayLabel = (dayKey) =>
     DAYS.find((d) => d.key === dayKey)?.fullLabel || dayKey;
@@ -208,21 +342,55 @@ export default function WeeklyMenu() {
     lastTriggerRef.current?.focus();
   }, []);
 
-  const handleAddRecipe = (dayKey, mealKey, recipe) => {
-    const newItem = createSlotItem(recipe);
-    setDays((prev) => ({
-      ...prev,
-      [dayKey]: {
-        ...prev[dayKey],
-        [mealKey]: [...prev[dayKey][mealKey], newItem],
-      },
-    }));
+  const handleAddRecipe = useCallback(
+    (dayKey, mealKey, recipe) => {
+      const recipeId = recipe?.id ?? recipe?._id;
+      const cookingTime = recipe?.cookingTime ?? recipe?.duration ?? recipe?.time;
+      if (
+        recipeId !== undefined &&
+        recipeId !== null &&
+        cookingTime !== undefined &&
+        cookingTime !== null
+      ) {
+        setRecipeTimeMap((prev) => ({
+          ...prev,
+          [String(recipeId)]: cookingTime,
+        }));
+      }
 
-    triggerHighlightForRecipe(recipe);
-    showToast(
-      `Đã thêm '${newItem.title}' vào ${getDayLabel(dayKey)} · ${getMealLabel(mealKey)}`
-    );
-  };
+      const normalizedRecipe = {
+        ...recipe,
+        id: recipeId,
+        title: recipe?.title || recipe?.name || 'Món ăn',
+        image: recipe?.image || recipe?.imageUrl || recipe?.thumbnail || '',
+        ingredients: Array.isArray(recipe?.ingredients)
+          ? recipe.ingredients.map((ing) =>
+              typeof ing === 'string'
+                ? { name: ing, quantity: 0, unit: '' }
+                : {
+                    name: ing?.name ?? '',
+                    quantity: ing?.quantity ?? 0,
+                    unit: ing?.unit ?? '',
+                  }
+            )
+          : [],
+      };
+
+      dispatch(
+        addRecipeToSlot({
+          day: dayKey,
+          meal: mealKey,
+          recipe: normalizedRecipe,
+        })
+      );
+
+      triggerHighlightForRecipe(normalizedRecipe);
+      showToast(
+        `Đã thêm '${normalizedRecipe.title}' vào ${getDayLabel(dayKey)} · ${getMealLabel(mealKey)}`
+      );
+    },
+    [dispatch, showToast, triggerHighlightForRecipe]
+  );
 
   const handleSelectFromPicker = (recipe) => {
     if (!pickerSlot) return;
@@ -239,16 +407,10 @@ export default function WeeklyMenu() {
 
   const handleRemoveRecipe = useCallback(
     (dayKey, mealKey, uid) => {
-      setDays((prev) => ({
-        ...prev,
-        [dayKey]: {
-          ...prev[dayKey],
-          [mealKey]: prev[dayKey][mealKey].filter((item) => item.uid !== uid),
-        },
-      }));
+      dispatch(removeRecipeFromSlot({ day: dayKey, meal: mealKey, uid }));
       showToast('Đã xóa món khỏi thực đơn');
     },
-    [showToast]
+    [dispatch, showToast]
   );
 
   const handleOpenMove = useCallback((dayKey, mealKey, item, triggerElement) => {
@@ -274,32 +436,12 @@ export default function WeeklyMenu() {
       return;
     }
 
-    setDays((prev) => {
-      const sourceList = prev[fromDay][fromMeal].filter((x) => x.uid !== item.uid);
-
-      if (fromDay === toDay) {
-        return {
-          ...prev,
-          [fromDay]: {
-            ...prev[fromDay],
-            [fromMeal]: sourceList,
-            [toMeal]: [...prev[fromDay][toMeal], item],
-          },
-        };
-      }
-
-      return {
-        ...prev,
-        [fromDay]: {
-          ...prev[fromDay],
-          [fromMeal]: sourceList,
-        },
-        [toDay]: {
-          ...prev[toDay],
-          [toMeal]: [...prev[toDay][toMeal], item],
-        },
-      };
-    });
+    dispatch(
+      moveRecipe({
+        from: { day: fromDay, meal: fromMeal, uid: item.uid },
+        to: { day: toDay, meal: toMeal },
+      })
+    );
 
     showToast(
       `Đã chuyển '${item.title}' sang ${getDayLabel(toDay)} · ${getMealLabel(toMeal)}`
@@ -308,7 +450,7 @@ export default function WeeklyMenu() {
   };
 
   const handleConfirmClearWeek = () => {
-    setDays(createEmptyDays());
+    dispatch(clearMenu());
     setConfirmClearOpen(false);
     showToast('Đã xóa toàn bộ thực đơn tuần');
     lastTriggerRef.current?.focus();
@@ -318,6 +460,8 @@ export default function WeeklyMenu() {
     setWeekOffset(0);
     setSelectedMobileDay(getTodayDayKey());
   };
+
+  const selectedDayFullLabel = getDayLabel(selectedMobileDay);
 
   return (
     <main className="weekly-menu">
@@ -433,56 +577,17 @@ export default function WeeklyMenu() {
                 <img src={cookingIcon} alt="" aria-hidden="true" />
                 <span>{meal.label}</span>
               </div>,
-              ...dates.map((day) => {
-                const slotItems = days[day.key][meal.key];
-
-                return (
-                  <div
-                    className={`weekly-menu__slot${
-                      slotItems.length > 0 ? ' weekly-menu__slot--filled' : ''
-                    }`}
-                    key={`${meal.key}-${day.key}`}
-                  >
-                    {slotItems.length > 0 ? (
-                      <>
-                        <div className="weekly-menu__slot-list">
-                          {slotItems.map((item) => (
-                            <DishCard
-                              key={item.uid}
-                              item={item}
-                              dayKey={day.key}
-                              mealKey={meal.key}
-                              onOpenMove={handleOpenMove}
-                              onRemove={handleRemoveRecipe}
-                            />
-                          ))}
-                        </div>
-                        <button
-                          type="button"
-                          className="weekly-menu__slot-add-more"
-                          aria-label={`Thêm món cho ${meal.label} ${day.fullLabel}`}
-                          onClick={(event) =>
-                            handleOpenPicker(day.key, meal.key, event.currentTarget)
-                          }
-                        >
-                          + Thêm
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        className="weekly-menu__slot-empty-btn"
-                        type="button"
-                        aria-label={`Thêm món cho ${meal.label} ${day.fullLabel}`}
-                        onClick={(event) =>
-                          handleOpenPicker(day.key, meal.key, event.currentTarget)
-                        }
-                      >
-                        + Thêm món
-                      </button>
-                    )}
-                  </div>
-                );
-              }),
+              ...dates.map((day) => (
+                <MenuSlot
+                  key={`${meal.key}-${day.key}`}
+                  day={day}
+                  meal={meal}
+                  recipeTimeMap={recipeTimeMap}
+                  onOpenPicker={handleOpenPicker}
+                  onOpenMove={handleOpenMove}
+                  onRemove={handleRemoveRecipe}
+                />
+              )),
             ])}
           </div>
         </section>
@@ -511,63 +616,18 @@ export default function WeeklyMenu() {
           </div>
 
           <div className="weekly-menu__mobile-meal-list">
-            {MEALS.map((meal) => {
-              const slotItems = days[selectedMobileDay][meal.key];
-              const dayFullLabel = getDayLabel(selectedMobileDay);
-
-              return (
-                <div key={meal.key} className="weekly-menu__mobile-meal-group">
-                  <div className="weekly-menu__mobile-meal-heading">
-                    <img src={cookingIcon} alt="" aria-hidden="true" />
-                    <span>{meal.label}</span>
-                  </div>
-
-                  {slotItems.length > 0 ? (
-                    <div className="weekly-menu__mobile-slot-stack">
-                      {slotItems.map((item) => (
-                        <DishCard
-                          key={item.uid}
-                          item={item}
-                          dayKey={selectedMobileDay}
-                          mealKey={meal.key}
-                          onOpenMove={handleOpenMove}
-                          onRemove={handleRemoveRecipe}
-                        />
-                      ))}
-                      <button
-                        type="button"
-                        className="weekly-menu__slot-empty-btn weekly-menu__slot-empty-btn--compact"
-                        aria-label={`Thêm món cho ${meal.label} ${dayFullLabel}`}
-                        onClick={(event) =>
-                          handleOpenPicker(
-                            selectedMobileDay,
-                            meal.key,
-                            event.currentTarget
-                          )
-                        }
-                      >
-                        + Thêm món
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="weekly-menu__slot-empty-btn weekly-menu__slot-empty-btn--mobile"
-                      aria-label={`Thêm món cho ${meal.label} ${dayFullLabel}`}
-                      onClick={(event) =>
-                        handleOpenPicker(
-                          selectedMobileDay,
-                          meal.key,
-                          event.currentTarget
-                        )
-                      }
-                    >
-                      + Thêm món
-                    </button>
-                  )}
-                </div>
-              );
-            })}
+            {MEALS.map((meal) => (
+              <MobileMealSlot
+                key={meal.key}
+                dayKey={selectedMobileDay}
+                dayFullLabel={selectedDayFullLabel}
+                meal={meal}
+                recipeTimeMap={recipeTimeMap}
+                onOpenPicker={handleOpenPicker}
+                onOpenMove={handleOpenMove}
+                onRemove={handleRemoveRecipe}
+              />
+            ))}
           </div>
         </section>
       </div>
@@ -787,6 +847,13 @@ export default function WeeklyMenu() {
           {toast.message}
         </div>
       )}
+
+      <WeeklyMenuPrintSheet
+        days={days}
+        shoppingItems={shoppingItems}
+        totalDishes={totalDishes}
+        rangeLabel={rangeLabel}
+      />
     </main>
   );
 }
