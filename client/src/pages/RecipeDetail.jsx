@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import AddToMenuDialog from "../components/AddToMenuDialog/AddToMenuDialog";
 import ReviewForm from "../components/ReviewForm/ReviewForm";
+import ReviewList from "../components/ReviewList/ReviewList";
 import lockIcon from "../assets/lock-keyhole.svg";
 import StarRating, { StarInput } from "../components/StarRating/StarRating";
 import { getRecipeById, createReview } from "../api";
@@ -410,26 +411,11 @@ function RecipeContent({ recipe }) {
         </p>
         <div className="recipe-detail__reviews-layout">
           <div className="recipe-detail__community">
-            {reviews.length > 0 ? (
-              reviews.map((review, index) => (
-                <article
-                  className="recipe-detail__review"
-                  key={review.id ?? index}
-                >
-                  <p>{review.userName || review.name || "Người dùng"}</p>
-                  {review.rating != null && (
-                    <StarRating value={review.rating} size="sm" />
-                  )}
-                  <p>
-                    {review.hidden ? "" : (review.comment ?? review.text ?? "")}
-                  </p>
-                </article>
-              ))
-            ) : (
-              <p className="recipe-detail__helper">
-                Chưa có đánh giá cho món này.
-              </p>
-            )}
+            <ReviewList
+              reviews={reviews}
+              averageRating={averageRating}
+              reviewCount={reviewCount}
+            />
           </div>
           {isLoggedIn ? (
             <div className="recipe-detail__review-form">
