@@ -1,4 +1,5 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, createSelector } from '@reduxjs/toolkit'
+import { mergeIngredients } from '../utils/weeklyMenuHelper'
 
 export const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 export const MEAL_KEYS = ['breakfast', 'lunch', 'dinner']
@@ -23,6 +24,9 @@ export function createEmptyDays() {
     DAY_KEYS.map((day) => [day, { breakfast: [], lunch: [], dinner: [] }]),
   )
 }
+
+const newUid = () =>
+  crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`
 
 const initialState = {
   days: createEmptyDays(),
@@ -57,7 +61,7 @@ const menuSlice = createSlice({
             day,
             meal,
             item: {
-              uid: crypto.randomUUID(),
+              uid: newUid(),
               recipeId: recipe.id ?? recipe._id,
               title: recipe.title,
               image: recipe.image ?? '',
@@ -124,4 +128,5 @@ export const selectMenuItemCount = (state) =>
     0,
   )
 
+export const selectShoppingList = createSelector(selectMenuDays, mergeIngredients)
 export default menuSlice.reducer

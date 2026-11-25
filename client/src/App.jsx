@@ -9,7 +9,11 @@ import NotFound from './pages/NotFound'
 import CookingMode from './pages/CookingMode'
 import Unauthorized from './pages/Unauthorized'
 import RecipeForm from './pages/RecipeForm'
-import AdminPanel from './pages/AdminPanel'
+import AdminLayout from './pages/Admin/AdminLayout'
+import Dashboard from './pages/Admin/Dashboard'
+import PendingRecipes from './pages/Admin/PendingRecipes'
+import Categories from './pages/Admin/Categories'
+import Comments from './pages/Admin/Comments'
 import MyAccountLayout from './pages/MyAccount/MyAccountLayout'
 import Profile from './pages/MyAccount/Profile'
 import MyRecipes from './pages/MyAccount/MyRecipes'
@@ -44,9 +48,14 @@ export default function App() {
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-          <Route path="/admin/*" element={<AdminPanel />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="pending-recipes" element={<PendingRecipes />} />
+            <Route path="categories" element={<Categories />} />
+            <Route path="comments" element={<Comments />} />
+          </Route>
         </Route>
-
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
