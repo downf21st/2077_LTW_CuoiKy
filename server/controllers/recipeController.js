@@ -5,6 +5,7 @@ const { withReviewStats } = require('../utils/reviewStats');
 const { resolveStatusFilter } = require('./recipeStatusController');
 
 const recipesFile = path.join(__dirname, '..', 'data', 'recipes.json');
+const categoriesFile = path.join(__dirname, '..', 'data', 'categories.json');
 const uploadsDirectory = path.join(__dirname, '..', 'public', 'uploads');
 const maxPageSize = 100;
 
@@ -321,19 +322,15 @@ const getRecipes = async (req, res) => {
 
 const getCategories = async (req, res) => {
   try {
-    const recipes = await readJsonArray(recipesFile, 'recipes.json');
-    const categories = [...new Set(
-      recipes
-        .map((recipe) => (
-          typeof recipe.category === 'string' ? recipe.category.trim() : ''
-        ))
-        .filter(Boolean)
-    )].sort((a, b) => a.localeCompare(b, 'vi'));
+    const categories = await readJsonArray(categoriesFile, 'categories.json');
+    if (!categories.every((category) => typeof category === 'string' && category.trim())) {
+      throw new Error('categories.json phải chứa danh sách tên loại món dạng chuỗi.');
+    }
 
     return res.status(200).json({
       success: true,
       message: 'Lấy danh sách loại món thành công.',
-      data: categories
+      data: categories.map((category) => category.trim()).sort((a, b) => a.localeCompare(b, 'vi'))
     });
   } catch (error) {
     return sendServerError(res, 'Không thể đọc danh sách loại món.', error);
