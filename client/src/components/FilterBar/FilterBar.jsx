@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { getCategories } from "../../api";
 import "./FilterBar.css";
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const TIME_OPTIONS = [
   { value: "15", label: "Dưới 15 phút" },
@@ -17,12 +16,16 @@ const DIFFICULTY_OPTIONS = [
   { value: "Khó", label: "Khó" },
 ];
 
-function normalizeCategoryOptions(rawList) {
-  if (!Array.isArray(rawList)) return [];
+function normalizeCategoryOptions(raw) {
+  const list = Array.isArray(raw)
+    ? raw
+    : Array.isArray(raw?.categories)
+      ? raw.categories
+      : [];
   const seen = new Set();
   const options = [];
 
-  rawList.forEach((item) => {
+  list.forEach((item) => {
     const name =
       typeof item === "string"
         ? item.trim()
@@ -34,20 +37,6 @@ function normalizeCategoryOptions(rawList) {
   });
 
   return options;
-}
-
-async function fetchCategoryOptions(signal) {
-  const res = await fetch(`${API_BASE}/categories`, { signal });
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(json?.message || `Lỗi ${res.status}`);
-  }
-  const list = Array.isArray(json)
-    ? json
-    : Array.isArray(json?.data)
-      ? json.data
-      : [];
-  return normalizeCategoryOptions(list);
 }
 
 const FilterIcon = () => (
@@ -85,21 +74,23 @@ export default function FilterBar({
   const filters = value || internalFilters;
 
   useEffect(() => {
-    const controller = new AbortController();
+    let active = true;
 
-    fetchCategoryOptions(controller.signal)
-      .then((options) => {
-        if (controller.signal.aborted) return;
-        setCategoryOptions(options);
+    getCategories()
+      .then((data) => {
+        if (!active) return;
+        setCategoryOptions(normalizeCategoryOptions(data));
         setCategoryStatus("done");
       })
       .catch((err) => {
-        if (controller.signal.aborted) return;
+        if (!active) return;
         setCategoryError(err?.message || "Không thể tải danh sách loại món.");
         setCategoryStatus("error");
       });
 
-    return () => controller.abort();
+    return () => {
+      active = false;
+    };
   }, [categoryReloadKey]);
 
   useEffect(() => {
