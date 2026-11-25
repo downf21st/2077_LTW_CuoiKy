@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import StarRatingInput from "../StarRating/StarRatingInput";
 import { validateReview } from "../../utils/validateReview";
 import "./ReviewForm.css";
@@ -7,15 +7,35 @@ export default function ReviewForm({ onSubmit }) {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [errors, setErrors] = useState({});
+  const [pending, setPending] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const pendingRef = useRef(false);
   const commentId = useId();
   const countId = useId();
   const commentErrorId = useId();
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
+    if (pendingRef.current) return;
     const nextErrors = validateReview({ rating, comment });
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length === 0) onSubmit({ rating, comment });
+    if (Object.keys(nextErrors).length !== 0) return;
+    pendingRef.current = true;
+    setPending(true);
+    setSubmitError("");
+    setSubmitted(false);
+    try {
+      await onSubmit({ rating, comment });
+      setSubmitted(true);
+    } catch (error) {
+      setSubmitError(
+        error?.message || "Không thể gửi đánh giá. Vui lòng thử lại.",
+      );
+    } finally {
+      pendingRef.current = false;
+      setPending(false);
+    }
   }
 
   return (
@@ -56,8 +76,14 @@ export default function ReviewForm({ onSubmit }) {
           </p>
         )}
       </div>
-      <button className="review-form__submit" type="submit">
-        Gửi đánh giá
+      {submitError && (
+        <p className="review-form__error" role="alert">
+          {submitError}
+        </p>
+      )}
+      {submitted && <p role="status">Đã gửi đánh giá.</p>}
+      <button className="review-form__submit" type="submit" disabled={pending}>
+        {pending ? "Đang gửi..." : "Gửi đánh giá"}
       </button>
     </form>
   );

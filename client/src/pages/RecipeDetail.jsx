@@ -4,7 +4,7 @@ import AddToMenuDialog from "../components/AddToMenuDialog/AddToMenuDialog";
 import ReviewForm from "../components/ReviewForm/ReviewForm";
 import lockIcon from "../assets/lock-keyhole.svg";
 import StarRating, { StarInput } from "../components/StarRating/StarRating";
-import { getRecipeById } from "../api";
+import { getRecipeById, createReview } from "../api";
 import useAuth from "../hooks/useAuth";
 import { getFavorites, addFavorite, removeFavorite } from "../api";
 import "./RecipeDetail.css";
@@ -103,7 +103,15 @@ function RecipeContent({ recipe }) {
   const ingredients = recipe.ingredients ?? [];
   const steps = recipe.steps ?? [];
   const equipment = recipe.equipment ?? [];
-  const reviews = recipe.reviews ?? [];
+  const [reviews, setReviews] = useState(() => recipe.reviews ?? []);
+  const [averageRating, setAverageRating] = useState(recipe.averageRating);
+  const handleReviewSubmit = async (values) => {
+    const result = await createReview(recipe.id, values);
+    if (result?.review) {
+      setReviews((previous) => [...previous, result.review]);
+      setAverageRating(result.averageRating);
+    }
+  };
   const image = recipe.image?.startsWith("/uploads/")
     ? new URL(
         recipe.image,
@@ -150,11 +158,11 @@ function RecipeContent({ recipe }) {
             {recipe.description || "Chưa có mô tả."}
           </p>
           <div className="recipe-detail__rating">
-            {reviews.length > 0 && recipe.averageRating != null ? (
+            {reviews.length > 0 && averageRating != null ? (
               <>
-                <StarRating value={recipe.averageRating} />
+                <StarRating value={averageRating} />
                 <span>
-                  {recipe.averageRating}/5 · {reviews.length} đánh giá
+                  {averageRating}/5 · {reviews.length} đánh giá
                 </span>
               </>
             ) : (
@@ -397,11 +405,13 @@ function RecipeContent({ recipe }) {
                   className="recipe-detail__review"
                   key={review.id ?? index}
                 >
-                  <p>{review.name || "Người dùng"}</p>
+                  <p>{review.userName || review.name || "Người dùng"}</p>
                   {review.rating != null && (
                     <StarRating value={review.rating} size="sm" />
                   )}
-                  <p>{review.text || ""}</p>
+                  <p>
+                    {review.hidden ? "" : (review.comment ?? review.text ?? "")}
+                  </p>
                 </article>
               ))
             ) : (
@@ -415,10 +425,7 @@ function RecipeContent({ recipe }) {
               <h3 className="recipe-detail__review-form-title">
                 Bữa cơm của bạn thế nào?
               </h3>
-              <p className="recipe-detail__review-form-note">
-                Chức năng gửi đánh giá chưa khả dụng. Nội dung chưa được lưu.
-              </p>
-              <ReviewForm onSubmit={() => {}} />
+              <ReviewForm onSubmit={handleReviewSubmit} />
             </div>
           ) : (
             <form
