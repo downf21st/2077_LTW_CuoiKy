@@ -105,11 +105,22 @@ function RecipeContent({ recipe }) {
   const equipment = recipe.equipment ?? [];
   const [reviews, setReviews] = useState(() => recipe.reviews ?? []);
   const [averageRating, setAverageRating] = useState(recipe.averageRating);
+  const [reviewCount, setReviewCount] = useState(
+    () => recipe.reviewCount ?? (recipe.reviews ?? []).length,
+  );
   const handleReviewSubmit = async (values) => {
     const result = await createReview(recipe.id, values);
     if (result?.review) {
-      setReviews((previous) => [...previous, result.review]);
+      setReviews((previous) =>
+        result.review.id != null &&
+        previous.some(
+          (review) => String(review.id) === String(result.review.id),
+        )
+          ? previous
+          : [...previous, result.review],
+      );
       setAverageRating(result.averageRating);
+      setReviewCount(result.reviewCount);
     }
   };
   const image = recipe.image?.startsWith("/uploads/")
@@ -158,11 +169,11 @@ function RecipeContent({ recipe }) {
             {recipe.description || "Chưa có mô tả."}
           </p>
           <div className="recipe-detail__rating">
-            {reviews.length > 0 && averageRating != null ? (
+            {reviewCount > 0 && averageRating != null ? (
               <>
                 <StarRating value={averageRating} />
                 <span>
-                  {averageRating}/5 · {reviews.length} đánh giá
+                  {averageRating}/5 · {reviewCount} đánh giá
                 </span>
               </>
             ) : (
