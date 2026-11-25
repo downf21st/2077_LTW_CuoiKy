@@ -267,6 +267,14 @@ const main = async () => {
   ]);
 
   await createIfMissing('recipes.json', async () => recipes);
+  await createIfMissing('categories.json', async () => {
+    const content = await fs.readFile(path.join(dataDirectory, 'recipes.json'), 'utf8');
+    const existingRecipes = JSON.parse(content.replace(/^\uFEFF/, ''));
+    if (!Array.isArray(existingRecipes)) throw new Error('recipes.json phải chứa một mảng JSON.');
+    return [...new Set(existingRecipes
+      .map((recipe) => (typeof recipe.category === 'string' ? recipe.category.trim() : ''))
+      .filter(Boolean))].sort((a, b) => a.localeCompare(b, 'vi'));
+  });
   await createIfMissing('menus.json', async () => []);
   await addDemoData();
 };

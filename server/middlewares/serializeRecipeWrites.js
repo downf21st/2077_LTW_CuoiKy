@@ -1,28 +1,22 @@
-let writeQueue = Promise.resolve();
+const { acquireLock } = require('../utils/mutex');
 
-// Giữ tuần tự toàn bộ thao tác đọc-sửa-ghi công thức trong một tiến trình.
-const serializeRecipeWrites = (req, res, next) => {
-  const previousWrite = writeQueue;
-  let releaseWrite;
-  writeQueue = new Promise((resolve) => {
-    releaseWrite = resolve;
-  });
-
-  previousWrite.then(() => {
+// Dùng chung khóa với review, duyệt món và danh mục để tránh ghi đè dữ liệu.
+const serializeRecipeWrites = async (req, res, next) => {
+  try {
+    const release = await acquireLock();
     let released = false;
-    const release = () => {
+    const releaseOnce = () => {
       if (released) return;
       released = true;
-      releaseWrite();
+      release();
     };
 
-    res.once('finish', release);
-    res.once('close', release);
+    res.once('finish', releaseOnce);
+    res.once('close', releaseOnce);
     next();
-  }).catch((error) => {
-    releaseWrite();
+  } catch (error) {
     next(error);
-  });
+  }
 };
 
 module.exports = serializeRecipeWrites;

@@ -65,13 +65,13 @@ const createReview = async (req, res) => {
 
       const reviews = Array.isArray(recipe.reviews) ? recipe.reviews : [];
 
-      const alreadyReviewed = reviews.some((r) => String(r.userId) === String(req.user.id));
+      const alreadyReviewed = reviews.find((r) => String(r.userId) === String(req.user.id));
       if (alreadyReviewed) {
         return { code: 400, body: { message: 'Bạn đã đánh giá món này rồi' } };
       }
 
       const review = {
-        id: reviews.reduce((max, r) => Math.max(max, Number(r.id) || 0), 0) + 1,
+        id: `review-${crypto.randomUUID()}`,
         userId: req.user.id,
         userName: req.user.name || req.user.fullName || 'Người dùng',
         rating,
