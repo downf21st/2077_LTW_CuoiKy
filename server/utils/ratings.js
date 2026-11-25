@@ -1,13 +1,5 @@
-const calcRatingStats = (reviews) => {
-  const list = Array.isArray(reviews) ? reviews : [];
-  const reviewCount = list.length;
-  if (reviewCount === 0) return { averageRating: 0, reviewCount: 0 };
+const { getReviewStats } = require('./reviewStats');
 
-  const total = list.reduce((sum, r) => sum + (Number(r.rating) || 0), 0);
-  return {
-    averageRating: Math.round((total / reviewCount) * 10) / 10,
-    reviewCount,
-  };
-};
+const calcRatingStats = (reviews) => getReviewStats(reviews);
 
 module.exports = { calcRatingStats };

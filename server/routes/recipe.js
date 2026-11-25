@@ -10,7 +10,7 @@ const {
   updateRecipe,
   deleteRecipe
 } = require('../controllers/recipeController');
-const { createReview } = require('../controllers/reviewController');
+const { createReview, setReviewHidden } = require('../controllers/reviewController');
 const { updateRecipeStatus } = require('../controllers/recipeStatusController');
 
 const router = express.Router();
@@ -22,6 +22,7 @@ router.get('/:id', getRecipeById);
 router.put('/:id', requireUser, upload.single('image'), serializeRecipeWrites, updateRecipe);
 router.delete('/:id', requireUser, serializeRecipeWrites, deleteRecipe);
 router.post('/:id/reviews', requireUser, createReview);
+router.put('/:id/reviews/:reviewId', requireUser, setReviewHidden);
 router.put('/:id/status', requireUser, updateRecipeStatus);
 
 module.exports = router;
