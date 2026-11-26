@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { getRecipes } from "../../api";
+import { getRecipes, setRecipeStatus } from "../../api";
 import "./PendingRecipes.css";
 
 function imageUrl(image) {
@@ -12,11 +12,14 @@ function imageUrl(image) {
   return new URL(image, apiUrl.origin).href;
 }
 
-export default function PendingRecipes({ onApprove, onReject }) {
+export default function PendingRecipes() {
   const [recipes, setRecipes] = useState([]);
   const [status, setStatus] = useState("loading");
   const [loadError, setLoadError] = useState("");
   const [attempt, setAttempt] = useState(0);
+  const [working, setWorking] = useState({});
+  const [actionErrors, setActionErrors] = useState({});
+  const inFlight = useRef(new Set());
 
   useEffect(() => {
     let active = true;
@@ -50,6 +53,31 @@ export default function PendingRecipes({ onApprove, onReject }) {
       active = false;
     };
   }, [attempt]);
+
+  async function updateStatus(recipe, nextStatus) {
+    if (recipe.id == null) return;
+    const id = String(recipe.id);
+    if (inFlight.current.has(id)) return;
+    inFlight.current.add(id);
+    setWorking((current) => ({ ...current, [id]: true }));
+    setActionErrors((current) => ({ ...current, [id]: "" }));
+    try {
+      await setRecipeStatus(recipe.id, nextStatus);
+      setRecipes((current) => current.filter((item) => String(item.id) !== id));
+    } catch (error) {
+      const detail =
+        error?.message && error.message !== "Failed to fetch"
+          ? ` ${error.message}`
+          : "";
+      setActionErrors((current) => ({
+        ...current,
+        [id]: `Không thể cập nhật công thức. Vui lòng thử lại.${detail}`,
+      }));
+    } finally {
+      inFlight.current.delete(id);
+      setWorking((current) => ({ ...current, [id]: false }));
+    }
+  }
 
   return (
     <section
@@ -159,8 +187,10 @@ export default function PendingRecipes({ onApprove, onReject }) {
                         <button
                           type="button"
                           className="pending-recipes__button pending-recipes__button--reject"
-                          disabled={!onReject}
-                          onClick={() => onReject?.(recipe)}
+                          disabled={
+                            recipe.id == null || !!working[String(recipe.id)]
+                          }
+                          onClick={() => updateStatus(recipe, "rejected")}
                         >
                           Từ chối
                           <span className="pending-recipes__sr-only">
@@ -171,8 +201,10 @@ export default function PendingRecipes({ onApprove, onReject }) {
                         <button
                           type="button"
                           className="pending-recipes__button pending-recipes__button--approve"
-                          disabled={!onApprove}
-                          onClick={() => onApprove?.(recipe)}
+                          disabled={
+                            recipe.id == null || !!working[String(recipe.id)]
+                          }
+                          onClick={() => updateStatus(recipe, "approved")}
                         >
                           Chấp nhận
                           <span className="pending-recipes__sr-only">
@@ -181,6 +213,22 @@ export default function PendingRecipes({ onApprove, onReject }) {
                           </span>
                         </button>
                       </div>
+                      {working[String(recipe.id)] && (
+                        <p
+                          className="pending-recipes__action-message"
+                          role="status"
+                        >
+                          Đang cập nhật...
+                        </p>
+                      )}
+                      {actionErrors[String(recipe.id)] && (
+                        <p
+                          className="pending-recipes__action-message pending-recipes__action-message--error"
+                          role="alert"
+                        >
+                          {actionErrors[String(recipe.id)]}
+                        </p>
+                      )}
                     </td>
                   </tr>
                 ))}

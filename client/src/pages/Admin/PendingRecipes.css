@@ -151,6 +151,14 @@
   opacity: 0.65;
   cursor: not-allowed;
 }
+.pending-recipes__action-message {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-xs);
+}
+.pending-recipes__action-message--error {
+  color: var(--color-error);
+  overflow-wrap: anywhere;
+}
 .pending-recipes__button:focus-visible,
 .pending-recipes__breadcrumb a:focus-visible {
   outline: 2px solid var(--color-brand);
