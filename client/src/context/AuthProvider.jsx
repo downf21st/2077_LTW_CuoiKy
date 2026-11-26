@@ -1,5 +1,8 @@
 import { useState } from 'react'
+import { useDispatch } from 'react-redux'
 import { AuthContext } from './AuthContext'
+import { resetMenu } from '../redux/menuSlice'
+import { resetSyncedMenuUser } from '../hooks/useMenuSync'
 import {
   readStoredUser,
   readCachedProfile,
@@ -9,6 +12,7 @@ import {
 } from './authStorage'
 
 export default function AuthProvider({ children }) {
+  const dispatch = useDispatch()
   const [user, setUser] = useState(readStoredUser)
 
   const login = (userData, options = {}) => {
@@ -39,6 +43,8 @@ export default function AuthProvider({ children }) {
   const logout = () => {
     setUser(null)
     clearStoredUser()
+    resetSyncedMenuUser()
+    dispatch(resetMenu())
   }
 
   const value = {
