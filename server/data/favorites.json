@@ -1,0 +1,17 @@
+[
+  {
+    "userId": "user-003",
+    "recipeId": "dish0013",
+    "createdAt": "2026-11-23T02:57:01.591Z"
+  },
+  {
+    "userId": "user-003",
+    "recipeId": "dish0025",
+    "createdAt": "2026-11-23T09:57:03.408Z"
+  },
+  {
+    "userId": "user-003",
+    "recipeId": "dish0102",
+    "createdAt": "2026-11-23T09:57:11.093Z"
+  }
+]
