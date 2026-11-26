@@ -41,6 +41,40 @@
   border-radius: var(--radius-lg);
   background: var(--color-bg-surface);
 }
+
+.recipe-form__category-status,
+.recipe-form__category-error {
+  margin: 0;
+  font-size: var(--font-size-2xs);
+}
+
+.recipe-form__category-status {
+  color: var(--color-text-muted);
+}
+
+.recipe-form__category-error {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  color: var(--color-error);
+}
+
+.recipe-form__category-retry {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.recipe-form__category-retry:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
 .recipe-form__basic-layout {
   display: flex;
   gap: var(--space-8);

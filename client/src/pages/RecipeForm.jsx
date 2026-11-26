@@ -6,9 +6,13 @@ import IngredientInput from "../components/IngredientInput/IngredientInput";
 import StepForm from "../components/StepForm/StepForm";
 import DifficultyTags from "../components/DifficultyTags/DifficultyTags";
 import imageIcon from "../assets/image-icon.svg";
-import { getRecipeById, createRecipe, updateRecipe } from "../api";
 import {
-  CATEGORY_OPTIONS,
+  getRecipeById,
+  createRecipe,
+  updateRecipe,
+  getCategories,
+} from "../api";
+import {
   FIELD_LIMITS,
   createInitialValues,
   createEditValues,
@@ -39,7 +43,6 @@ const fields = [
     label: "Loại món",
     type: "select",
     placeholder: "Chọn loại món",
-    options: CATEGORY_OPTIONS,
   },
   {
     name: "cookingTime",
@@ -122,11 +125,40 @@ function RecipeFormEditor({ initialRecipe, onSubmit, isSubmitting = false }) {
   const [imageError, setImageError] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
+  const [categories, setCategories] = useState([]);
+  const [categoryStatus, setCategoryStatus] = useState("loading");
+  const [categoryAttempt, setCategoryAttempt] = useState(0);
   const savingRef = useRef(false);
   const refs = useRef({});
   const imageInputRef = useRef(null);
   const imageButtonRef = useRef(null);
   const imagePreviewRef = useRef(null);
+
+  useEffect(() => {
+    let active = true;
+    async function loadCategories() {
+      setCategoryStatus("loading");
+      try {
+        const result = await getCategories();
+        if (
+          !Array.isArray(result) ||
+          !result.every((item) => typeof item === "string" && item.trim())
+        ) {
+          throw new Error("Danh sách loại món không hợp lệ.");
+        }
+        if (active) {
+          setCategories(result);
+          setCategoryStatus("done");
+        }
+      } catch {
+        if (active) setCategoryStatus("error");
+      }
+    }
+    loadCategories();
+    return () => {
+      active = false;
+    };
+  }, [categoryAttempt]);
 
   useEffect(() => {
     if (!imageFile) return;
@@ -308,7 +340,15 @@ function RecipeFormEditor({ initialRecipe, onSubmit, isSubmitting = false }) {
 
   const renderField = ({ name, label, type, placeholder, options, hint }) => {
     const error = touched[name] ? validateRecipeInfo(values)[name] : undefined;
-    const fieldHint = hint;
+    const categoryMissing =
+      name === "category" &&
+      categoryStatus === "done" &&
+      values.category &&
+      !categories.includes(values.category);
+    const fieldHint = categoryMissing
+      ? "Loại món hiện tại không còn trong danh sách. Bạn có thể chọn loại khác."
+      : hint;
+    const fieldOptions = name === "category" ? categories : options;
     const describedBy =
       [error && `${name}-error`, fieldHint && `${name}-hint`]
         .filter(Boolean)
@@ -349,19 +389,41 @@ function RecipeFormEditor({ initialRecipe, onSubmit, isSubmitting = false }) {
             }}
           />
         ) : type === "select" ? (
-          <select {...props}>
-            {values[name] && !options.includes(values[name]) && (
-              <option value={values[name]}>{values[name]}</option>
-            )}
-            <option value="" disabled>
-              {placeholder}
-            </option>
-            {options.map((option) => (
-              <option key={option} value={option}>
-                {option}
+          <>
+            <select
+              {...props}
+              disabled={name === "category" && categoryStatus !== "done"}
+            >
+              {values[name] && !fieldOptions.includes(values[name]) && (
+                <option value={values[name]}>{values[name]}</option>
+              )}
+              <option value="" disabled>
+                {placeholder}
               </option>
-            ))}
-          </select>
+              {fieldOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+            {name === "category" && categoryStatus === "loading" && (
+              <p className="recipe-form__category-status" role="status">
+                Đang tải danh sách loại món...
+              </p>
+            )}
+            {name === "category" && categoryStatus === "error" && (
+              <div className="recipe-form__category-error" role="alert">
+                <span>Không thể tải danh sách loại món.</span>
+                <button
+                  className="recipe-form__category-retry"
+                  type="button"
+                  onClick={() => setCategoryAttempt((attempt) => attempt + 1)}
+                >
+                  Thử lại
+                </button>
+              </div>
+            )}
+          </>
         ) : type === "textarea" ? (
           <textarea {...props} maxLength={FIELD_LIMITS.description.max} />
         ) : (

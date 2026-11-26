@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import AddToMenuDialog from "../components/AddToMenuDialog/AddToMenuDialog";
+import ReviewForm from "../components/ReviewForm/ReviewForm";
+import ReviewList from "../components/ReviewList/ReviewList";
 import lockIcon from "../assets/lock-keyhole.svg";
 import StarRating, { StarInput } from "../components/StarRating/StarRating";
-import { getRecipeById } from "../api";
+import { getRecipeById, createReview } from "../api";
 import useAuth from "../hooks/useAuth";
 import { getFavorites, addFavorite, removeFavorite } from "../api";
 import "./RecipeDetail.css";
@@ -94,12 +97,41 @@ function FavoriteButton({ userId, recipeId }) {
 
 function RecipeContent({ recipe }) {
   const { isLoggedIn, user } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuTrigger = useRef(null);
+  const navigate = useNavigate();
+  const location = useLocation();
   const ingredients = recipe.ingredients ?? [];
   const steps = recipe.steps ?? [];
   const equipment = recipe.equipment ?? [];
-  const reviews = recipe.reviews ?? [];
-  const image = recipe.image?.startsWith('/uploads/')
-    ? new URL(recipe.image, new URL(import.meta.env.VITE_API_URL || 'http://localhost:5000/api', window.location.href).origin).href
+  const [reviews, setReviews] = useState(() => recipe.reviews ?? []);
+  const [averageRating, setAverageRating] = useState(recipe.averageRating);
+  const [reviewCount, setReviewCount] = useState(
+    () => recipe.reviewCount ?? (recipe.reviews ?? []).length,
+  );
+  const handleReviewSubmit = async (values) => {
+    const result = await createReview(recipe.id, values);
+    if (result?.review) {
+      setReviews((previous) =>
+        result.review.id != null &&
+        previous.some(
+          (review) => String(review.id) === String(result.review.id),
+        )
+          ? previous
+          : [...previous, result.review],
+      );
+      setAverageRating(result.averageRating);
+      setReviewCount(result.reviewCount);
+    }
+  };
+  const image = recipe.image?.startsWith("/uploads/")
+    ? new URL(
+        recipe.image,
+        new URL(
+          import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+          window.location.href,
+        ).origin,
+      ).href
     : recipe.image;
   const cookingPath = `/recipe/${encodeURIComponent(recipe.id)}/cooking-mode`;
 
@@ -138,11 +170,11 @@ function RecipeContent({ recipe }) {
             {recipe.description || "Chưa có mô tả."}
           </p>
           <div className="recipe-detail__rating">
-            {reviews.length > 0 && recipe.averageRating != null ? (
+            {reviewCount > 0 && averageRating != null ? (
               <>
-                <StarRating value={recipe.averageRating} />
+                <StarRating value={averageRating} />
                 <span>
-                  {recipe.averageRating}/5 · {reviews.length} đánh giá
+                  {averageRating}/5 · {reviewCount} đánh giá
                 </span>
               </>
             ) : (
@@ -201,7 +233,7 @@ function RecipeContent({ recipe }) {
             <img className="recipe-detail__lock-icon" src={lockIcon} alt="" />
           )}
           {isLoggedIn
-            ? "Tính năng lên thực đơn tuần đang được phát triển."
+            ? "Lưu món yêu thích hoặc thêm món vào thực đơn tuần."
             : "Đăng nhập để lưu món yêu thích và lên thực đơn tuần."}
         </p>
         <div className="recipe-detail__guest-actions">
@@ -221,9 +253,14 @@ function RecipeContent({ recipe }) {
             </button>
           )}
           <button
-            className="recipe-detail__button recipe-detail__button--locked"
+            className="recipe-detail__button recipe-detail__button--primary"
             type="button"
-            disabled
+            ref={menuTrigger}
+            onClick={() =>
+              isLoggedIn
+                ? setMenuOpen(true)
+                : navigate("/login", { state: { from: location } })
+            }
           >
             Thêm vào thực đơn tuần
           </button>
@@ -236,6 +273,12 @@ function RecipeContent({ recipe }) {
             </Link>
           )}
         </div>
+        <AddToMenuDialog
+          open={menuOpen}
+          onClose={() => setMenuOpen(false)}
+          recipe={recipe}
+          triggerRef={menuTrigger}
+        />
       </section>
       <div className="recipe-detail__content">
         <section
@@ -368,69 +411,75 @@ function RecipeContent({ recipe }) {
         </p>
         <div className="recipe-detail__reviews-layout">
           <div className="recipe-detail__community">
-            {reviews.length > 0 ? (
-              reviews.map((review, index) => (
-                <article
-                  className="recipe-detail__review"
-                  key={review.id ?? index}
-                >
-                  <p>{review.name || "Người dùng"}</p>
-                  {review.rating != null && (
-                    <StarRating value={review.rating} size="sm" />
-                  )}
-                  <p>{review.text || ""}</p>
-                </article>
-              ))
-            ) : (
-              <p className="recipe-detail__helper">
-                Chưa có đánh giá cho món này.
-              </p>
-            )}
+            <ReviewList
+              reviews={reviews}
+              averageRating={averageRating}
+              reviewCount={reviewCount}
+            />
           </div>
-          <form
-            className="recipe-detail__review-form"
-            onSubmit={(event) => event.preventDefault()}
-          >
-            <h3 className="recipe-detail__review-form-title">
-              Bữa cơm của bạn thế nào?
-            </h3>
-            {!isLoggedIn && <p className="recipe-detail__review-login-hint">
-              <img className="recipe-detail__lock-icon" src={lockIcon} alt="" />{" "}
-              Đăng nhập để đánh giá và bình luận.
-            </p>}
-            {!isLoggedIn && (
-            <Link
-              className="recipe-detail__button recipe-detail__button--primary recipe-detail__review-form-button"
-              to="/login"
+          {isLoggedIn ? (
+            <div className="recipe-detail__review-form">
+              <h3 className="recipe-detail__review-form-title">
+                Bữa cơm của bạn thế nào?
+              </h3>
+              <ReviewForm onSubmit={handleReviewSubmit} />
+            </div>
+          ) : (
+            <form
+              className="recipe-detail__review-form"
+              onSubmit={(event) => event.preventDefault()}
             >
-              Đăng nhập
-            </Link>
-            )}
-            <fieldset className="recipe-detail__rating-field" disabled>
-              <legend className="recipe-detail__rating-legend">
-                {isLoggedIn ? 'Điểm của bạn' : 'Điểm của bạn · Chưa đăng nhập'}
-              </legend>
-              <StarInput name="rating" />
-            </fieldset>
-            <label className="recipe-detail__comment-label">
-              Bình luận của bạn
-              <textarea
-                className="recipe-detail__comment"
-                placeholder="Viết cảm nhận của bạn…"
+              <h3 className="recipe-detail__review-form-title">
+                Bữa cơm của bạn thế nào?
+              </h3>
+              {!isLoggedIn && (
+                <p className="recipe-detail__review-login-hint">
+                  <img
+                    className="recipe-detail__lock-icon"
+                    src={lockIcon}
+                    alt=""
+                  />{" "}
+                  Đăng nhập để đánh giá và bình luận.
+                </p>
+              )}
+              {!isLoggedIn && (
+                <Link
+                  className="recipe-detail__button recipe-detail__button--primary recipe-detail__review-form-button"
+                  to="/login"
+                >
+                  Đăng nhập
+                </Link>
+              )}
+              <fieldset className="recipe-detail__rating-field" disabled>
+                <legend className="recipe-detail__rating-legend">
+                  {isLoggedIn
+                    ? "Điểm của bạn"
+                    : "Điểm của bạn · Chưa đăng nhập"}
+                </legend>
+                <StarInput name="rating" />
+              </fieldset>
+              <label className="recipe-detail__comment-label">
+                Bình luận của bạn
+                <textarea
+                  className="recipe-detail__comment"
+                  placeholder="Viết cảm nhận của bạn…"
+                  disabled
+                />
+              </label>
+              <button
+                className="recipe-detail__button recipe-detail__button--disabled recipe-detail__review-form-button"
+                type="submit"
                 disabled
-              />
-            </label>
-            <button
-              className="recipe-detail__button recipe-detail__button--disabled recipe-detail__review-form-button"
-              type="submit"
-              disabled
-            >
-              Gửi đánh giá
-            </button>
-            <p className="recipe-detail__review-form-note">
-              {isLoggedIn ? 'Tính năng đánh giá đang được phát triển.' : 'Chưa thể gửi khi chưa đăng nhập.'}
-            </p>
-          </form>
+              >
+                Gửi đánh giá
+              </button>
+              <p className="recipe-detail__review-form-note">
+                {isLoggedIn
+                  ? "Tính năng đánh giá đang được phát triển."
+                  : "Chưa thể gửi khi chưa đăng nhập."}
+              </p>
+            </form>
+          )}
         </div>
       </section>
     </div>

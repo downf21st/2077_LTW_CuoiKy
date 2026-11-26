@@ -4,17 +4,21 @@ const path = require('node:path');
 const recipeRoutes = require('./routes/recipe');
 const categoryRoutes = require('./routes/category');
 const userRoutes = require('./routes/user');
+const menuRoutes = require('./routes/menu');
+const reviewRoutes = require('./routes/review');
 const { notFound, errorHandler } = require('./middlewares/errorHandler');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 app.use('/api/recipes', recipeRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/menus', menuRoutes);
+app.use('/api/reviews', reviewRoutes);
 app.use(notFound);
 app.use(errorHandler);
 

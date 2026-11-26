@@ -1,8 +1,11 @@
 const crypto = require('node:crypto');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const { withReviewStats } = require('../utils/reviewStats');
+const { resolveStatusFilter } = require('./recipeStatusController');
 
 const recipesFile = path.join(__dirname, '..', 'data', 'recipes.json');
+const categoriesFile = path.join(__dirname, '..', 'data', 'categories.json');
 const uploadsDirectory = path.join(__dirname, '..', 'public', 'uploads');
 const maxPageSize = 100;
 
@@ -165,6 +168,14 @@ const authorizeRecipeMutation = (req, recipe) => {
 
 const getRecipes = async (req, res) => {
   try {
+    const statusFilter = resolveStatusFilter(req);
+    if (statusFilter.error) {
+      return res.status(statusFilter.error.code).json({
+        success: false,
+        message: statusFilter.error.message
+      });
+    }
+
     const page = parsePositiveInteger(req.query.page, 1);
     const limit = parsePositiveInteger(req.query.limit, 10);
     const { search, category, maxTime, difficulty, ingredients, authorId } = req.query;
@@ -216,11 +227,18 @@ const getRecipes = async (req, res) => {
       const recipeStatus = recipe.status || 'approved';
       const isOwner = currentUser
         && String(recipe.authorId) === String(currentUser.id);
-      const isVisible = recipeStatus === 'approved'
-        || currentUser?.role === 'admin'
-        || isOwner;
 
-      if (!isVisible) return false;
+      if (statusFilter.mode === 'admin') {
+        if (statusFilter.status !== 'all' && recipeStatus !== statusFilter.status) {
+          return false;
+        }
+      } else {
+        const isVisible = recipeStatus === 'approved'
+          || currentUser?.role === 'admin'
+          || isOwner;
+        if (!isVisible) return false;
+      }
+
       if (authorId && String(recipe.authorId) !== authorId.trim()) return false;
       if (category && normalizeText(String(recipe.category ?? '')) !== normalizeText(category.trim())) {
         return false;
@@ -252,7 +270,6 @@ const getRecipes = async (req, res) => {
         if (!matchesSearch) return false;
       }
 
-
       return true;
     });
 
@@ -282,6 +299,11 @@ const getRecipes = async (req, res) => {
         });
     }
 
+    filteredRecipes = filteredRecipes.map((recipe) => ({
+      ...withReviewStats(recipe),
+      ...(recipe.matchCount === undefined ? {} : { matchCount: recipe.matchCount })
+    }));
+
     const totalItems = filteredRecipes.length;
     const totalPages = Math.ceil(totalItems / limit);
     const startIndex = (page - 1) * limit;
@@ -300,24 +322,21 @@ const getRecipes = async (req, res) => {
 
 const getCategories = async (req, res) => {
   try {
-    const recipes = await readJsonArray(recipesFile, 'recipes.json');
-    const categories = [...new Set(
-      recipes
-        .map((recipe) => (
-          typeof recipe.category === 'string' ? recipe.category.trim() : ''
-        ))
-        .filter(Boolean)
-    )].sort((a, b) => a.localeCompare(b, 'vi'));
+    const categories = await readJsonArray(categoriesFile, 'categories.json');
+    if (!categories.every((category) => typeof category === 'string' && category.trim())) {
+      throw new Error('categories.json phải chứa danh sách tên loại món dạng chuỗi.');
+    }
 
     return res.status(200).json({
       success: true,
       message: 'Lấy danh sách loại món thành công.',
-      data: categories
+      data: categories.map((category) => category.trim()).sort((a, b) => a.localeCompare(b, 'vi'))
     });
   } catch (error) {
     return sendServerError(res, 'Không thể đọc danh sách loại món.', error);
   }
 };
+
 const getRecipeById = async (req, res) => {
   try {
     const recipes = await readJsonArray(recipesFile, 'recipes.json');
@@ -336,7 +355,10 @@ const getRecipeById = async (req, res) => {
       });
     }
 
-    return res.status(200).json({ success: true, data: recipe });
+    return res.status(200).json({
+      success: true,
+      data: withReviewStats(recipe, true)
+    });
   } catch (error) {
     return sendServerError(res, 'Không thể đọc chi tiết công thức.', error);
   }
@@ -424,6 +446,7 @@ const updateRecipe = async (req, res) => {
     const index = recipes.findIndex((item) => String(item.id) === req.params.id);
 
     if (index === -1) {
+      await removeUploadedFile(req);
       return res.status(404).json({
         success: false,
         message: 'Không tìm thấy công thức.'
@@ -433,6 +456,7 @@ const updateRecipe = async (req, res) => {
     const authorizationError = authorizeRecipeMutation(req, recipes[index]);
 
     if (authorizationError) {
+      await removeUploadedFile(req);
       return res.status(authorizationError.status).json({
         success: false,
         message: authorizationError.message
