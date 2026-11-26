@@ -9,7 +9,13 @@ import {
 } from "../../redux/menuSlice";
 import "./AddToMenuDialog.css";
 
-export default function AddToMenuDialog({ open, onClose, recipe, triggerRef }) {
+export default function AddToMenuDialog({
+  open,
+  onClose,
+  onAdded,
+  recipe,
+  triggerRef,
+}) {
   const dialogRef = useRef(null);
   const previousFocus = useRef(null);
   const titleId = useId();
@@ -37,6 +43,7 @@ export default function AddToMenuDialog({ open, onClose, recipe, triggerRef }) {
   function handleSubmit(event) {
     event.preventDefault();
     dispatch(addRecipeToSlot({ day, meal, recipe }));
+    onAdded?.({ day: DAY_LABELS[day], meal: MEAL_LABELS[meal] });
     dialogRef.current.close();
   }
 

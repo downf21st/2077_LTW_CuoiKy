@@ -98,6 +98,7 @@ function FavoriteButton({ userId, recipeId }) {
 function RecipeContent({ recipe }) {
   const { isLoggedIn, user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuMessage, setMenuMessage] = useState("");
   const menuTrigger = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -256,11 +257,14 @@ function RecipeContent({ recipe }) {
             className="recipe-detail__button recipe-detail__button--primary"
             type="button"
             ref={menuTrigger}
-            onClick={() =>
-              isLoggedIn
-                ? setMenuOpen(true)
-                : navigate("/login", { state: { from: location } })
-            }
+            onClick={() => {
+              if (isLoggedIn) {
+                setMenuMessage("");
+                setMenuOpen(true);
+              } else {
+                navigate("/login", { state: { from: location } });
+              }
+            }}
           >
             Thêm vào thực đơn tuần
           </button>
@@ -273,9 +277,17 @@ function RecipeContent({ recipe }) {
             </Link>
           )}
         </div>
+        {menuMessage && (
+          <p className="recipe-detail__guest-message" role="status">
+            {menuMessage}
+          </p>
+        )}
         <AddToMenuDialog
           open={menuOpen}
           onClose={() => setMenuOpen(false)}
+          onAdded={({ day, meal }) =>
+            setMenuMessage(`Đã thêm vào ${day}, bữa ${meal}`)
+          }
           recipe={recipe}
           triggerRef={menuTrigger}
         />
