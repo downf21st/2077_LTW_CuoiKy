@@ -31,6 +31,11 @@ function EmptyCategoryIcon() {
   );
 }
 
+function extractCategoryId(item, fallbackName) {
+  if (!item || typeof item !== 'object') return fallbackName;
+  return item.id ?? item._id ?? item.categoryId ?? fallbackName;
+}
+
 function normalizeCategoryList(raw, countsByCategory = {}) {
   const list = Array.isArray(raw)
     ? raw
@@ -44,16 +49,16 @@ function normalizeCategoryList(raw, countsByCategory = {}) {
         const name = item.trim();
         if (!name) return null;
         return {
-          id: null,
-          key: `legacy-${name}-${index}`,
+          id: name,
+          key: `${name}-${index}`,
           name,
           recipeCount: countsByCategory[name.toLowerCase()] ?? 0,
         };
       }
 
-      const id = item?.id ?? item?._id ?? null;
       const name = String(item?.name || '').trim();
       if (!name) return null;
+      const id = extractCategoryId(item, name);
 
       const recipeCount =
         typeof item?.recipeCount === 'number'
@@ -62,7 +67,7 @@ function normalizeCategoryList(raw, countsByCategory = {}) {
 
       return {
         id,
-        key: id !== null ? String(id) : `cat-${name}-${index}`,
+        key: `${String(id)}-${index}`,
         name,
         recipeCount,
       };
@@ -151,7 +156,7 @@ export default function AdminCategories() {
 
     Promise.all([
       getCategories(),
-      getRecipes({ page: 1, limit: 100 }).catch(() => []),
+      getRecipes({ page: 1, limit: 1000 }).catch(() => []),
     ])
       .then(([catData, recipeData]) => {
         if (!active) return;
@@ -265,24 +270,8 @@ export default function AdminCategories() {
     setCreateError('');
 
     try {
-      const created = await createCategory(trimmed);
-      const createdItem =
-        created && typeof created === 'object'
-          ? {
-              id: created.id ?? created._id ?? null,
-              key: String(created.id ?? created._id ?? `new-${Date.now()}`),
-              name: String(created.name || trimmed).trim(),
-              recipeCount:
-                typeof created.recipeCount === 'number' ? created.recipeCount : 0,
-            }
-          : null;
-
-      if (createdItem && createdItem.id !== null) {
-        setCategories((prev) => [...prev, createdItem]);
-      } else {
-        setReloadKey((prev) => prev + 1);
-      }
-
+      await createCategory(trimmed);
+      setReloadKey((prev) => prev + 1);
       setNewName('');
       setIsAddOpen(false);
       showToast(`Đã thêm loại món “${trimmed}”.`);
@@ -329,20 +318,11 @@ export default function AdminCategories() {
     setEditingError('');
 
     try {
-      let nextName = trimmed;
-      if (editTarget.id !== null) {
-        const updated = await updateCategory(editTarget.id, trimmed);
-        nextName = String(updated?.name || trimmed).trim();
-      }
-
-      setCategories((prev) =>
-        prev.map((item) =>
-          item.key === editTarget.key ? { ...item, name: nextName } : item
-        )
-      );
+      await updateCategory(editTarget.id, trimmed);
+      setReloadKey((prev) => prev + 1);
       setEditTarget(null);
       setEditingName('');
-      showToast(`Đã đổi tên thành “${nextName}”.`);
+      showToast(`Đã đổi tên thành “${trimmed}”.`);
       lastTriggerRef.current?.focus();
     } catch (err) {
       setEditingError(formatApiError(err, 'update'));
@@ -371,16 +351,9 @@ export default function AdminCategories() {
     setDeleteError('');
 
     try {
-      if (deleteTarget.id !== null) {
-        await deleteCategory(deleteTarget.id);
-      } else if (deleteTarget.recipeCount > 0) {
-        throw new Error('Loại món này đang có món sử dụng');
-      }
-
+      await deleteCategory(deleteTarget.id);
       const removedName = deleteTarget.name;
-      setCategories((prev) =>
-        prev.filter((item) => item.key !== deleteTarget.key)
-      );
+      setReloadKey((prev) => prev + 1);
       setDeleteTarget(null);
       showToast(`Đã xóa loại món “${removedName}”.`);
       lastTriggerRef.current?.focus();
@@ -532,7 +505,7 @@ export default function AdminCategories() {
               <article key={category.key} className="admin-categories__mobile-card">
                 <div className="admin-categories__col-name">
                   <span className="admin-categories__pill">Loại món</span>
-                  <h2 className="admin-categories__name">{category.name}</h2>
+                  <span className="admin-categories__name">{category.name}</span>
                 </div>
 
                 <p className="admin-categories__mobile-count">
