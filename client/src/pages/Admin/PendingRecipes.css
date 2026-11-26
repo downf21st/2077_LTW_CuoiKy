@@ -136,6 +136,7 @@
 }
 .pending-recipes__button--view {
   color: var(--color-text);
+  text-decoration: none;
 }
 .pending-recipes__button--reject {
   color: var(--color-error);

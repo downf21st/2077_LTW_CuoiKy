@@ -1,36 +1,56 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { getRecipes } from "../../api";
 import "./PendingRecipes.css";
 
-const EXAMPLE_RECIPES = [
-  {
-    id: "example-1",
-    title: "Bún chả Hà Nội",
-    authorName: "Phạm Minh Anh",
-    category: "Món nướng",
-  },
-  {
-    id: "example-2",
-    title: "Cá kho tộ",
-    authorName: "Lê Thu Hà",
-    category: "Món kho",
-  },
-  {
-    id: "example-3",
-    title: "Gỏi cuốn tôm thịt",
-    authorName: "Đỗ Khánh Linh",
-    category: "Món cuốn",
-  },
-];
+function imageUrl(image) {
+  if (!image?.startsWith("/uploads/")) return image;
+  const apiUrl = new URL(
+    import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+    window.location.href,
+  );
+  return new URL(image, apiUrl.origin).href;
+}
 
-export default function PendingRecipes({
-  recipes = EXAMPLE_RECIPES,
-  status = "preview",
-  onView,
-  onApprove,
-  onReject,
-  onRetry,
-}) {
-  const isPreview = status === "preview";
+export default function PendingRecipes({ onApprove, onReject }) {
+  const [recipes, setRecipes] = useState([]);
+  const [status, setStatus] = useState("loading");
+  const [loadError, setLoadError] = useState("");
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    async function loadRecipes() {
+      setStatus("loading");
+      setLoadError("");
+      try {
+        const list = [];
+        let page = 1;
+        let batch;
+        do {
+          batch = await getRecipes({ status: "pending", page, limit: 100 });
+          if (!Array.isArray(batch))
+            throw new Error("Dữ liệu công thức không hợp lệ.");
+          list.push(...batch);
+          page += 1;
+        } while (batch.length === 100 && active);
+        if (active) {
+          setRecipes(list);
+          setStatus("ready");
+        }
+      } catch (error) {
+        if (active) {
+          setLoadError(error.message || "Không thể tải công thức chờ duyệt.");
+          setStatus("error");
+        }
+      }
+    }
+    loadRecipes();
+    return () => {
+      active = false;
+    };
+  }, [attempt]);
+
   return (
     <section
       className="pending-recipes"
@@ -45,11 +65,6 @@ export default function PendingRecipes({
         <h1 id="pending-recipes-title">Duyệt công thức</h1>
         <p>Xem và duyệt các công thức mới do thành viên đăng.</p>
       </header>
-      {isPreview && (
-        <p className="pending-recipes__preview">
-          Dữ liệu minh họa. Chức năng duyệt chưa được kết nối.
-        </p>
-      )}
       {status === "loading" ? (
         <p className="pending-recipes__state" role="status">
           Đang tải công thức chờ duyệt...
@@ -57,15 +72,14 @@ export default function PendingRecipes({
       ) : status === "error" ? (
         <div className="pending-recipes__state" role="alert">
           <p>Không thể tải công thức chờ duyệt.</p>
-          {onRetry && (
-            <button
-              type="button"
-              className="pending-recipes__button"
-              onClick={onRetry}
-            >
-              Thử lại
-            </button>
-          )}
+          {loadError && loadError !== "Failed to fetch" && <p>{loadError}</p>}
+          <button
+            type="button"
+            className="pending-recipes__button"
+            onClick={() => setAttempt((current) => current + 1)}
+          >
+            Thử lại
+          </button>
         </div>
       ) : recipes.length === 0 ? (
         <div className="pending-recipes__state" role="status">
@@ -91,7 +105,7 @@ export default function PendingRecipes({
                         {recipe.image ? (
                           <img
                             className="pending-recipes__image"
-                            src={recipe.image}
+                            src={imageUrl(recipe.image)}
                             alt=""
                           />
                         ) : (
@@ -118,22 +132,34 @@ export default function PendingRecipes({
                     </td>
                     <td>
                       <div className="pending-recipes__actions">
-                        <button
-                          type="button"
-                          className="pending-recipes__button pending-recipes__button--view"
-                          disabled={!onView || isPreview}
-                          onClick={() => onView?.(recipe)}
-                        >
-                          Xem
-                          <span className="pending-recipes__sr-only">
-                            {" "}
-                            {recipe.title}
-                          </span>
-                        </button>
+                        {recipe.id != null ? (
+                          <Link
+                            className="pending-recipes__button pending-recipes__button--view"
+                            to={`/recipe/${encodeURIComponent(recipe.id)}`}
+                          >
+                            Xem
+                            <span className="pending-recipes__sr-only">
+                              {" "}
+                              {recipe.title}
+                            </span>
+                          </Link>
+                        ) : (
+                          <button
+                            type="button"
+                            className="pending-recipes__button pending-recipes__button--view"
+                            disabled
+                          >
+                            Xem
+                            <span className="pending-recipes__sr-only">
+                              {" "}
+                              {recipe.title}
+                            </span>
+                          </button>
+                        )}
                         <button
                           type="button"
                           className="pending-recipes__button pending-recipes__button--reject"
-                          disabled={!onReject || isPreview}
+                          disabled={!onReject}
                           onClick={() => onReject?.(recipe)}
                         >
                           Từ chối
@@ -145,7 +171,7 @@ export default function PendingRecipes({
                         <button
                           type="button"
                           className="pending-recipes__button pending-recipes__button--approve"
-                          disabled={!onApprove || isPreview}
+                          disabled={!onApprove}
                           onClick={() => onApprove?.(recipe)}
                         >
                           Chấp nhận
