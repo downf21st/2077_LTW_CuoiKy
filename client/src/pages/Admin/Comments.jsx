@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { getAdminReviews } from "../../api";
+import { useEffect, useRef, useState } from "react";
+import { getAdminReviews, setReviewHidden } from "../../api";
 import StarRating from "../../components/StarRating/StarRating";
 import "./Comments.css";
 
@@ -9,12 +9,24 @@ const FILTERS = [
   { value: "hidden", label: "Đã ẩn" },
 ];
 
+const reviewKey = (review) =>
+  JSON.stringify([String(review.recipeId), String(review.id)]);
+
 export default function Comments() {
   const [reviews, setReviews] = useState([]);
   const [status, setStatus] = useState("loading");
   const [attempt, setAttempt] = useState(0);
   const [filter, setFilter] = useState("all");
   const [limit, setLimit] = useState(5);
+  const [selected, setSelected] = useState(null);
+  const [working, setWorking] = useState({});
+  const [actionErrors, setActionErrors] = useState({});
+  const dialogRef = useRef(null);
+  const inFlight = useRef(new Set());
+
+  useEffect(() => {
+    if (selected && !dialogRef.current.open) dialogRef.current.showModal();
+  }, [selected]);
   useEffect(() => {
     let active = true;
     async function loadReviews() {
@@ -57,6 +69,32 @@ export default function Comments() {
     setLimit(5);
   }
 
+  async function updateVisibility(review, hidden) {
+    const key = reviewKey(review);
+    if (inFlight.current.has(key)) return;
+    inFlight.current.add(key);
+    setWorking((current) => ({ ...current, [key]: true }));
+    setActionErrors((current) => ({ ...current, [key]: "" }));
+    try {
+      const result = await setReviewHidden(review.recipeId, review.id, hidden);
+      if (typeof result?.hidden !== "boolean")
+        throw new Error("Phản hồi không hợp lệ.");
+      setReviews((current) =>
+        current.map((item) =>
+          reviewKey(item) === key ? { ...item, hidden: result.hidden } : item,
+        ),
+      );
+    } catch {
+      setActionErrors((current) => ({
+        ...current,
+        [key]: "Không thể cập nhật bình luận. Vui lòng thử lại.",
+      }));
+    } finally {
+      inFlight.current.delete(key);
+      setWorking((current) => ({ ...current, [key]: false }));
+    }
+  }
+
   return (
     <main className="admin-comments">
       <p className="admin-comments__breadcrumb">
@@ -66,9 +104,6 @@ export default function Comments() {
       <p className="admin-comments__description">
         Theo dõi đánh giá gần đây, ẩn hoặc khôi phục bình luận vi phạm. Điểm sao
         trung bình vẫn được giữ khi ẩn bình luận.
-      </p>
-      <p className="admin-comments__notice">
-        Chức năng ẩn và bỏ ẩn bình luận chưa được kết nối.
       </p>
       <div className="admin-comments__filters" aria-label="Lọc bình luận">
         {FILTERS.map(({ value, label }) => (
@@ -124,6 +159,11 @@ export default function Comments() {
                   </p>
                   <StarRating value={Number(review.rating)} size="sm" />
                   <p className="admin-comments__comment">{review.comment}</p>
+                  {actionErrors[reviewKey(review)] && (
+                    <p className="admin-comments__error" role="alert">
+                      {actionErrors[reviewKey(review)]}
+                    </p>
+                  )}
                 </div>
                 <div className="admin-comments__row-actions">
                   <span
@@ -134,10 +174,18 @@ export default function Comments() {
                   <button
                     className="admin-comments__button"
                     type="button"
-                    disabled
+                    disabled={Boolean(working[reviewKey(review)])}
+                    onClick={() => {
+                      if (review.hidden) updateVisibility(review, false);
+                      else setSelected(review);
+                    }}
                     aria-label={`${review.hidden ? "Bỏ ẩn" : "Ẩn"} bình luận của ${review.userName || "Người dùng"} về ${review.recipeTitle || "công thức"}`}
                   >
-                    {review.hidden ? "Bỏ ẩn" : "Ẩn"}
+                    {working[reviewKey(review)]
+                      ? "Đang xử lý..."
+                      : review.hidden
+                        ? "Bỏ ẩn"
+                        : "Ẩn"}
                   </button>
                 </div>
               </li>
@@ -157,6 +205,39 @@ export default function Comments() {
           </div>
         </>
       )}
+      <dialog
+        ref={dialogRef}
+        className="admin-comments__dialog"
+        aria-labelledby="admin-comments-dialog-title"
+        aria-describedby="admin-comments-dialog-description"
+        onClose={() => setSelected(null)}
+      >
+        <h2 id="admin-comments-dialog-title">Ẩn bình luận</h2>
+        <p id="admin-comments-dialog-description">
+          Nội dung sẽ bị ẩn với người đọc; điểm sao vẫn được tính.
+        </p>
+        <div className="admin-comments__dialog-actions">
+          <button
+            type="button"
+            className="admin-comments__more"
+            autoFocus
+            onClick={() => dialogRef.current.close()}
+          >
+            Hủy
+          </button>
+          <button
+            type="button"
+            className="admin-comments__button"
+            onClick={() => {
+              const review = selected;
+              dialogRef.current.close();
+              if (review) updateVisibility(review, true);
+            }}
+          >
+            Ẩn bình luận
+          </button>
+        </div>
+      </dialog>
     </main>
   );
 }

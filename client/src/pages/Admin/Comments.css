@@ -134,6 +134,31 @@
   gap: var(--space-4);
   margin-top: var(--space-4);
 }
+.admin-comments__error {
+  color: var(--color-error);
+  overflow-wrap: anywhere;
+}
+.admin-comments__dialog {
+  width: min(480px, calc(100% - 2 * var(--space-6)));
+  max-height: calc(100% - 2 * var(--space-6));
+  padding: var(--space-6);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  color: var(--color-text);
+}
+.admin-comments__dialog::backdrop {
+  background: var(--color-overlay);
+}
+.admin-comments__dialog h2 {
+  margin: 0;
+  font-family: var(--font-heading);
+}
+.admin-comments__dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
 @media (max-width: 600px) {
   .admin-comments {
     padding: var(--space-3);
