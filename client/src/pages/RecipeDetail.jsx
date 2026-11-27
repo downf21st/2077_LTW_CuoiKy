@@ -105,18 +105,29 @@ function RecipeContent({ recipe }) {
   const ingredients = recipe.ingredients ?? [];
   const steps = recipe.steps ?? [];
   const equipment = recipe.equipment ?? [];
-  const [reviews, setReviews] = useState(() => recipe.reviews ?? []);
+  const [reviews, setReviews] = useState(() =>
+    Array.isArray(recipe.reviews) ? recipe.reviews : [],
+  );
   const [averageRating, setAverageRating] = useState(recipe.averageRating);
   const [reviewCount, setReviewCount] = useState(
-    () => recipe.reviewCount ?? (recipe.reviews ?? []).length,
+    () =>
+      recipe.reviewCount ??
+      (Array.isArray(recipe.reviews) ? recipe.reviews.length : 0),
   );
+  const ownReview =
+    isLoggedIn && user?.id != null
+      ? reviews.find(
+          (review) =>
+            review?.userId != null && String(review.userId) === String(user.id),
+        )
+      : null;
   const handleReviewSubmit = async (values) => {
     const result = await createReview(recipe.id, values);
     if (result?.review) {
       setReviews((previous) =>
         result.review.id != null &&
         previous.some(
-          (review) => String(review.id) === String(result.review.id),
+          (review) => String(review?.id) === String(result.review.id),
         )
           ? previous
           : [...previous, result.review],
@@ -434,7 +445,11 @@ function RecipeContent({ recipe }) {
               <h3 className="recipe-detail__review-form-title">
                 Bữa cơm của bạn thế nào?
               </h3>
-              <ReviewForm onSubmit={handleReviewSubmit} />
+              {ownReview ? (
+                <p role="status">Bạn đã đánh giá {ownReview.rating} sao</p>
+              ) : (
+                <ReviewForm onSubmit={handleReviewSubmit} />
+              )}
             </div>
           ) : (
             <form
