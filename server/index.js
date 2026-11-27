@@ -6,6 +6,7 @@ const categoryRoutes = require('./routes/category');
 const userRoutes = require('./routes/user');
 const menuRoutes = require('./routes/menu');
 const reviewRoutes = require('./routes/review');
+const statsRoutes = require('./routes/stats');
 const { notFound, errorHandler } = require('./middlewares/errorHandler');
 
 const app = express();
@@ -19,6 +20,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/menus', menuRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/stats', statsRoutes);
 app.use(notFound);
 app.use(errorHandler);
 

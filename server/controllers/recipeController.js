@@ -514,6 +514,8 @@ const updateRecipe = async (req, res) => {
     const oldImage = recipes[index].image;
     if (req.file) updated.image = `/uploads/${req.file.filename}`;
     updated.status = 'pending';
+    delete updated.rejectionReason;
+    delete updated.rejectionNote;
     recipes[index] = updated;
     await writeRecipes(recipes);
     if (req.file && oldImage !== updated.image) await removeRecipeImage(oldImage);
