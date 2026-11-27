@@ -40,3 +40,23 @@
   outline: 2px solid var(--color-brand);
   outline-offset: 2px;
 }
+
+@media (max-width: 600px) {
+  .review-form {
+    min-width: 0;
+  }
+  .review-form .star-input__options {
+    flex-wrap: wrap;
+  }
+  .review-form__field textarea {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .review-form__error,
+  .review-form__count {
+    overflow-wrap: anywhere;
+  }
+  .review-form__submit {
+    width: 100%;
+  }
+}
