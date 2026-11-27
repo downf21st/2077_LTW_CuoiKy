@@ -41,6 +41,7 @@ function difficultyClass(value) {
 
 export default function PendingRecipes() {
   const [recipes, setRecipes] = useState([]);
+  const [search, setSearch] = useState("");
   const [status, setStatus] = useState("loading");
   const [loadError, setLoadError] = useState("");
   const [attempt, setAttempt] = useState(0);
@@ -179,6 +180,18 @@ export default function PendingRecipes() {
     }
   }
 
+  const query = search.trim().toLocaleLowerCase("vi-VN");
+  const filteredRecipes = recipes.filter((recipe) =>
+    [
+      recipe.title,
+      recipe.authorName || recipe.author?.name || recipe.authorId,
+    ].some((value) =>
+      String(value ?? "")
+        .toLocaleLowerCase("vi-VN")
+        .includes(query),
+    ),
+  );
+
   return (
     <section
       className="pending-recipes"
@@ -218,140 +231,154 @@ export default function PendingRecipes() {
       ) : (
         <>
           <p className="pending-recipes__count">{recipes.length} chờ duyệt</p>
-          <div className="pending-recipes__table-wrap">
-            <table className="pending-recipes__table">
-              <thead>
-                <tr>
-                  <th scope="col">Công thức</th>
-                  <th scope="col">Tác giả</th>
-                  <th scope="col">Gửi lúc</th>
-                  <th scope="col">Thời gian &amp; độ khó</th>
-                  <th scope="col">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recipes.map((recipe) => (
-                  <tr key={recipe.id} className="pending-recipes__row">
-                    <td>
-                      <div className="pending-recipes__recipe">
-                        {recipe.image ? (
-                          <img
-                            className="pending-recipes__image"
-                            src={imageUrl(recipe.image)}
-                            alt=""
-                          />
-                        ) : (
-                          <span
-                            className="pending-recipes__image"
-                            aria-hidden="true"
-                          />
-                        )}
-                        <div>
-                          <strong>{recipe.title}</strong>
-                          {recipe.category && (
-                            <p className="pending-recipes__category">
-                              {recipe.category}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="pending-recipes__author">
-                      {recipe.authorName ||
-                        recipe.author?.name ||
-                        recipe.authorId ||
-                        "Chưa rõ tác giả"}
-                    </td>
-                    <td className="pending-recipes__submitted">
-                      <span className="pending-recipes__mobile-label">
-                        Gửi lúc:{" "}
-                      </span>
-                      {formatSubmittedAt(recipe.createdAt)}
-                    </td>
-                    <td>
-                      <div className="pending-recipes__meta">
-                        <span className="pending-recipes__time">
-                          {recipe.cookingTime != null &&
-                          recipe.cookingTime !== ""
-                            ? `${recipe.cookingTime} phút`
-                            : "Chưa có thời gian"}
-                        </span>
-                        <span
-                          className={`pending-recipes__difficulty pending-recipes__difficulty--${difficultyClass(recipe.difficulty)}`}
-                        >
-                          {recipe.difficulty || "Chưa có độ khó"}
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="pending-recipes__actions">
-                        <button
-                          type="button"
-                          className="pending-recipes__button pending-recipes__button--view"
-                          disabled={recipe.id == null}
-                          onClick={(event) =>
-                            openPreview(recipe, event.currentTarget)
-                          }
-                        >
-                          Xem
-                          <span className="pending-recipes__sr-only">
-                            {" "}
-                            {recipe.title}
-                          </span>
-                        </button>
-                        <button
-                          type="button"
-                          className="pending-recipes__button pending-recipes__button--reject"
-                          disabled={
-                            recipe.id == null || !!working[String(recipe.id)]
-                          }
-                          onClick={(event) =>
-                            openRejection(recipe, event.currentTarget)
-                          }
-                        >
-                          Từ chối
-                          <span className="pending-recipes__sr-only">
-                            {" "}
-                            {recipe.title}
-                          </span>
-                        </button>
-                        <button
-                          type="button"
-                          className="pending-recipes__button pending-recipes__button--approve"
-                          disabled={
-                            recipe.id == null || !!working[String(recipe.id)]
-                          }
-                          onClick={() => updateStatus(recipe, "approved")}
-                        >
-                          Chấp nhận
-                          <span className="pending-recipes__sr-only">
-                            {" "}
-                            {recipe.title}
-                          </span>
-                        </button>
-                      </div>
-                      {working[String(recipe.id)] && (
-                        <p
-                          className="pending-recipes__action-message"
-                          role="status"
-                        >
-                          Đang cập nhật...
-                        </p>
-                      )}
-                      {actionErrors[String(recipe.id)] && (
-                        <p
-                          className="pending-recipes__action-message pending-recipes__action-message--error"
-                          role="alert"
-                        >
-                          {actionErrors[String(recipe.id)]}
-                        </p>
-                      )}
-                    </td>
+          <input
+            className="pending-recipes__search"
+            type="search"
+            aria-label="Tìm theo tên món hoặc tác giả"
+            placeholder="Tìm theo tên món hoặc tác giả..."
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+          {filteredRecipes.length === 0 ? (
+            <p className="pending-recipes__state" role="status">
+              Không tìm thấy công thức phù hợp.
+            </p>
+          ) : (
+            <div className="pending-recipes__table-wrap">
+              <table className="pending-recipes__table">
+                <thead>
+                  <tr>
+                    <th scope="col">Công thức</th>
+                    <th scope="col">Tác giả</th>
+                    <th scope="col">Gửi lúc</th>
+                    <th scope="col">Thời gian &amp; độ khó</th>
+                    <th scope="col">Thao tác</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filteredRecipes.map((recipe) => (
+                    <tr key={recipe.id} className="pending-recipes__row">
+                      <td>
+                        <div className="pending-recipes__recipe">
+                          {recipe.image ? (
+                            <img
+                              className="pending-recipes__image"
+                              src={imageUrl(recipe.image)}
+                              alt=""
+                            />
+                          ) : (
+                            <span
+                              className="pending-recipes__image"
+                              aria-hidden="true"
+                            />
+                          )}
+                          <div>
+                            <strong>{recipe.title}</strong>
+                            {recipe.category && (
+                              <p className="pending-recipes__category">
+                                {recipe.category}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="pending-recipes__author">
+                        {recipe.authorName ||
+                          recipe.author?.name ||
+                          recipe.authorId ||
+                          "Chưa rõ tác giả"}
+                      </td>
+                      <td className="pending-recipes__submitted">
+                        <span className="pending-recipes__mobile-label">
+                          Gửi lúc:{" "}
+                        </span>
+                        {formatSubmittedAt(recipe.createdAt)}
+                      </td>
+                      <td>
+                        <div className="pending-recipes__meta">
+                          <span className="pending-recipes__time">
+                            {recipe.cookingTime != null &&
+                            recipe.cookingTime !== ""
+                              ? `${recipe.cookingTime} phút`
+                              : "Chưa có thời gian"}
+                          </span>
+                          <span
+                            className={`pending-recipes__difficulty pending-recipes__difficulty--${difficultyClass(recipe.difficulty)}`}
+                          >
+                            {recipe.difficulty || "Chưa có độ khó"}
+                          </span>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="pending-recipes__actions">
+                          <button
+                            type="button"
+                            className="pending-recipes__button pending-recipes__button--view"
+                            disabled={recipe.id == null}
+                            onClick={(event) =>
+                              openPreview(recipe, event.currentTarget)
+                            }
+                          >
+                            Xem
+                            <span className="pending-recipes__sr-only">
+                              {" "}
+                              {recipe.title}
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            className="pending-recipes__button pending-recipes__button--reject"
+                            disabled={
+                              recipe.id == null || !!working[String(recipe.id)]
+                            }
+                            onClick={(event) =>
+                              openRejection(recipe, event.currentTarget)
+                            }
+                          >
+                            Từ chối
+                            <span className="pending-recipes__sr-only">
+                              {" "}
+                              {recipe.title}
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            className="pending-recipes__button pending-recipes__button--approve"
+                            disabled={
+                              recipe.id == null || !!working[String(recipe.id)]
+                            }
+                            onClick={() => updateStatus(recipe, "approved")}
+                          >
+                            Chấp nhận
+                            <span className="pending-recipes__sr-only">
+                              {" "}
+                              {recipe.title}
+                            </span>
+                          </button>
+                        </div>
+                        {working[String(recipe.id)] && (
+                          <p
+                            className="pending-recipes__action-message"
+                            role="status"
+                          >
+                            Đang cập nhật...
+                          </p>
+                        )}
+                        {actionErrors[String(recipe.id)] && (
+                          <p
+                            className="pending-recipes__action-message pending-recipes__action-message--error"
+                            role="alert"
+                          >
+                            {actionErrors[String(recipe.id)]}
+                          </p>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </>
       )}
       <p className="pending-recipes__note">

@@ -36,7 +36,7 @@
 }
 .pending-recipes__breadcrumb {
   margin-bottom: var(--space-6);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-2xs);
   overflow-wrap: anywhere;
 }
 .pending-recipes__breadcrumb a {
@@ -48,11 +48,48 @@
 .pending-recipes__header h1 {
   margin: 0 0 var(--space-2);
   color: var(--color-text-brand);
-  font-family: var(--font-heading);
+  font-family: var(--font-display);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-display);
+  line-height: var(--line-height-heading);
   overflow-wrap: anywhere;
 }
 .pending-recipes__header p {
   margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+.pending-recipes__search {
+  box-sizing: border-box;
+  display: block;
+  width: min(220px, 100%);
+  height: 40px;
+  margin: 0 0 var(--space-6);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--font-size-xs);
+}
+.pending-recipes__search:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+.pending-recipes__search::placeholder {
+  color: var(--color-text-muted);
+}
+@media (max-width: 480px) {
+  .pending-recipes__header h1 {
+    font-size: clamp(1.1rem, 5.2vw, 1.375rem);
+  }
+  .pending-recipes__header p {
+    font-size: var(--font-size-xs);
+  }
+  .pending-recipes__search {
+    width: 100%;
+  }
 }
 .pending-recipes__preview {
   margin: 0 0 var(--space-4);
