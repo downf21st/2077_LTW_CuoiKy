@@ -37,7 +37,7 @@ function parseMinutes(recipe) {
 
 export default function Home() {
   const [allRecipes, setAllRecipes] = useState([]);
-  const [status, setStatus] = useState('loading'); 
+  const [status, setStatus] = useState('loading');
   const [errorMessage, setErrorMessage] = useState('');
   const [searchTags, setSearchTags] = useState([]);
   const [searchInput, setSearchInput] = useState('');
@@ -49,7 +49,7 @@ export default function Home() {
   });
 
   const debouncedInput = useDebounce(searchInput, 500);
-    const [reloadKey, setReloadKey] = useState(0);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -79,7 +79,6 @@ export default function Home() {
     setErrorMessage('');
     setReloadKey((prev) => prev + 1);
   };
-
 
   const featuredRecipe = useMemo(() => getRecipeOfTheDay(allRecipes), [allRecipes]);
   const featuredId = featuredRecipe?._id || featuredRecipe?.id || 'recipe-001';
@@ -193,7 +192,7 @@ export default function Home() {
         <div className="home-hero__content">
           <p className="home-hero__kicker">
             <svg className="home-hero__kicker-icon" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M9.74 6.17499C8.955 4.13499 6.16 4.02499 6.835 1.05999C6.885 0.839994 6.65 0.669994 6.46 0.784994C4.645 1.85499 3.34 3.99999 4.435 6.80999C4.525 7.03999 4.255 7.25499 4.06 7.10499C3.155 6.41999 3.06 5.43499 3.14 4.72999C3.17 4.46999 2.83 4.34499 2.685 4.55999C2.345 5.07999 2 5.91999 2 7.18499C2.19 9.98499 4.555 10.845 5.405 10.955C6.62 11.11 7.935 10.885 8.88 10.02C9.92 9.05499 10.3 7.51499 9.74 6.17499ZM5.1 8.68999C5.82 8.51499 6.19 7.99499 6.29 7.53499C6.455 6.81999 5.81 6.11999 6.245 4.98999C6.41 5.92499 7.88 6.50999 7.88 7.52999C7.92 8.79499 6.55 9.87999 5.1 8.68999Z" fill="var(--color-accent-soft)" />
+              <path d="M9.74 6.17499C8.955 4.13499 6.16 4.02499 6.835 1.05999C6.885 0.839994 6.65 0.669994 6.46 0.784994C4.645 1.85499 3.34 3.99999 4.435 6.80999C4.525 7.03999 4.255 7.25499 4.06 7.10499C3.155 6.41999 3.06 5.43499 3.14 4.72999C3.17 4.46999 2.83 4.34499 2.685 4.55999C2.345 5.07999 2 5.91999 2 7.18499C2.19 9.98499 4.555 10.845 5.405 10.955C6.62 11.11 7.935 10.885 8.88 10.02C9.92 9.05499 10.3 7.51499 9.74 6.17499ZM5.1 8.68999C5.82 8.51499 6.19 7.99499 6.29 7.53499C6.455 6.81999 5.81 6.11999 6.245 4.98999C6.41 5.92499 7.88 6.50999 7.88 7.52999C7.92 8.79499 6.55 9.87999 5.1 8.68999Z" fill="currentColor" />
             </svg>
             <span>Công thức hôm nay - {featuredTitle}</span>
           </p>
@@ -211,7 +210,7 @@ export default function Home() {
 
         <div className="home-hero__visual">
           <Link to={`/recipe/${featuredId}`} className="home-hero__backdrop-card" tabIndex={-1} aria-hidden="true">
-            {featuredImage && <img src={featuredImage} alt={featuredTitle} className="home-hero__backdrop-image" />}
+            {featuredImage && <img src={featuredImage} alt="" className="home-hero__backdrop-image" />}
           </Link>
           <Link to={`/recipe/${featuredId}`} className="home-hero__featured-card">
             <span className="home-hero__badge">CÔNG THỨC CỦA NGÀY</span>
@@ -242,7 +241,7 @@ export default function Home() {
         onRemoveSearchTag={handleRemoveSearchTag}
         resultCount={status === 'done' ? searchedRecipes.length : 0}
       />
-        <RecipeList
+      <RecipeList
         key={JSON.stringify([searchTags, debouncedInput, searchMode, filters])}
         recipes={searchedRecipes}
         status={status}

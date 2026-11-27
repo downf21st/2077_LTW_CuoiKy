@@ -11,6 +11,7 @@ import './AdminCategories.css';
 
 const MAX_NAME_LENGTH = 40;
 const TOAST_DURATION_MS = 3500;
+const RECIPES_FETCH_LIMIT = 100;
 
 function EmptyCategoryIcon() {
   return (
@@ -34,6 +35,31 @@ function EmptyCategoryIcon() {
 function extractCategoryId(item, fallbackName) {
   if (!item || typeof item !== 'object') return fallbackName;
   return item.id ?? item._id ?? item.categoryId ?? fallbackName;
+}
+
+function extractRecipeCategoryName(recipe) {
+  if (!recipe || typeof recipe !== 'object') return '';
+  const rawCategory =
+    recipe.category ??
+    recipe.categoryName ??
+    recipe.category_name ??
+    '';
+
+  if (typeof rawCategory === 'string') {
+    return rawCategory.trim();
+  }
+  if (rawCategory && typeof rawCategory === 'object') {
+    return String(rawCategory.name || rawCategory.title || '').trim();
+  }
+  return '';
+}
+
+function extractRecipesArray(raw) {
+  if (Array.isArray(raw)) return raw;
+  if (Array.isArray(raw?.recipes)) return raw.recipes;
+  if (Array.isArray(raw?.items)) return raw.items;
+  if (Array.isArray(raw?.data)) return raw.data;
+  return [];
 }
 
 function normalizeCategoryList(raw, countsByCategory = {}) {
@@ -117,6 +143,7 @@ export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
   const [status, setStatus] = useState('loading');
   const [loadError, setLoadError] = useState('');
+  const [countsWarning, setCountsWarning] = useState('');
   const [reloadKey, setReloadKey] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -156,23 +183,38 @@ export default function AdminCategories() {
 
     Promise.all([
       getCategories(),
-      getRecipes({ page: 1, limit: 1000 }).catch(() => []),
+      getRecipes({ page: 1, limit: RECIPES_FETCH_LIMIT }).catch((err) => ({
+        __recipesError: err?.message || 'Không thể tải danh sách công thức để đếm.',
+      })),
     ])
-      .then(([catData, recipeData]) => {
+      .then(([catData, recipeResult]) => {
         if (!active) return;
-        const recipes = Array.isArray(recipeData) ? recipeData : [];
+
+        let recipesWarning = '';
+        let rawRecipes = recipeResult;
+
+        if (recipeResult && typeof recipeResult === 'object' && recipeResult.__recipesError) {
+          recipesWarning = recipeResult.__recipesError;
+          rawRecipes = [];
+        }
+
+        const recipes = extractRecipesArray(rawRecipes);
         const countsByCategory = {};
+
         recipes.forEach((recipe) => {
-          const catName = String(recipe?.category || '').trim().toLowerCase();
+          const catName = extractRecipeCategoryName(recipe).toLowerCase();
           if (catName) {
             countsByCategory[catName] = (countsByCategory[catName] || 0) + 1;
           }
         });
+
+        setCountsWarning(recipesWarning);
         setCategories(normalizeCategoryList(catData, countsByCategory));
         setStatus('done');
       })
       .catch((err) => {
         if (!active) return;
+        setCountsWarning('');
         setLoadError(err?.message || 'Không thể tải danh sách loại món.');
         setStatus('error');
       });
@@ -404,6 +446,12 @@ export default function AdminCategories() {
           Thêm loại món
         </button>
       </div>
+
+      {countsWarning && (
+        <p className="admin-categories__modal-error" role="status">
+          {countsWarning}
+        </p>
+      )}
 
       {status === 'loading' && (
         <div className="admin-categories__state-card" role="status">
