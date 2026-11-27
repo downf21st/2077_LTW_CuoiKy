@@ -112,6 +112,8 @@ export default function Comments() {
             type="button"
             key={value}
             aria-pressed={filter === value}
+            onMouseDown={(event) => event.stopPropagation()}
+            onTouchStart={(event) => event.stopPropagation()}
             onClick={() => changeFilter(value)}
           >
             {label}
