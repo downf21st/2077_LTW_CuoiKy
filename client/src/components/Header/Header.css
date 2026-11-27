@@ -32,6 +32,28 @@
   gap: 12px;
 }
 
+.header__theme-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 50%;
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-brand);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.header__theme-btn:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-brand);
+  color: var(--color-brand);
+}
+
 .header__account-chip {
   display: inline-flex;
   align-items: center;
@@ -129,6 +151,7 @@
 
 .header__logo:focus-visible,
 .header__account-chip:focus-visible,
+.header__theme-btn:focus-visible,
 .header__nav-link:focus-visible,
 .header__login-link:focus-visible,
 .header__logout-btn:focus-visible,
@@ -161,6 +184,11 @@
     border-bottom: 1px solid var(--color-border-default);
   }
 
+  .header__theme-btn {
+    width: 32px;
+    height: 32px;
+  }
+  
   .header__menu-btn {
     display: flex;
     align-items: center;

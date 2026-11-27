@@ -301,10 +301,10 @@ function Sidebar({ isOpen, onToggle, onClose, toggleRef }) {
                   <span className="nav-item__label">Bảng điều khiển Admin</span>
                 </div>
                 <div className="sidebar__group-list">
-                  <NavLink to="/admin/stats" className="sidebar__sub-item" onClick={handleNavigate}>
+                  <NavLink to="/admin/dashboard" className="sidebar__sub-item" onClick={handleNavigate}>
                     Tổng quan & Thống kê
                   </NavLink>
-                  <NavLink to="/admin/approve" className="sidebar__sub-item" onClick={handleNavigate}>
+                  <NavLink to="/admin/pending-recipes" className="sidebar__sub-item" onClick={handleNavigate}>
                     Duyệt công thức
                   </NavLink>
                   <NavLink to="/admin/categories" className="sidebar__sub-item" onClick={handleNavigate}>

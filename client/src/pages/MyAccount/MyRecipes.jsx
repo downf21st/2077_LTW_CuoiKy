@@ -117,7 +117,9 @@ export default function MyRecipes() {
                         ? "Đã duyệt"
                         : recipe.status === "pending"
                           ? "Chờ duyệt"
-                          : "Chưa có trạng thái"}
+                          : recipe.status === "rejected"
+                            ? "Bị từ chối"
+                            : "Chưa có trạng thái"}
                     </span>
                   }
                 />

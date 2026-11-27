@@ -1,24 +1,23 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import MainLayout from './components/layout/MainLayout'
-import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'
-import Home from './pages/Home'
-import RecipeDetail from './pages/RecipeDetail'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import NotFound from './pages/NotFound'
-import CookingMode from './pages/CookingMode'
-import Unauthorized from './pages/Unauthorized'
-import RecipeForm from './pages/RecipeForm'
-import AdminLayout from './pages/Admin/AdminLayout'
-import Dashboard from './pages/Admin/Dashboard'
-import PendingRecipes from './pages/Admin/PendingRecipes'
-import Categories from './pages/Admin/Categories'
-import Comments from './pages/Admin/Comments'
-import MyAccountLayout from './pages/MyAccount/MyAccountLayout'
-import Profile from './pages/MyAccount/Profile'
-import MyRecipes from './pages/MyAccount/MyRecipes'
-import Favorites from './pages/MyAccount/Favorites'
-import WeeklyMenu from './pages/MyAccount/WeeklyMenu'
+import { Routes, Route, Navigate } from "react-router-dom";
+import MainLayout from "./components/layout/MainLayout";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+import Home from "./pages/Home";
+import RecipeDetail from "./pages/RecipeDetail";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import NotFound from "./pages/NotFound";
+import CookingMode from "./pages/CookingMode";
+import Unauthorized from "./pages/Unauthorized";
+import RecipeForm from "./pages/RecipeForm";
+import Dashboard from "./pages/Admin/Dashboard";
+import PendingRecipes from "./pages/Admin/PendingRecipes";
+import Categories from "./pages/Admin/Categories";
+import Comments from "./pages/Admin/Comments";
+import MyAccountLayout from "./pages/MyAccount/MyAccountLayout";
+import Profile from "./pages/MyAccount/Profile";
+import MyRecipes from "./pages/MyAccount/MyRecipes";
+import Favorites from "./pages/MyAccount/Favorites";
+import WeeklyMenu from "./pages/MyAccount/WeeklyMenu";
 
 export default function App() {
   return (
@@ -35,7 +34,7 @@ export default function App() {
         <Route path="/recipe/:id" element={<RecipeDetail />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
 
-        <Route element={<ProtectedRoute allowedRoles={['member', 'admin']} />}>
+        <Route element={<ProtectedRoute allowedRoles={["member", "admin"]} />}>
           <Route path="/my-account" element={<MyAccountLayout />}>
             <Route index element={<Navigate to="profile" replace />} />
             <Route path="profile" element={<Profile />} />
@@ -47,8 +46,8 @@ export default function App() {
           <Route path="/recipe/edit/:id" element={<RecipeForm />} />
         </Route>
 
-        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-          <Route path="/admin" element={<AdminLayout />}>
+        <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+          <Route path="/admin">
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="pending-recipes" element={<PendingRecipes />} />
@@ -59,5 +58,5 @@ export default function App() {
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
-  )
+  );
 }
