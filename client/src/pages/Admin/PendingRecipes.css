@@ -115,6 +115,47 @@
 .pending-recipes__author {
   overflow-wrap: anywhere;
 }
+.pending-recipes__submitted {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  overflow-wrap: anywhere;
+}
+.pending-recipes__mobile-label {
+  display: none;
+}
+.pending-recipes__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.pending-recipes__time,
+.pending-recipes__difficulty {
+  display: inline-block;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-heading);
+}
+.pending-recipes__time {
+  border: 1px solid var(--color-border);
+  color: var(--color-text-brand);
+}
+.pending-recipes__difficulty--easy {
+  background: var(--color-highlight);
+  color: var(--color-text);
+}
+.pending-recipes__difficulty--medium {
+  background: var(--color-brand);
+  color: var(--color-on-brand);
+}
+.pending-recipes__difficulty--hard {
+  background: var(--color-accent-soft);
+  color: var(--color-text);
+}
+.pending-recipes__difficulty--unknown {
+  border: 1px solid var(--color-border-strong);
+}
 .pending-recipes__actions {
   display: flex;
   flex-wrap: wrap;
@@ -146,6 +187,25 @@
   background: var(--color-brand);
   border-color: var(--color-brand);
   color: var(--color-on-brand);
+}
+@media (hover: hover) {
+  .pending-recipes__button:hover:not(:disabled) {
+    background: var(--color-surface-hover);
+  }
+  .pending-recipes__button--approve:hover:not(:disabled) {
+    background: var(--color-brand-hover);
+    border-color: var(--color-brand-hover);
+  }
+  .pending-recipes__button--reject:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-error) 12%, transparent);
+  }
+  .pending-recipes__breadcrumb a:hover {
+    color: var(--color-text-brand);
+    text-decoration: underline;
+  }
+  .pending-recipes__row:hover {
+    background: var(--color-surface-hover);
+  }
 }
 .pending-recipes__button:disabled {
   opacity: 0.65;
@@ -191,7 +251,163 @@
   white-space: nowrap;
   border: 0;
 }
+.pending-recipes__dialog {
+  box-sizing: border-box;
+  width: min(480px, calc(100% - 2 * var(--space-4)));
+  max-width: calc(100% - 2 * var(--space-4));
+  max-height: calc(100vh - 2 * var(--space-4));
+  max-height: calc(100dvh - 2 * var(--space-4));
+  margin: auto;
+  padding: var(--space-6);
+  overflow-y: auto;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  background: var(--color-bg-surface);
+  overflow-wrap: anywhere;
+}
+.pending-recipes__dialog::backdrop {
+  background: var(--color-overlay);
+}
+.pending-recipes__dialog h2 {
+  color: var(--color-text-brand);
+  font-family: var(--font-heading);
+}
+.pending-recipes__dialog p,
+.pending-recipes__dialog h3,
+.pending-recipes__dialog fieldset {
+  margin: var(--space-3) 0;
+}
+.pending-recipes__dialog-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.pending-recipes__dialog-heading .pending-recipes__button {
+  flex: none;
+  min-width: 44px;
+}
+.pending-recipes__preview-image {
+  display: block;
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  margin: var(--space-4) 0;
+}
+.pending-recipes__detail-text {
+  white-space: pre-wrap;
+}
+.pending-recipes__detail-section {
+  border-top: 1px solid var(--color-border-default);
+  margin-top: var(--space-4);
+}
+.pending-recipes__detail-section ul,
+.pending-recipes__detail-section ol {
+  padding-left: var(--space-6);
+}
+.pending-recipes__detail-section li {
+  margin: var(--space-2) 0;
+  white-space: pre-wrap;
+}
+.pending-recipes__dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+.pending-recipes__dialog-actions .pending-recipes__button {
+  flex: 1 1 120px;
+}
+.pending-recipes__reasons {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+  padding: 0;
+  border: 0;
+}
+.pending-recipes__reasons legend {
+  margin-bottom: var(--space-2);
+}
+.pending-recipes__reasons label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-page);
+  color: var(--color-text);
+  cursor: pointer;
+}
+.pending-recipes__reasons input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.pending-recipes__reasons label:has(input:checked) {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
+.pending-recipes__reasons label:has(input:focus-visible) {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 3px;
+}
+.pending-recipes__dialog:not(.pending-recipes__dialog--preview) h2 {
+  font-family: var(--font-display);
+  font-size: var(--font-size-xl);
+}
+.pending-recipes__dialog:not(.pending-recipes__dialog--preview)
+  .pending-recipes__button--reject {
+  background: var(--color-error);
+  border-color: var(--color-error);
+  color: var(--color-on-brand);
+}
+@media (hover: hover) {
+  .pending-recipes__reasons label:hover:not(:has(input:checked)) {
+    background: var(--color-surface-hover);
+  }
+  .pending-recipes__dialog:not(.pending-recipes__dialog--preview)
+    .pending-recipes__button--reject:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-error) 85%, var(--color-text));
+  }
+}
+.pending-recipes__dialog textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 84px;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-page);
+  color: var(--color-text);
+  font: inherit;
+  resize: vertical;
+}
+.pending-recipes__reason-note {
+  color: var(--color-text);
+}
+.pending-recipes__dialog :focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 3px;
+}
+@media (max-width: 480px) {
+  .pending-recipes__dialog {
+    padding: var(--space-4);
+  }
+  .pending-recipes__dialog-actions .pending-recipes__button {
+    flex-basis: 100%;
+  }
+}
 @media (max-width: 768px) {
+  .pending-recipes__mobile-label {
+    display: inline;
+  }
   .pending-recipes__table-wrap {
     border: 0;
     background: transparent;
