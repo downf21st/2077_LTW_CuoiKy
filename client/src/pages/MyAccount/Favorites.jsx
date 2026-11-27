@@ -233,12 +233,11 @@ export default function Favorites() {
 
       {status === 'done' && favoriteRecipes.length === 0 && (
         <div className="favorites-page__empty-card" role="status">
-          <div className="favorites-page__empty-icon">
+          <div className="favorites-page__empty-icon" aria-hidden="true">
             <img
               src={emptyBreadIcon}
               alt=""
               className="favorites-page__empty-icon-img"
-              aria-hidden="true"
             />
           </div>
           <p className="favorites-page__empty-text">Bạn chưa lưu món nào.</p>

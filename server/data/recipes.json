@@ -8885,9 +8885,20 @@
     ],
     "authorId": "user-002",
     "status": "approved",
-    "reviews": [],
-    "averageRating": 0,
-    "createdAt": "2026-11-18T13:58:55.133Z"
+    "reviews": [
+      {
+        "id": "review-60991cc6-1b48-4f16-8943-7467051d5c68",
+        "userId": "user-002",
+        "userName": "Admin",
+        "rating": 5,
+        "comment": "Bổ ích",
+        "hidden": false,
+        "createdAt": "2026-11-27T10:28:33.664Z"
+      }
+    ],
+    "averageRating": 5,
+    "createdAt": "2026-11-18T13:58:55.133Z",
+    "reviewCount": 1
   },
   {
     "id": "dish0109",
@@ -64071,10 +64082,11 @@
       }
     ],
     "authorId": "user-001",
-    "status": "pending",
+    "status": "approved",
     "reviews": [],
     "averageRating": 0,
-    "createdAt": "2026-11-23T08:00:00.000Z"
+    "createdAt": "2026-11-23T08:00:00.000Z",
+    "reviewCount": 0
   },
   {
     "id": "demo-pending-002",
@@ -64126,9 +64138,10 @@
       }
     ],
     "authorId": "user-001",
-    "status": "pending",
+    "status": "approved",
     "reviews": [],
     "averageRating": 0,
-    "createdAt": "2026-11-23T08:05:00.000Z"
+    "createdAt": "2026-11-23T08:05:00.000Z",
+    "reviewCount": 0
   }
 ]

@@ -14,6 +14,7 @@
   font-family: var(--font-body);
   width: 100%;
   box-sizing: border-box;
+  transition: color 130ms ease-out;
 }
 
 .weekly-menu__breadcrumb {
@@ -28,6 +29,7 @@
 .weekly-menu__breadcrumb a {
   color: inherit;
   text-decoration: none;
+  transition: color 130ms ease-out;
 }
 
 .weekly-menu__breadcrumb a:hover {
@@ -44,6 +46,7 @@
   margin: 0;
   color: var(--color-text-brand);
   font: var(--font-weight-display) var(--font-size-xl) / var(--line-height-heading) var(--font-heading);
+  transition: color 130ms ease-out;
 }
 
 .weekly-menu__header p {
@@ -60,6 +63,7 @@
   border-radius: var(--radius-sm);
   overflow: hidden;
   background: var(--color-bg-surface);
+  transition: background-color 130ms ease-out, border-color 130ms ease-out;
 }
 
 .weekly-menu__mobile-tab {
@@ -71,7 +75,7 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: background-color 160ms ease, color 160ms ease;
+  transition: background-color 130ms ease-out, color 130ms ease-out;
 }
 
 .weekly-menu__mobile-tab--active {
@@ -118,9 +122,10 @@
   font-size: 26px;
   line-height: 1;
   cursor: pointer;
+  transition: background-color 130ms ease-out, color 130ms ease-out;
 }
 
-.weekly-menu__week-switcher > button:not(.weekly-menu__text-action):hover {
+.weekly-menu__week-switcher > button:not(.weekly-menu__text-action):hover:not(:disabled) {
   background: var(--color-surface-hover);
 }
 
@@ -131,11 +136,13 @@
 .weekly-menu__text-action {
   padding: 6px 4px;
   border: 0;
+  border-radius: 4px;
   background: transparent;
   color: var(--color-accent);
   font: var(--font-weight-regular) var(--font-size-xs) / 1 var(--font-body);
   cursor: pointer;
   white-space: nowrap;
+  transition: color 130ms ease-out, opacity 130ms ease-out;
 }
 
 .weekly-menu__text-action:hover:not(:disabled) {
@@ -145,7 +152,7 @@
 .weekly-menu__text-action:disabled {
   color: var(--color-text-disabled);
   cursor: not-allowed;
-  opacity: 0.65;
+  opacity: 0.7;
 }
 
 .weekly-menu__btn {
@@ -159,7 +166,11 @@
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+  transition:
+    background-color 130ms ease-out,
+    color 130ms ease-out,
+    border-color 130ms ease-out,
+    opacity 130ms ease-out;
 }
 
 .weekly-menu__btn--outline {
@@ -168,7 +179,7 @@
   color: var(--color-text);
 }
 
-.weekly-menu__btn--outline:hover {
+.weekly-menu__btn--outline:hover:not(:disabled) {
   background: var(--color-surface-hover);
   border-color: var(--color-brand);
 }
@@ -179,7 +190,7 @@
   color: var(--color-on-brand);
 }
 
-.weekly-menu__btn--primary:hover {
+.weekly-menu__btn--primary:hover:not(:disabled) {
   background: var(--color-brand-hover);
   border-color: var(--color-brand-hover);
 }
@@ -190,8 +201,15 @@
   color: var(--color-text-on-inverse);
 }
 
-.weekly-menu__btn--danger:hover {
+.weekly-menu__btn--danger:hover:not(:disabled) {
   opacity: 0.9;
+}
+
+.weekly-menu__btn:disabled {
+  background: var(--color-disabled-bg);
+  border-color: var(--color-border);
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
 }
 
 .weekly-menu__grid-card {
@@ -201,6 +219,7 @@
   background: var(--color-bg-surface);
   overflow-x: auto;
   box-sizing: border-box;
+  transition: background-color 130ms ease-out, border-color 130ms ease-out;
 }
 
 .weekly-menu__grid {
@@ -292,10 +311,10 @@
   color: var(--color-text-muted);
   font: var(--font-weight-regular) var(--font-size-2xs) / 1 var(--font-body);
   cursor: pointer;
-  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
+  transition: border-color 130ms ease-out, background-color 130ms ease-out, color 130ms ease-out;
 }
 
-.weekly-menu__slot-empty-btn:hover {
+.weekly-menu__slot-empty-btn:hover:not(:disabled) {
   border-color: var(--color-brand);
   background: var(--color-surface-hover);
   color: var(--color-text-brand);
@@ -311,13 +330,21 @@
   font-family: var(--font-body);
   font-size: 11px;
   cursor: pointer;
-  transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
+  transition: border-color 130ms ease-out, color 130ms ease-out, background-color 130ms ease-out;
 }
 
-.weekly-menu__slot-add-more:hover {
+.weekly-menu__slot-add-more:hover:not(:disabled) {
   border-color: var(--color-brand);
   background: var(--color-surface-hover);
   color: var(--color-text-brand);
+}
+
+.weekly-menu__slot-empty-btn:disabled,
+.weekly-menu__slot-add-more:disabled {
+  background: var(--color-disabled-bg);
+  color: var(--color-text-disabled);
+  border-color: var(--color-border);
+  cursor: not-allowed;
 }
 
 .weekly-menu__dish-card {
@@ -330,7 +357,7 @@
   background: var(--color-bg-elevated);
   min-width: 0;
   box-sizing: border-box;
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  transition: border-color 130ms ease-out, box-shadow 130ms ease-out, background-color 130ms ease-out;
 }
 
 .weekly-menu__dish-card:hover {
@@ -374,6 +401,7 @@
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  transition: color 130ms ease-out;
 }
 
 .weekly-menu__dish-title:hover {
@@ -424,21 +452,26 @@
   background: transparent;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background-color 150ms ease, color 150ms ease;
+  transition: background-color 130ms ease-out, color 130ms ease-out;
 }
 
 .weekly-menu__icon-btn--move {
   margin-left: auto;
 }
 
-.weekly-menu__icon-btn:hover {
+.weekly-menu__icon-btn:hover:not(:disabled) {
   background: var(--color-surface-hover);
   color: var(--color-text-brand);
 }
 
-.weekly-menu__icon-btn--danger:hover {
-  background: color-mix(in srgb, var(--color-error) 12%, transparent);
+.weekly-menu__icon-btn--danger:hover:not(:disabled) {
+  background: var(--color-error-bg);
   color: var(--color-error);
+}
+
+.weekly-menu__icon-btn:disabled {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
 }
 
 .weekly-menu__icon-btn img,
@@ -477,6 +510,7 @@
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
+  transition: background-color 130ms ease-out, border-color 130ms ease-out, color 130ms ease-out;
 }
 
 .weekly-menu__day-pill small {
@@ -586,6 +620,7 @@
   color: var(--color-text-on-primary);
   font-size: var(--font-size-sm);
   text-decoration: none;
+  transition: background-color 130ms ease-out;
 }
 
 .weekly-menu__empty-state a:hover {
@@ -642,7 +677,7 @@
   height: 100%;
   border-radius: var(--radius-pill);
   background: var(--color-brand);
-  transition: width 220ms ease;
+  transition: width 150ms ease-out;
 }
 
 .weekly-menu__shopping-actions {
@@ -699,11 +734,12 @@
 .weekly-menu__shopping-item {
   padding: 6px 8px;
   border-radius: var(--radius-sm);
-  transition: background-color 240ms ease;
+  transition: background-color 140ms ease-out;
 }
 
 .weekly-menu__shopping-item--highlight {
-  background: color-mix(in srgb, var(--color-brand) 16%, var(--color-bg-surface));
+  background: var(--color-success-bg);
+  outline: 1px solid color-mix(in srgb, var(--color-success) 35%, transparent);
 }
 
 .weekly-menu__shopping-label {
@@ -725,6 +761,7 @@
   display: grid;
   place-content: center;
   cursor: pointer;
+  transition: background-color 130ms ease-out, border-color 130ms ease-out;
 }
 
 .weekly-menu__checkbox::before {
@@ -734,7 +771,7 @@
   border-left: 2px solid var(--color-on-brand);
   border-bottom: 2px solid var(--color-on-brand);
   transform: rotate(-45deg) scale(0);
-  transition: transform 140ms ease;
+  transition: transform 130ms ease-out;
 }
 
 .weekly-menu__checkbox:checked {
@@ -744,6 +781,12 @@
 
 .weekly-menu__checkbox:checked::before {
   transform: rotate(-45deg) scale(1);
+}
+
+.weekly-menu__checkbox:disabled {
+  background: var(--color-disabled-bg);
+  border-color: var(--color-border);
+  cursor: not-allowed;
 }
 
 .weekly-menu__shopping-item-body {
@@ -831,10 +874,16 @@
   height: 42px;
   padding: 0 var(--space-3);
   margin-bottom: var(--space-4);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
   background: var(--color-bg-elevated);
   color: var(--color-text-muted);
+  transition: border-color 130ms ease-out, box-shadow 130ms ease-out;
+}
+
+.weekly-menu__picker-search:focus-within {
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .weekly-menu__picker-search input {
@@ -846,6 +895,10 @@
   color: var(--color-text);
   font-family: var(--font-body);
   font-size: var(--font-size-sm);
+}
+
+.weekly-menu__picker-search input::placeholder {
+  color: var(--color-text-muted);
 }
 
 .weekly-menu__picker-body {
@@ -953,12 +1006,20 @@
   font-weight: var(--font-weight-medium);
   cursor: pointer;
   flex-shrink: 0;
+  transition: background-color 130ms ease-out, border-color 130ms ease-out, color 130ms ease-out;
 }
 
-.weekly-menu__picker-choose:hover {
+.weekly-menu__picker-choose:hover:not(:disabled) {
   background: var(--color-brand);
   border-color: var(--color-brand);
   color: var(--color-on-brand);
+}
+
+.weekly-menu__picker-choose:disabled {
+  background: var(--color-disabled-bg);
+  color: var(--color-text-disabled);
+  border-color: var(--color-border);
+  cursor: not-allowed;
 }
 
 .weekly-menu__picker-footer {
@@ -1020,6 +1081,7 @@
   transform: translateX(-50%);
   max-width: calc(100vw - 32px);
   padding: 12px 20px;
+  border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-md);
   background: var(--color-bg-inverse);
   color: var(--color-text-on-primary);
@@ -1027,10 +1089,11 @@
   font-weight: var(--font-weight-medium);
   box-shadow: var(--shadow-dropdown);
   text-align: center;
-  animation: weeklyMenuToastIn 200ms ease-out both;
+  animation: weeklyMenuToastIn 140ms ease-out both;
 }
 
 .weekly-menu__toast--error {
+  border-color: var(--color-error);
   background: var(--color-error);
   color: var(--color-text-on-inverse);
 }
@@ -1039,8 +1102,9 @@
 .weekly-menu button:focus-visible,
 .weekly-menu input:focus-visible,
 .weekly-menu select:focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-brand);
   outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 @media (max-width: 900px) {
@@ -1163,12 +1227,19 @@
   }
 
   .weekly-menu__picker-item {
+    flex-wrap: wrap;
     gap: var(--space-2);
   }
 
+  .weekly-menu__picker-info {
+    flex: 1 1 calc(100% - 64px);
+    min-width: 0;
+  }
+
   .weekly-menu__picker-choose {
-    min-width: 64px;
-    height: 36px;
+    width: 100%;
+    min-width: 0;
+    height: 38px;
   }
 
   .weekly-menu__dialog-fields {
@@ -1186,6 +1257,28 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .weekly-menu,
+  .weekly-menu__breadcrumb a,
+  .weekly-menu__header h1,
+  .weekly-menu__shopping h2,
+  .weekly-menu__mobile-tabs,
+  .weekly-menu__mobile-tab,
+  .weekly-menu__week-switcher > button,
+  .weekly-menu__text-action,
+  .weekly-menu__btn,
+  .weekly-menu__grid-card,
+  .weekly-menu__slot-empty-btn,
+  .weekly-menu__slot-add-more,
+  .weekly-menu__dish-card,
+  .weekly-menu__dish-title,
+  .weekly-menu__icon-btn,
+  .weekly-menu__day-pill,
+  .weekly-menu__empty-state a,
+  .weekly-menu__shopping-item,
+  .weekly-menu__checkbox,
+  .weekly-menu__checkbox::before,
+  .weekly-menu__picker-search,
+  .weekly-menu__picker-choose,
   .weekly-menu__toast,
   .weekly-menu__progress-fill {
     animation: none;
