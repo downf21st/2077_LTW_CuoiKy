@@ -38,3 +38,18 @@
   margin: 0;
   white-space: pre-wrap;
 }
+
+@media (max-width: 600px) {
+  .review-list__header > * {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .review-list > .star-rating {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+  .review-list__review p,
+  .review-list__empty {
+    overflow-wrap: anywhere;
+  }
+}
