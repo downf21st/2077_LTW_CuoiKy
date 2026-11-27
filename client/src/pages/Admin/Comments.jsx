@@ -17,6 +17,7 @@ export default function Comments() {
   const [status, setStatus] = useState("loading");
   const [attempt, setAttempt] = useState(0);
   const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
   const [limit, setLimit] = useState(5);
   const [selected, setSelected] = useState(null);
   const [working, setWorking] = useState({});
@@ -57,11 +58,20 @@ export default function Comments() {
   const items = reviews;
   const visible = items.filter((review) => !review.hidden).length;
   const counts = { all: items.length, visible, hidden: items.length - visible };
-  const filtered = items.filter(
-    (review) =>
+  const query = search.trim().toLocaleLowerCase("vi-VN");
+  const filtered = items.filter((review) => {
+    const matchesStatus =
       filter === "all" ||
-      (filter === "hidden" ? review.hidden : !review.hidden),
-  );
+      (filter === "hidden" ? review.hidden : !review.hidden);
+    const matchesSearch =
+      !query ||
+      [review.recipeTitle, review.comment].some((value) =>
+        String(value ?? "")
+          .toLocaleLowerCase("vi-VN")
+          .includes(query),
+      );
+    return matchesStatus && matchesSearch;
+  });
   const ready = status !== "loading" && status !== "error";
 
   function changeFilter(value) {
@@ -123,6 +133,19 @@ export default function Comments() {
           </button>
         ))}
       </div>
+      <input
+        className="admin-comments__search"
+        type="search"
+        aria-label="Tìm theo tên món hoặc nội dung bình luận"
+        placeholder="Tìm theo tên món hoặc nội dung bình luận"
+        value={search}
+        onMouseDown={(event) => event.stopPropagation()}
+        onTouchStart={(event) => event.stopPropagation()}
+        onChange={(event) => {
+          setSearch(event.target.value);
+          setLimit(5);
+        }}
+      />
       {status === "loading" ? (
         <div className="admin-comments__state" role="status">
           Đang tải bình luận...
@@ -140,9 +163,11 @@ export default function Comments() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="admin-comments__state" role="status">
-          {items.length
-            ? "Không có bình luận ở trạng thái này."
-            : "Chưa có bình luận nào."}
+          {query && items.length
+            ? "Không tìm thấy bình luận phù hợp."
+            : items.length
+              ? "Không có bình luận ở trạng thái này."
+              : "Chưa có bình luận nào."}
         </div>
       ) : (
         <>
