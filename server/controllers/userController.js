@@ -104,7 +104,7 @@ const login = async (req, res, next) => {
       : '';
 
     if (!email || !password) {
-      return res.status(400).json({ message: 'Vui lòng nhập email và mật khẩu.' });
+      return res.status(400).json({ success: false, message: 'Vui lòng nhập email và mật khẩu.' });
     }
 
     const users = await readUsers();
@@ -113,7 +113,7 @@ const login = async (req, res, next) => {
     );
 
     if (!user || !(await verifyPassword(password, user.passwordHash))) {
-      return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng.' });
+      return res.status(401).json({ success: false, message: 'Email hoặc mật khẩu không đúng.' });
     }
 
     return res.status(200).json(publicUser(user));
@@ -236,11 +236,11 @@ const register = async (req, res, next) => {
       : '';
 
     if (!name || !email || !password) {
-      return res.status(400).json({ message: 'Vui lòng nhập tên, email và mật khẩu.' });
+      return res.status(400).json({ success: false, message: 'Vui lòng nhập tên, email và mật khẩu.' });
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({ message: 'Email không hợp lệ.' });
+      return res.status(400).json({ success: false, message: 'Email không hợp lệ.' });
     }
 
     const registration = writeQueue.current.then(async () => {
