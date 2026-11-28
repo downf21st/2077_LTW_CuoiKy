@@ -137,11 +137,14 @@ export default function Dashboard() {
                   <span>Hạng</span>
                   <span>Món ăn</span>
                   <span>Đánh giá</span>
+                  <span>Số lượt</span>
                 </div>
                 <ol className="dashboard__top-list">
                   {topRated.map((recipe, index) => {
                     const rank = index + 1
                     const image = resolveRecipeImage(recipe.image)
+                    const ratingText = Number(recipe.averageRating ?? 0).toFixed(1)
+                    const reviewCount = Number(recipe.reviewCount ?? 0)
                     return (
                       <li key={recipe.id} className="dashboard__top-item">
                         <span
@@ -151,23 +154,28 @@ export default function Dashboard() {
                         >
                           {rank}
                         </span>
-                        <div className="dashboard__recipe-cell">
-                          <div className="dashboard__thumb">
-                            {image && <img src={image} alt={recipe.title} />}
-                          </div>
+                        <div className="dashboard__thumb">
+                          {image && <img src={image} alt={recipe.title} />}
+                        </div>
+                        <div className="dashboard__recipe-info">
                           <Link
                             to={`/recipe/${encodeURIComponent(recipe.id)}`}
                             className="dashboard__recipe-title"
                           >
                             {recipe.title}
                           </Link>
+                          {recipe.authorName && (
+                            <span className="dashboard__recipe-author">
+                              {recipe.authorName}
+                            </span>
+                          )}
                         </div>
                         <div className="dashboard__rating">
-                          <StarRating
-                            value={Number(recipe.averageRating ?? 0)}
-                            count={Number(recipe.reviewCount ?? 0)}
-                            size="sm"
-                          />
+                          <StarRating value={Number(recipe.averageRating ?? 0)} size="sm" />
+                          <span className="dashboard__rating-score">{ratingText}</span>
+                          <span className="dashboard__rating-count">
+                            {reviewCount} đánh giá
+                          </span>
                         </div>
                       </li>
                     )
