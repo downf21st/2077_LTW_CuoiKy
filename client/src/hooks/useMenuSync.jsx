@@ -8,6 +8,7 @@ import {
   selectMenuDays,
   selectMenuDirty,
   selectMenuStatus,
+  selectMenuWeekKey,
   setMenu,
   setMenuError,
   setMenuLoading,
@@ -16,9 +17,11 @@ import useAuth from './useAuth'
 import useDebounce from './useDebounce'
 
 let syncedUserId = null
+let syncedWeekKey = null
 
 export function resetSyncedMenuUser() {
   syncedUserId = null
+  syncedWeekKey = null
 }
 
 export default function useMenuSync() {
@@ -27,32 +30,39 @@ export default function useMenuSync() {
   const userId = user?.id ?? null
 
   const days = useSelector(selectMenuDays)
+  const weekKey = useSelector(selectMenuWeekKey)
   const status = useSelector(selectMenuStatus)
   const dirty = useSelector(selectMenuDirty)
   const debouncedDays = useDebounce(days, 800)
 
   const [saveError, setSaveError] = useState(null)
 
+  // Load menu when userId or weekKey changes
   useEffect(() => {
     if (!userId) {
       syncedUserId = null
+      syncedWeekKey = null
       dispatch(resetMenu())
       return
     }
 
-    if (syncedUserId === userId) return
+    if (syncedUserId === userId && syncedWeekKey === weekKey) return
 
     let cancelled = false
-    if (syncedUserId !== null) {
+    const isSameUser = syncedUserId === userId
+    if (!isSameUser) {
       dispatch(resetMenu())
+      syncedWeekKey = null
     }
     dispatch(setMenuLoading())
 
-    getMenu(userId)
+    getMenu(userId, weekKey)
       .then((menu) => {
         if (cancelled) return
         syncedUserId = userId
-        dispatch(setMenu({ days: menu?.days ?? createEmptyDays() }))
+        syncedWeekKey = weekKey
+        const daysData = menu?.days ?? createEmptyDays()
+        dispatch(setMenu({ days: daysData, weekKey: menu?.weekKey ?? weekKey }))
       })
       .catch(() => {
         if (cancelled) return
@@ -62,15 +72,16 @@ export default function useMenuSync() {
     return () => {
       cancelled = true
     }
-  }, [userId, dispatch])
+  }, [userId, weekKey, dispatch])
 
+  // Save menu when dirty for current week
   useEffect(() => {
-    if (!userId || status !== 'ready' || !dirty) return
+    if (!userId || status !== 'ready' || !dirty || !weekKey) return
     if (debouncedDays !== days) return
 
     let cancelled = false
 
-    saveMenu(userId, debouncedDays)
+    saveMenu(userId, weekKey, debouncedDays)
       .then(() => {
         if (cancelled) return
         setSaveError(null)
@@ -84,11 +95,11 @@ export default function useMenuSync() {
     return () => {
       cancelled = true
     }
-  }, [userId, status, dirty, debouncedDays, days, dispatch])
+  }, [userId, status, dirty, debouncedDays, days, weekKey, dispatch])
 
   const retrySave = useCallback(() => {
-    if (!userId || status !== 'ready' || !dirty) return
-    saveMenu(userId, days)
+    if (!userId || status !== 'ready' || !dirty || !weekKey) return
+    saveMenu(userId, weekKey, days)
       .then(() => {
         setSaveError(null)
         dispatch(markSaved())
@@ -96,7 +107,7 @@ export default function useMenuSync() {
       .catch(() => {
         setSaveError('Chưa lưu được thực đơn')
       })
-  }, [userId, status, dirty, days, dispatch])
+  }, [userId, status, dirty, days, weekKey, dispatch])
 
   return { saveError, retrySave }
 }

@@ -5,6 +5,7 @@ import send from "../../assets/footer/send.svg";
 import github from "../../assets/footer/github.svg";
 import instagram from "../../assets/footer/instagram.svg";
 import threads from "../../assets/footer/threads.svg";
+import { subscribeNewsletter } from "../../api";
 import "./Footer.css";
 
 function Footer() {
@@ -16,11 +17,50 @@ function Footer() {
     ? `/recipe/${encodeURIComponent(recipeId)}/cooking-mode`
     : "/cooking-mode-emty";
   const [email, setEmail] = useState("");
-  const [newsletterUnavailable, setNewsletterUnavailable] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState(null);
 
-  const handleSubmit = (event) => {
+  const validateEmail = (value) => {
+    const trimmed = value.trim();
+    if (!trimmed) return "Vui lòng nhập email.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return "Email không hợp lệ.";
+    return null;
+  };
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    setNewsletterUnavailable(true);
+    const error = validateEmail(email);
+    if (error) {
+      setFeedback({ type: "error", message: error });
+      return;
+    }
+
+    setSubmitting(true);
+    setFeedback(null);
+
+    try {
+      const result = await subscribeNewsletter(email.trim());
+      setFeedback({
+        type: "success",
+        message:
+          typeof result?.message === "string"
+            ? result.message
+            : "Đăng ký nhận món ngon mỗi ngày thành công! Kiểm tra hộp thư nhé.",
+      });
+      setEmail("");
+    } catch (error) {
+      setFeedback({
+        type: "error",
+        message: error?.message || "Không thể đăng ký nhận email lúc này. Vui lòng thử lại.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleEmailChange = (event) => {
+    setEmail(event.target.value);
+    if (feedback) setFeedback(null);
   };
 
   return (
@@ -40,22 +80,29 @@ function Footer() {
                 type="email"
                 className="footer__input"
                 value={email}
-                onChange={(event) => {
-                  setEmail(event.target.value);
-                  setNewsletterUnavailable(false);
-                }}
+                onChange={handleEmailChange}
                 placeholder="cooked2026est@example.com"
                 aria-label="Email nhận công thức"
                 required
+                disabled={submitting}
               />
-              <button type="submit" className="footer__submit">
-                Subscribe
+              <button
+                type="submit"
+                className="footer__submit"
+                disabled={submitting}
+                aria-busy={submitting}
+              >
+                {submitting ? "Đang gửi..." : "Subscribe"}
                 <img src={send} alt="" aria-hidden="true" />
               </button>
             </form>
-            {newsletterUnavailable && (
-              <p className="footer__notice" role="status">
-                Chức năng đăng ký nhận email chưa khả dụng.
+            {feedback && (
+              <p
+                className={`footer__notice footer__notice--${feedback.type}`}
+                role="status"
+                aria-live="polite"
+              >
+                {feedback.message}
               </p>
             )}
           </div>

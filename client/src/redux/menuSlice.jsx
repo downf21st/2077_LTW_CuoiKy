@@ -30,6 +30,7 @@ const newUid = () =>
 
 const initialState = {
   days: createEmptyDays(),
+  weekKey: null,
   status: 'idle',
   dirty: false,
 }
@@ -44,8 +45,19 @@ const menuSlice = createSlice({
     setMenuError(state) {
       state.status = 'error'
     },
+    setWeekKey(state, action) {
+      const weekKey = action.payload
+      if (state.weekKey === weekKey) return
+      state.weekKey = weekKey
+      state.days = createEmptyDays()
+      state.status = 'loading'
+      state.dirty = false
+    },
     setMenu(state, action) {
       state.days = action.payload.days
+      if (action.payload.weekKey !== undefined) {
+        state.weekKey = action.payload.weekKey
+      }
       state.status = 'ready'
       state.dirty = false
     },
@@ -96,7 +108,7 @@ const menuSlice = createSlice({
       state.dirty = true
     },
     resetMenu() {
-      return { days: createEmptyDays(), status: 'idle', dirty: false }
+      return { days: createEmptyDays(), weekKey: null, status: 'idle', dirty: false }
     },
     markSaved(state) {
       state.dirty = false
@@ -107,6 +119,7 @@ const menuSlice = createSlice({
 export const {
   setMenuLoading,
   setMenuError,
+  setWeekKey,
   setMenu,
   addRecipeToSlot,
   removeRecipeFromSlot,
@@ -117,6 +130,7 @@ export const {
 } = menuSlice.actions
 
 export const selectMenuDays = (state) => state.menu.days
+export const selectMenuWeekKey = (state) => state.menu.weekKey
 export const selectMenuStatus = (state) => state.menu.status
 export const selectMenuDirty = (state) => state.menu.dirty
 export const selectSlotItems = (day, meal) => (state) => state.menu.days[day][meal]
