@@ -35,24 +35,24 @@ const writeRecipes = async (recipes) => {
 const createReview = async (req, res) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ message: 'Bạn cần đăng nhập để đánh giá' });
+      return res.status(401).json({ success: false, message: 'Bạn cần đăng nhập để đánh giá' });
     }
 
     const { rating, comment } = req.body || {};
 
     if (typeof rating !== 'number' || !Number.isInteger(rating) || rating < 1 || rating > 5) {
-      return res.status(400).json({ message: 'Số sao phải là số nguyên từ 1 đến 5' });
+      return res.status(400).json({ success: false, message: 'Số sao phải là số nguyên từ 1 đến 5' });
     }
 
     if (comment !== undefined && comment !== null && typeof comment !== 'string') {
-      return res.status(400).json({ message: 'Bình luận phải là chuỗi ký tự' });
+      return res.status(400).json({ success: false, message: 'Bình luận phải là chuỗi ký tự' });
     }
 
     const cleanComment = (comment ?? '').trim();
     if (cleanComment.length > MAX_COMMENT_LENGTH) {
       return res
         .status(400)
-        .json({ message: `Bình luận tối đa ${MAX_COMMENT_LENGTH} ký tự` });
+        .json({ success: false, message: `Bình luận tối đa ${MAX_COMMENT_LENGTH} ký tự` });
     }
 
     const result = await withLock(async () => {
@@ -60,14 +60,14 @@ const createReview = async (req, res) => {
       const recipe = recipes.find((r) => String(r.id) === String(req.params.id));
 
       if (!recipe || (recipe.status || 'approved') !== 'approved') {
-        return { code: 404, body: { message: 'Không tìm thấy công thức' } };
+        return { code: 404, body: { success: false, message: 'Không tìm thấy công thức' } };
       }
 
       const reviews = Array.isArray(recipe.reviews) ? recipe.reviews : [];
 
       const alreadyReviewed = reviews.find((r) => String(r.userId) === String(req.user.id));
       if (alreadyReviewed) {
-        return { code: 400, body: { message: 'Bạn đã đánh giá món này rồi' } };
+        return { code: 400, body: { success: false, message: 'Bạn đã đánh giá món này rồi' } };
       }
 
       const review = {
@@ -100,7 +100,7 @@ const createReview = async (req, res) => {
     return res.status(result.code).json(result.body);
   } catch (error) {
     console.error('createReview error:', error.message);
-    return res.status(500).json({ message: 'Không thể lưu đánh giá, vui lòng thử lại' });
+    return res.status(500).json({ success: false, message: 'Không thể lưu đánh giá, vui lòng thử lại' });
   }
 };
 

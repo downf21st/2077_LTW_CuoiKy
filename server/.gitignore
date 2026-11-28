@@ -1,1 +1,4 @@
 /.local-backups/
+
+.env
+/data/newsletter-subscribers.json
