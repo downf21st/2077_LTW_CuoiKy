@@ -99,7 +99,6 @@ const updateCategory = async (req, res) => {
       }
 
       const recipes = await readStringArrayOfObjects(recipesFile);
-      const originalRecipes = await fs.readFile(recipesFile);
       const updatedRecipes = recipes.map((recipe) => (
         recipe.category === categories[index] ? { ...recipe, category: name } : recipe
       ));
@@ -110,7 +109,7 @@ const updateCategory = async (req, res) => {
       try {
         await writeJson(categoriesFile, updatedCategories);
       } catch (error) {
-        await fs.writeFile(recipesFile, originalRecipes);
+        await writeJson(recipesFile, recipes);
         throw error;
       }
       return name;

@@ -57,6 +57,7 @@ const updateRecipeStatus = async (req, res) => {
         : '';
       if (!rejectionReason || rejectionReason.length > MAX_REJECTION_REASON_LENGTH) {
         return res.status(400).json({
+          success: false,
           message: `rejectionReason là bắt buộc và tối đa ${MAX_REJECTION_REASON_LENGTH} ký tự khi từ chối món`
         });
       }
@@ -66,6 +67,7 @@ const updateRecipeStatus = async (req, res) => {
       rejectionNote = (req.body.rejectionNote || '').trim();
       if (rejectionNote.length > MAX_REJECTION_NOTE_LENGTH) {
         return res.status(400).json({
+          success: false,
           message: `rejectionNote tối đa ${MAX_REJECTION_NOTE_LENGTH} ký tự`
         });
       }
