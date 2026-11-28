@@ -62,7 +62,7 @@
 .dashboard__heading {
   margin: 0;
   color: var(--color-text-brand);
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-display);
   line-height: var(--line-height-heading);
@@ -156,9 +156,9 @@
 .dashboard__card-value {
   margin: 0;
   color: var(--color-text-brand);
-  font-family: var(--font-body);
+  font-family: var(--font-heading);
   font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-display);
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
 }
@@ -179,8 +179,9 @@
 
 .dashboard__section-desc {
   margin: var(--space-2) 0 var(--space-4);
-  color: var(--color-text-muted);
+  color: var(--color-text);
   font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
 }
 
 .dashboard__table-card {
@@ -214,7 +215,7 @@
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-4) var(--space-6);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-accent-soft);
 }
 
 .dashboard__top-item:last-child {
