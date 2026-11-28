@@ -156,7 +156,7 @@
 .dashboard__card-value {
   margin: 0;
   color: var(--color-text-brand);
-  font-family: var(--font-heading);
+  font-family: var(--font-display);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-display);
   font-variant-numeric: tabular-nums;
