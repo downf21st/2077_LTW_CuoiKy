@@ -86,14 +86,14 @@ export default function Dashboard() {
       <nav className="dashboard__breadcrumb" aria-label="Đường dẫn">
         <Link to="/">Trang chủ</Link>
         <span aria-hidden="true">/</span>
-        <span>Quản trị</span>
+        <span>Bảng điều khiển Admin</span>
         <span aria-hidden="true">/</span>
         <span aria-current="page">Tổng quan &amp; Thống kê</span>
       </nav>
 
       <header className="dashboard__header">
         <h1 className="dashboard__heading">Tổng quan &amp; Thống kê</h1>
-        <p className="dashboard__subtitle">Số liệu tổng hợp của Cooked.</p>
+        <p className="dashboard__subtitle">Số liệu chung của Cooked.</p>
       </header>
 
       {loading ? (
