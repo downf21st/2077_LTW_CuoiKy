@@ -1,12 +1,15 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('node:path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const recipeRoutes = require('./routes/recipe');
 const categoryRoutes = require('./routes/category');
 const userRoutes = require('./routes/user');
 const menuRoutes = require('./routes/menu');
 const reviewRoutes = require('./routes/review');
 const statsRoutes = require('./routes/stats');
+const newsletterRoutes = require('./routes/newsletter');
+const { startNewsletterScheduler } = require('./services/newsletterService');
 const { notFound, errorHandler } = require('./middlewares/errorHandler');
 
 const app = express();
@@ -21,9 +24,11 @@ app.use('/api/users', userRoutes);
 app.use('/api/menus', menuRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/newsletter', newsletterRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log('Cooked API đang chạy tại http://localhost:' + PORT);
+  startNewsletterScheduler();
 });

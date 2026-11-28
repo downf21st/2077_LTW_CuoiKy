@@ -1,6 +1,6 @@
 # Cooked API (Express)
 
-Chạy server:
+Chạy server (sao chép `.env.example` thành `.env` và nhập cấu hình SMTP nếu muốn bật email):
 
 ```bash
 npm install
@@ -53,6 +53,15 @@ Nguyên liệu có cấu trúc `{ "name": "...", "quantity": 100, "unit": "g" }`
 | DELETE | `/api/users/:id/favorites/:recipeId` | Bỏ món khỏi danh sách. |
 
 Danh sách yêu thích được lưu trong `data/favorites.json` và khởi tạo khi phát sinh lần lưu đầu tiên.
+
+## Bản tin công thức
+
+| Method | Đường dẫn | Ghi chú |
+| --- | --- | --- |
+| POST | `/api/newsletter/subscribe` | Body `{ "email": "..." }`; email được chuẩn hóa chữ thường, đăng ký trùng trả 409; email đã hủy có thể đăng ký lại. |
+| GET | `/api/newsletter/unsubscribe/:token` | Token ngẫu nhiên nằm trong liên kết cuối mỗi email; hủy idempotent, token không hợp lệ trả 404. |
+
+Mỗi lượt chạy chọn ngẫu nhiên một công thức có `status: "approved"` rồi gửi cùng nội dung tới các đăng ký đang hoạt động. Lịch mặc định là hằng ngày lúc 09:00 `Asia/Ho_Chi_Minh`; chỉnh bằng `NEWSLETTER_CRON` và `NEWSLETTER_TIMEZONE`. SMTP được đọc từ `server/.env` theo mẫu `.env.example`. Nếu chưa cấu hình host và địa chỉ gửi, lịch không được bật và email không được gửi. Không commit `.env` hoặc danh sách đăng ký.
 ## Thực đơn tuần
 
 | Method | Đường dẫn | Ghi chú |
