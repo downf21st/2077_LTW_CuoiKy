@@ -272,7 +272,7 @@
 
 [data-theme="dark"] .footer__submit {
   background: var(--color-brand);
-  color: var(--color-on-brand, #ffffff);
+  color: var(--color-on-brand);
   border-radius: 4px;
 }
 
