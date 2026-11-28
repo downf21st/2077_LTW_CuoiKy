@@ -14,7 +14,10 @@ import {
   removeRecipeFromSlot,
   selectMenuDays,
   selectMenuItemCount,
+  selectMenuStatus,
+  selectMenuWeekKey,
   selectSlotItems,
+  setWeekKey,
 } from '../../redux/menuSlice';
 import {
   DAYS,
@@ -22,6 +25,7 @@ import {
   formatCookingTime,
   getTodayDayKey,
   getWeekMeta,
+  getWeekStartKey,
   mergeIngredients,
   normalizeText,
   resolveRecipeImage,
@@ -217,6 +221,8 @@ export default function WeeklyMenu() {
 
   const days = useSelector(selectMenuDays);
   const totalDishes = useSelector(selectMenuItemCount);
+  const activeWeekKey = useSelector(selectMenuWeekKey);
+  const menuStatus = useSelector(selectMenuStatus);
 
   const [recipeTimeMap, setRecipeTimeMap] = useState({});
   const [weekOffset, setWeekOffset] = useState(0);
@@ -242,6 +248,9 @@ export default function WeeklyMenu() {
   const toastTimerRef = useRef(null);
   const highlightTimerRef = useRef(null);
   const lastTriggerRef = useRef(null);
+
+  const expectedWeekKey = useMemo(() => getWeekStartKey(weekOffset), [weekOffset]);
+  const isWeekSynced = activeWeekKey === expectedWeekKey && menuStatus !== 'loading';
 
   useEffect(() => {
     let isCurrent = true;
@@ -296,6 +305,11 @@ export default function WeeklyMenu() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [moveTarget, confirmClearOpen, incomingRecipe]);
 
+  // Sync weekKey with weekOffset so Redux loads/saves menu for the correct week
+  useEffect(() => {
+    dispatch(setWeekKey(expectedWeekKey));
+  }, [expectedWeekKey, dispatch]);
+
   const { dates, rangeLabel } = useMemo(() => getWeekMeta(weekOffset), [weekOffset]);
   const shoppingItems = useMemo(() => mergeIngredients(days), [days]);
 
@@ -344,6 +358,7 @@ export default function WeeklyMenu() {
 
   const handleAddRecipe = useCallback(
     (dayKey, mealKey, recipe) => {
+      if (!isWeekSynced) return;
       const recipeId = recipe?.id ?? recipe?._id;
       const cookingTime = recipe?.cookingTime ?? recipe?.duration ?? recipe?.time;
       if (
@@ -389,7 +404,7 @@ export default function WeeklyMenu() {
         `Đã thêm '${normalizedRecipe.title}' vào ${getDayLabel(dayKey)} · ${getMealLabel(mealKey)}`
       );
     },
-    [dispatch, showToast, triggerHighlightForRecipe]
+    [dispatch, isWeekSynced, showToast, triggerHighlightForRecipe]
   );
 
   const handleSelectFromPicker = (recipe) => {
@@ -407,10 +422,11 @@ export default function WeeklyMenu() {
 
   const handleRemoveRecipe = useCallback(
     (dayKey, mealKey, uid) => {
+      if (!isWeekSynced) return;
       dispatch(removeRecipeFromSlot({ day: dayKey, meal: mealKey, uid }));
       showToast('Đã xóa món khỏi thực đơn');
     },
-    [dispatch, showToast]
+    [dispatch, isWeekSynced, showToast]
   );
 
   const handleOpenMove = useCallback((dayKey, mealKey, item, triggerElement) => {
@@ -426,7 +442,7 @@ export default function WeeklyMenu() {
 
   const handleConfirmMove = (event) => {
     event.preventDefault();
-    if (!moveTarget) return;
+    if (!moveTarget || !isWeekSynced) return;
 
     const { day: fromDay, meal: fromMeal, item } = moveTarget;
     const { day: toDay, meal: toMeal } = moveDraft;
@@ -450,6 +466,7 @@ export default function WeeklyMenu() {
   };
 
   const handleConfirmClearWeek = () => {
+    if (!isWeekSynced) return;
     dispatch(clearMenu());
     setConfirmClearOpen(false);
     showToast('Đã xóa toàn bộ thực đơn tuần');
@@ -545,7 +562,7 @@ export default function WeeklyMenu() {
             <button
               type="button"
               className="weekly-menu__text-action"
-              disabled={totalDishes === 0}
+              disabled={totalDishes === 0 || !isWeekSynced}
               onClick={(event) => {
                 lastTriggerRef.current = event.currentTarget;
                 setConfirmClearOpen(true);

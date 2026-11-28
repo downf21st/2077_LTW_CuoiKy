@@ -92,6 +92,19 @@ export function getWeekMeta(weekOffset = 0) {
   return { dates, rangeLabel };
 }
 
+// Trả về chuỗi mốc thời gian tuần (YYYY-MM-DD) cho thứ 2 đầu tuần
+export function getWeekStartKey(weekOffset = 0) {
+  const now = new Date();
+  const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const offsetToMonday = (todayMidnight.getDay() + 6) % 7;
+  const monday = new Date(todayMidnight);
+  monday.setDate(todayMidnight.getDate() - offsetToMonday + weekOffset * 7);
+  const y = monday.getFullYear();
+  const m = String(monday.getMonth() + 1).padStart(2, '0');
+  const d = String(monday.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 export function normalizeText(value) {
   return String(value ?? '')
     .trim()
@@ -157,34 +170,105 @@ export function mergeIngredients(menuDays) {
   return Object.values(grouped).sort((a, b) => a.name.localeCompare(b.name, 'vi'));
 }
 
-const PROTEIN_KEYWORDS = [
-  'thit', 'ga', 'bo', 'heo', 'lon', 'ca', 'tom', 'muc', 'cua', 'oc',
-  'trung', 'suon', 'xuong', 'cha', 'gio', 'dau phu', 'dau hu', 'ba chi', 'nam',
+// Helper kiểm tra khớp nguyên cụm từ theo ranh giới từ (khoảng trắng hoặc đầu/cuối chuỗi)
+function matchesKeyword(normalized, keyword) {
+  const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(?:^|\\s)${escaped}(?:\\s|$)`, 'i');
+  return regex.test(normalized);
+}
+
+// Kiểm tra xem normalized có bắt đầu bằng keyword không (cho các từ ghép)
+function startsWithKeyword(normalized, keyword) {
+  const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`^${escaped}(?:\\s|$)`, 'i');
+  return regex.test(normalized);
+}
+
+const PANTRY_KEYWORDS = [
+  'nuoc mam', 'nuoc tuong', 'xi dau', 'tuong ot', 'tuong ca', 'tuong den', 'hoisin', 'sa te',
+  'mam tom', 'mam ruoc', 'nuoc cot chanh', 'nuoc mau', 'mat ong', 'siro', 'mayonnaise', 'xot', 'sot',
+  'nuoc loc', 'nuoc dung', 'dau an', 'dau hao', 'dau me', 'dau mau dieu',
+  'muoi', 'duong', 'hat nem', 'bot nem', 'bot ngot', 'tieu', 'ngu vi huong',
+  'ot bot', 'bot ot', 'bot nghe', 'bot toi', 'bot hanh', 'bot ca ri', 'bot que',
+  'baking soda', 'bot no', 'men no', 'vani', 'giam', 'ruou',
+];
+
+const DRY_KEYWORDS = [
+  'hanh phi', 'toi phi', 'nuoc cot dua', 'nuoc dao dua', 'nuoc dua',
+  'sua tuoi', 'sua dac', 'kem tuoi', 'whipping cream', 'kem beo', 'pho mai', 'bo',
+  'tra', 'ca phe', 'nuoc da',
+  'bot mi', 'bot nang', 'bot gao', 'bot bap', 'bot chien', 'bot cacao', 'bot tra xanh', 'tinh bot', 'gelatin',
+  'dau phong', 'lac', 'me', 'vung', 'dau xanh', 'dau den', 'dau do', 'hat sen',
+  'gao', 'nep', 'bun', 'pho', 'mi', 'mien', 'hu tieu', 'banh trang', 'banh mi', 'yen mach',
 ];
 
 const PRODUCE_KEYWORDS = [
-  'rau', 'ca chua', 'dua', 'hanh', 'toi', 'gung', 'ot', 'xa lach', 'dua leo',
-  'ca rot', 'khoai', 'bi', 'bau', 'muop', 'gia', 'ngo', 'thom', 'chanh',
-  'sa', 'la', 'cu', 'qua', 'bong cai', 'bap cai', 'su hao', 'dau bap',
+  'ca chua', 'ca rot', 'ca tim', 'rau muong', 'mong toi', 'can tay', 'xa lach', 'dua leo', 'dua chuot',
+  'dau bap', 'dau que', 'gia do', 'moc nhi', 'hanh la', 'hanh tay', 'hanh tim', 'la dua', 'la chanh',
+  'ngo ri', 'ngo gai', 'rau mui', 'tia to', 'hung que', 'thi la', 'dua soi', 'trai cay',
+  'rau', 'cai', 'khoai', 'bi', 'bau', 'muop', 'dua', 'thom', 'chuoi', 'xoai', 'tao', 'cam', 'buoi',
+  'gia', 'nam', 'toi', 'gung', 'sa', 'nghe', 'rieng', 'ot', 'chanh', 'tac', 'quat',
 ];
 
+const PROTEIN_KEYWORDS = [
+  'ba chi', 'ba roi', 'xuc xich', 'lap xuong', 'bach tuoc', 'dau hu', 'dau phu', 'tau hu',
+  'thit', 'heo', 'lon', 'bo', 'ga', 'vit', 'ngan', 'de', 'be', 'suon', 'xuong', 'nac', 'than',
+  'gio', 'cha', 'tom', 'tep', 'cua', 'ghe', 'muc', 'oc', 'ngheo', 'so', 'hau', 'luon', 'trung',
+];
+
+function classifyShoppingItem(name) {
+  const normalized = normalizeText(name);
+
+  // 1. Kiểm tra nhóm protein (thịt, cá & trứng) - ưu tiên cao nhất
+  for (const kw of PROTEIN_KEYWORDS) {
+    if (matchesKeyword(normalized, kw)) {
+      return 'protein';
+    }
+  }
+
+  // Xử lý riêng 'ca' ở protein:
+  // Loại trừ: ca chua, ca rot, ca tim, ca phe, ca ri, tuong ca
+  if (matchesKeyword(normalized, 'ca')) {
+    const excluded = ['ca chua', 'ca rot', 'ca tim', 'ca phe', 'ca ri', 'tuong ca'];
+    const isExcluded = excluded.some((ex) => startsWithKeyword(normalized, ex) || normalized === ex);
+    if (!isExcluded) {
+      return 'protein';
+    }
+  }
+
+  // 2. Kiểm tra nhóm produce (rau củ & trái cây)
+  for (const kw of PRODUCE_KEYWORDS) {
+    if (matchesKeyword(normalized, kw) || startsWithKeyword(normalized, kw)) {
+      return 'produce';
+    }
+  }
+
+  // 3. Kiểm tra nhóm dry (đồ khô, bột & sữa)
+  for (const kw of DRY_KEYWORDS) {
+    if (matchesKeyword(normalized, kw) || startsWithKeyword(normalized, kw)) {
+      return 'dry';
+    }
+  }
+
+  // 4. Fallback cho nguyên liệu còn lại -> pantry (gia vị & nước chấm)
+  return 'pantry';
+}
+
 export function groupShoppingItems(items) {
-  const groups = [
-    { id: 'protein', title: 'Thịt & hải sản', items: [] },
-    { id: 'produce', title: 'Rau củ', items: [] },
-    { id: 'pantry', title: 'Gia vị & khác', items: [] },
-  ];
+  const groupsMap = {
+    protein: { id: 'protein', title: 'Thịt, cá & trứng', items: [] },
+    produce: { id: 'produce', title: 'Rau củ & trái cây', items: [] },
+    dry: { id: 'dry', title: 'Đồ khô, bột & sữa', items: [] },
+    pantry: { id: 'pantry', title: 'Gia vị & nước chấm', items: [] },
+  };
 
   items.forEach((item) => {
-    const normalized = normalizeText(item.name);
-    if (PROTEIN_KEYWORDS.some((kw) => normalized.includes(kw))) {
-      groups[0].items.push(item);
-    } else if (PRODUCE_KEYWORDS.some((kw) => normalized.includes(kw))) {
-      groups[1].items.push(item);
-    } else {
-      groups[2].items.push(item);
-    }
+    const groupId = classifyShoppingItem(item.name);
+    groupsMap[groupId].items.push(item);
   });
 
-  return groups.filter((group) => group.items.length > 0);
+  const order = ['protein', 'produce', 'dry', 'pantry'];
+  return order
+    .map((id) => groupsMap[id])
+    .filter((group) => group.items.length > 0);
 }

@@ -95,7 +95,11 @@ const getMenu = async (req, res) => {
   if (!authorizeOwner(req, res)) return;
   try {
     const menus = await readMenus();
-    const menu = menus.find((item) => String(item.userId) === String(req.params.userId));
+    const weekKey = req.query.weekKey;
+    const menu = menus.find((item) =>
+      String(item.userId) === String(req.params.userId) &&
+      (weekKey ? String(item.weekKey) === String(weekKey) : true),
+    );
     return res.json({
       success: true,
       data: menu || { userId: req.user.id, updatedAt: new Date().toISOString(), days: emptyDays() }
@@ -109,10 +113,19 @@ const saveMenu = async (req, res) => {
   if (!authorizeOwner(req, res)) return;
   try {
     const days = validateDays(req.body?.days);
+    const weekKey = req.body?.weekKey;
     const menu = await withLock(async () => {
       const menus = await readMenus();
-      const saved = { userId: req.user.id, updatedAt: new Date().toISOString(), days };
-      const index = menus.findIndex((item) => String(item.userId) === String(req.params.userId));
+      const saved = {
+        userId: req.user.id,
+        weekKey,
+        updatedAt: new Date().toISOString(),
+        days,
+      };
+      const index = menus.findIndex((item) =>
+        String(item.userId) === String(req.params.userId) &&
+        (weekKey ? String(item.weekKey) === String(weekKey) : true),
+      );
       if (index === -1) menus.push(saved);
       else menus[index] = saved;
       await writeMenus(menus);
@@ -127,9 +140,14 @@ const saveMenu = async (req, res) => {
 const deleteMenu = async (req, res) => {
   if (!authorizeOwner(req, res)) return;
   try {
+    const weekKey = req.query.weekKey;
     await withLock(async () => {
       const menus = await readMenus();
-      const remaining = menus.filter((item) => String(item.userId) !== String(req.params.userId));
+      const remaining = menus.filter((item) => {
+        const sameUser = String(item.userId) === String(req.params.userId);
+        const sameWeek = weekKey ? String(item.weekKey) === String(weekKey) : true;
+        return !(sameUser && sameWeek);
+      });
       if (remaining.length !== menus.length) await writeMenus(remaining);
     });
     return res.status(204).end();

@@ -112,21 +112,23 @@ const jsonRequest = (method, body) => ({
   body: JSON.stringify(body),
 })
 
-export async function getMenu(userId) {
-  const json = await request(`/menus/${encodeURIComponent(userId)}`)
+export async function getMenu(userId, weekKey) {
+  const query = weekKey ? `?weekKey=${encodeURIComponent(weekKey)}` : ''
+  const json = await request(`/menus/${encodeURIComponent(userId)}${query}`)
   return unwrap(json)
 }
 
-export async function saveMenu(userId, days) {
+export async function saveMenu(userId, weekKey, days) {
   const json = await request(
     `/menus/${encodeURIComponent(userId)}`,
-    jsonRequest('PUT', { days }),
+    jsonRequest('PUT', { weekKey, days }),
   )
   return unwrap(json)
 }
 
-export async function clearMenuApi(userId) {
-  await request(`/menus/${encodeURIComponent(userId)}`, { method: 'DELETE' })
+export async function clearMenuApi(userId, weekKey) {
+  const query = weekKey ? `?weekKey=${encodeURIComponent(weekKey)}` : ''
+  await request(`/menus/${encodeURIComponent(userId)}${query}`, { method: 'DELETE' })
 }
 
 export async function createReview(recipeId, { rating, comment }) {
