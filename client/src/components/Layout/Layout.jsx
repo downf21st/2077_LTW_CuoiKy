@@ -54,7 +54,7 @@ function Layout() {
 
   const closeSidebar = () => {
     setIsSidebarOpen(false);
-    const trigger = window.matchMedia("(max-width: 600px)").matches
+    const trigger = window.matchMedia("(max-width: 768px)").matches
       ? layoutRef.current?.querySelector(".header__menu-btn")
       : toggleRef.current;
     trigger?.focus();

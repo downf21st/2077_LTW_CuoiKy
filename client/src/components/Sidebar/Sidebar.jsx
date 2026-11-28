@@ -217,7 +217,7 @@ function Sidebar({ isOpen, onToggle, onClose, toggleRef }) {
   }, [pathname, preview, isOpen, recipePath]);
 
   const handleNavigate = () => {
-    if (window.innerWidth <= 600 && onClose) {
+    if (window.innerWidth <= 768 && onClose) {
       onClose();
     }
   };
